@@ -1,0 +1,63 @@
+/* 
+    COMP 333: Software Engineering
+    Ada Qin (aqin@wesleyan.edu)
+*/
+/*  Brief introduction: I supposed the basic theme is red/balck style
+    simillar to Wesleyan offical website
+*/
+/*
+    font from Google at https://fonts.google.com/
+*/
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
+
+h1{
+    color:brown;
+}
+
+p {
+    color: black;
+}
+
+.navbar {
+    background-color: brown;
+}
+
+.navbar ul {
+    /* 
+          Remove bullet points.
+    */
+    list-style: none;
+    width: 500px;
+    margin: 0 auto;
+    /* 
+          No padding.
+    */
+    padding: 0;
+    /* 
+          For navbars use background color that stands out.
+    */
+    background-color: black;
+    text-align: center;
+}
+
+.navbar li {
+    width: 150 px;
+    background-color: #000;
+    border: 1px solid red;
+    /* 
+          Show the navbar elements next to each other instead of on top of each 
+          other. 
+    */
+    padding: 10px;
+    display: inline-block;
+    line-height: 40px;
+}
+  
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* 
+    Style iframes.
+*/
