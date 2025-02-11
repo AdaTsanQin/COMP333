@@ -1,0 +1,42 @@
+<!-- 
+    COMP 333: Software Engineering
+    Ada Qin (aqin@wesleyan.edu)
+-->
+<!DOCTYPE HTML>
+<html lang="en">
+
+<h2>Join us now</h2>
+<p>
+    Interested in this app? Pre-register now to get five discount uses!
+</p>
+<!-- 
+    Send data to the database.
+-->
+<form action="login_confirm.html"> <!-- not actually saving the data -->
+  <!-- 
+        Ask for text input.
+  -->
+  <input type="text" name="full_name" placeholder="Enter your full name" />
+  <input type="email" name="email" placeholder="Enter your email" />
+  <!-- "For this web fo not have data base to store info, as long
+    as hit the submit, it will go to the nex page"
+  -->
+  <!-- 
+        You can have people submitting data without showing it, which can
+        be useful for a cookie value that you are passing in here, for 
+        example. 
+  -->
+  <input
+    type="hidden"
+    name="hidden-field"
+    value="pass-in-cookie-value-here"
+  />
+  <!-- 
+    "this is for a cookie idefntifire, not display, just
+    as a hidden code, to absourb the value from user"
+  -->
+  <!-- 
+        Submit button 
+  -->
+  <input type="submit" value="register" />
+</form>
