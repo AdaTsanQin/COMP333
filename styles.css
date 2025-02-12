@@ -4,6 +4,8 @@
 */
 /*  Brief introduction: I supposed the basic theme is red/balck style
     simillar to Wesleyan offical website
+    black for text (sometimes white due to background)
+    brown for header
 */
 /*
     font from Google at https://fonts.google.com/
@@ -18,39 +20,37 @@ p {
     color: black;
 }
 
+.button-container {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: center;
+    gap: 10px;
+}
+
 .navbar {
     background-color: brown;
 }
 
 .navbar ul {
-    /* 
-          Remove bullet points.
-    */
     list-style: none;
-    width: 500px;
     margin: 0 auto;
-    /* 
-          No padding.
-    */
     padding: 0;
-    /* 
-          For navbars use background color that stands out.
-    */
     background-color: black;
     text-align: center;
+    display: flex; 
+    justify-content: space-evenly; 
+    align-items: center; 
+    height: 60px;
 }
 
 .navbar li {
-    width: 150 px;
-    background-color: #000;
     border: 1px solid red;
     /* 
           Show the navbar elements next to each other instead of on top of each 
           other. 
     */
     padding: 10px;
-    display: inline-block;
-    line-height: 40px;
+    line-height: 38px; /* originally, 40 px*/
 }
   
 .navbar a {
@@ -58,6 +58,14 @@ p {
     text-decoration: none;
 }
 
-/* 
-    Style iframes.
-*/
+form {
+    display: flex;
+    flex-direction: column;
+    width: 300px; /* Adjust width as needed */
+}
+
+input {
+    margin-bottom: 10px; /* Adds space between inputs */
+    padding: 8px;
+    font-size: 16px;
+}
