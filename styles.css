@@ -20,26 +20,35 @@ title{
 
 h1{
     color:brown;
+    font-size: 3rem;
 }
 
 h2{
     color:black;
+    font-size: 2rem;
 }
 
 h3{
     color: brown;
+    font-size: 1.5rem;
 }
 
 p {
     color: black;
+    font-size: 1.2rem;
+}
+
+.hero-section{
+    height:100vh;
 }
 
 .radio-group {
     display: flex;
-    margin-bottom: 20px;
-    justify-content: center;
-    gap: 10px;
-}
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
 
 .navbar {
     background-color: brown;
