@@ -12,15 +12,29 @@
 */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
 
+
+
+title{
+    color:black;
+}
+
 h1{
     color:brown;
+}
+
+h2{
+    color:black;
+}
+
+h3{
+    color: brown;
 }
 
 p {
     color: black;
 }
 
-.button-container {
+.radio-group {
     display: flex;
     margin-bottom: 20px;
     justify-content: center;
@@ -45,12 +59,8 @@ p {
 
 .navbar li {
     border: 1px solid red;
-    /* 
-          Show the navbar elements next to each other instead of on top of each 
-          other. 
-    */
     padding: 10px;
-    line-height: 38px; /* originally, 40 px*/
+    line-height: 38px; 
 }
   
 .navbar a {
@@ -61,11 +71,11 @@ p {
 form {
     display: flex;
     flex-direction: column;
-    width: 300px; /* Adjust width as needed */
+    width: 300px; 
 }
 
 input {
-    margin-bottom: 10px; /* Adds space between inputs */
+    margin-bottom: 10px; 
     padding: 8px;
     font-size: 16px;
 }
