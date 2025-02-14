@@ -124,6 +124,21 @@ input {
     color: gray;
 
 }
+.log-confirm {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; 
+    height: 100vh; 
+    text-align: center; 
+}
+
+img {
+    width: 50vw; 
+    height: auto;
+    display: block;
+    margin: 0 auto; 
+}
 
 table {
     width: 80%;
@@ -179,4 +194,36 @@ th {
     text-transform: uppercase; 
     letter-spacing: 1px;      
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.198); 
+}
+
+.gallery {
+    display: flex;
+    flex-direction: column; 
+    gap: 20px; 
+    padding: 20px;
+    width: 100%;
+}
+
+figure {
+    margin: 0;
+    text-align: center;
+}
+
+img {
+    width: 50%; 
+    height: auto;
+}
+
+@media screen and (max-width: 600px) {
+    img {
+        width: 100%; 
+        max-width: 300px; 
+        height: auto; 
+    }
+}
+
+figcaption {
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
 }
