@@ -8,8 +8,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
 
 body {
-    font-family: "Noto Sans SC", sans-serif;
+    font-family: "Noto Sans SC", Arial, Helvetica, sans-serif;
     text-align: center;
+    background-color: #f8f8f8; 
+    
   }
 
 
@@ -21,13 +23,6 @@ p {
     color: black;
 }
 
-.button-container {
-    text-align: center;
-    display: flex;
-    margin-bottom: 20px;
-    justify-content: center;
-    gap: 10px;
-}
 
 .navbar {
     background-color: rgb(173, 54, 54);
@@ -46,7 +41,10 @@ p {
 }
 
 .navbar li {
-    border: 1px solid red;
+    flex: 1; 
+    border: 1px solid white;
+    border-top: none;      
+    border-bottom: none; 
     padding: 10px;
     line-height: 38px; 
 }
@@ -59,7 +57,9 @@ p {
 form {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    align-items: center;
+    justify-content: center;
+    height: 30vh
 }
 
 input {
@@ -67,6 +67,7 @@ input {
     padding: 8px;
     font-size: 16px;
 }
+
 
 
 .hero-section {
@@ -102,7 +103,7 @@ input {
     max-width: 700px;      
     margin: 0 auto;        
     text-align: left;      
-    background-color: #fff;  
+    background-color: #f8f8f8;  
     padding: 20px;     
   }
   
@@ -118,4 +119,26 @@ input {
 
 .hero-btn:hover {
     background-color: #eee;
+}
+
+.implicit-link{
+    color: gray;
+
+}
+
+table {
+    width: 80%;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+th, td {
+    border: 0.1vw solid #900000;
+    padding: 1em;
+    text-align: center;
+}
+
+th {
+    background-color: #900000; 
+    color: white;
 }
