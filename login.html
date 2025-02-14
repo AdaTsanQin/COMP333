@@ -4,22 +4,23 @@
 -->
 <!DOCTYPE HTML>
 <html lang="en">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
 
 <h1>Join us now</h1>
 <p>
     Interested in this app? Pre-register now to get five discount uses!
 </p>
-<!-- 
-    Send data to the database.
--->
-<form action="login_confirm.html"> <!-- not actually saving the data -->
-  <!-- 
-        Ask for text input.
-  -->
+
+<form action="login_confirm.html"> 
+
 <div>
   <input type="text" name="full_name" placeholder="Enter your full name" required/>
 </div>
+
 <div>
   <input type="email" name="email" placeholder="Enter your email" required/>
 </div>
@@ -29,31 +30,18 @@
 <div class="radio-group">
     
   <input type="radio" id="runErrands" name="option" value="Run Errands" />
-  <label for="runErrands">Run Errands</label>
+  <label for="runErrands">Buyers</label>
 
   <input type="radio" id="beUser" name="option" value="Be User" />
-  <label for="beUser">Be User</label>
+  <label for="beUser">Shoppers</label>
 
 </div>
 
-  <!-- "For this web fo not have data base to store info, as long
-    as hit the submit, it will go to the nex page" -->
-  <!-- 
-        You can have people submitting data without showing it, which can
-        be useful for a cookie value that you are passing in here, for 
-        example. 
-  -->
   <input
     type="hidden"
     name="hidden-field"
     value="pass-in-cookie-value-here"
   />
-  <!-- 
-    "this is for a cookie idefntifire, not display, just
-    as a hidden code, to absourb the value from user"
-  -->
-  <!-- 
-        Submit button 
-  -->
+
   <input type="submit" value="register" />
 </form>
