@@ -1,31 +1,40 @@
 <!-- 
     COMP 333: Software Engineering
 -->
-    
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>mainpage</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
+    <title>WesDash - Main Page</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 
 <body>
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <p id="wesdash">WesDash</p>
-         <!-- ID for hero -->
-        <p id="hero-subtitle">Your campus delivery made simple.</p>
-        <!-- a hyperlink to the three steps part-->
-        <a class="hero-btn" href="#three-steps">Get Started</a>
+    <!-- navigation Section -->
+    <div id="navbar" class="navbar">
+        <ul>
+            <li><a href="#hero-section">Home</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#signup">Register</a></li>
+            <li><a href="#">More Comments</a></li>
+        </ul>
     </div>
 
-      <!-- the main content(center) -->
-    <div class="howitwork-box">
-    <header>
-        <h1>How Our App Works</h1>
-    </header>
-        <!--content -->
+    <!-- Hero Section -->
+    <div class="hero-section" id="hero-section">
+        <p id="wesdash">WesDash</p>
+        <!-- Hero subtitle -->
+        <p id="hero-subtitle">Your campus delivery made simple.</p>
+        <!-- button to how it works part -->
+        <a class="hero-btn" href="#how-it-works">Get Started</a>
+    </div>
+
+    <!-- “How It Works” section -->
+    <div class="howitwork-box" id="how-it-works">
+        <header>
+            <h1>How Our App Works</h1>
+        </header>
         <h3>Step 1: Submit a Request</h3>
         <p>
             List your items, pick a delivery speed (Turbo or Chill), 
@@ -34,7 +43,7 @@
 
         <h3>Step 2: Wait for a Shopper</h3>
         <p>
-            A "Wes dasher" sees your request, shops for you, and updates you along the way.
+            A “Wes dasher” sees your request, shops for you, and updates you along the way.
         </p>    
 
         <h3>Step 3: Arrange Drop-off</h3>
@@ -45,17 +54,66 @@
 
         <p>
             <strong>Buyers:</strong><br>
-            "Don't want to go out? Let Wes Dasher run the errands for you!"
+            “Don't want to go out? Let Wes Dasher run the errands for you!”
             <br><br>
             <strong>Shoppers:</strong><br>
-            "Looking to earn extra cash? Grab a request on your next trip—it's that simple!"
+            “Looking to earn extra cash? Grab a request on your next trip—it's that simple!”
         </p>
     </div>
 
+    <!-- Signup section  -->
+    <div id="signup">
+        <h1>Join us now</h1>
+        <p>
+            Interested in this app? Pre-register now to get five discount uses!
+        </p>
+        
+        <form action="login_confirm.html" method="GET">
+            <div>
+                <input 
+                    type="text" 
+                    name="full_name" 
+                    placeholder="Enter your full name" 
+                    required
+                />
+            </div>
+            <div>
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email" 
+                    required
+                />
+            </div>
+            <p>Please select a preference if you have one</p>
+            <div class="radio-group">
+                <input 
+                    type="radio" 
+                    id="runErrands" 
+                    name="option" 
+                    value="Run Errands" 
+                />
+                <label for="runErrands">Run Errands</label>
 
-
-
-
+                <input 
+                    type="radio" 
+                    id="beUser" 
+                    name="option" 
+                    value="Be User" 
+                />
+                <label for="beUser">Be User</label>
+            </div>
+            <input 
+                type="hidden" 
+                name="hidden-field" 
+                value="pass-in-cookie-value-here"
+            />
+            <input 
+                type="submit" 
+                value="Register" 
+            />
+        </form>
+    </div>
 
 </body>
 </html>
