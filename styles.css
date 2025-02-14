@@ -143,22 +143,22 @@ th {
 }
 
 .advert-slogans {
-    background-color: #7e0707;
+    background-color: #8d0808;
     color: #fff;
-    padding: 40px 20px;
-    margin: 30px auto;
-    max-width: 800px;   
+    padding: 30px 20px;
+    margin: 20px auto;
+    max-width: 650px;   
     border-radius: 8px; 
     text-align: center;
 }
 
 .advert-slogans h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 10px;
     color: #fffbfb; 
 }
 .advert-slogans h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin-bottom: 10px;
     color: #fffbfb; }
 
@@ -175,7 +175,7 @@ th {
     font-size: 2.5rem;    
     color: #b11616;     
     font-weight: bold;   
-    margin-bottom: 1rem;  /* 让标题与下方文字之间留点距离 */
+    margin-bottom: 1rem; 
     text-transform: uppercase; 
     letter-spacing: 1px;      
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.198); 
