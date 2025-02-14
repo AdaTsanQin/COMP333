@@ -1,57 +1,36 @@
 /* 
     COMP 333: Software Engineering
-    Ada Qin (aqin@wesleyan.edu)
+    Brief introduction: Red/black style 
+    Similar to Wesleyan official website
+    Brown for header, black/white for text, etc.
 */
-/*  Brief introduction: I supposed the basic theme is red/balck style
-    simillar to Wesleyan offical website
-    black for text (sometimes white due to background)
-    brown for header
-*/
-/*
-    font from Google at https://fonts.google.com/
-*/
+
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
 
+body {
+    font-family: "Noto Sans SC", sans-serif;
+    text-align: center;
+  }
 
 
-title{
-    color:black;
-}
-
-h1{
-    color:brown;
-    font-size: 3rem;
-}
-
-h2{
-    color:black;
-    font-size: 2rem;
-}
-
-h3{
-    color: brown;
-    font-size: 1.5rem;
+h1 {
+    color: rgb(173, 54, 54); 
 }
 
 p {
     color: black;
-    font-size: 1.2rem;
 }
 
-.hero-section{
-    height:100vh;
-}
-
-.radio-group {
+.button-container {
+    text-align: center;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  
+    margin-bottom: 20px;
+    justify-content: center;
+    gap: 10px;
+}
 
 .navbar {
-    background-color: brown;
+    background-color: rgb(173, 54, 54);
 }
 
 .navbar ul {
@@ -71,7 +50,7 @@ p {
     padding: 10px;
     line-height: 38px; 
 }
-  
+
 .navbar a {
     color: #fff;
     text-decoration: none;
@@ -80,11 +59,63 @@ p {
 form {
     display: flex;
     flex-direction: column;
-    width: 300px; 
+    width: 300px;
 }
 
 input {
     margin-bottom: 10px; 
     padding: 8px;
     font-size: 16px;
+}
+
+
+.hero-section {
+    background: linear-gradient(135deg, #600000, #900000);
+    color: #fff;
+    text-align: center;
+    padding: 80px 20px; 
+    margin-bottom: 30px;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero-section p {
+    font-size: 2.0rem;
+    max-width: 600px;
+    margin: 0 auto 1.5rem auto;
+}
+#hero-subtitle {
+    color: #fff;       
+    font-size: 1.5rem;  
+    margin-bottom: 50px;
+  }
+#wesdash{
+    color: #d61010;       
+    font-size: 4.0rem;  
+    margin-bottom: 30px;
+}
+
+.howitwork-box {
+    max-width: 700px;      
+    margin: 0 auto;        
+    text-align: left;      
+    background-color: #fff;  
+    padding: 20px;     
+  }
+  
+.hero-btn {
+    background-color: #fff;
+    color: #900000;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.hero-btn:hover {
+    background-color: #eee;
 }
