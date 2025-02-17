@@ -1,0 +1,146 @@
+<!-- 
+    COMP 333: Software Engineering
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>WesDash - Main Page</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+    <!-- navigation Section -->
+    <div id="navbar" class="navbar">
+        <ul>
+            <li><a href="#hero-section">Home</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#signup">Register</a></li>
+            <li><a href="#">More Comments</a></li>
+        </ul>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section" id="hero-section">
+        <p id="wesdash">WesDash</p>
+        <!-- Hero subtitle -->
+        <p id="hero-subtitle">Your campus delivery made simple.</p>
+        <!-- button to how it works part -->
+        <a class="hero-btn" href="#signup">Get Started</a>
+    </div>
+
+    
+    <!-- “How It Works” section -->
+    <div class="howitwork-box" id="how-it-works">
+        <header>
+            <h1>How Our App Works</h1>
+        </header>
+        <h3>Step 1: Submit a Request</h3>
+        <p>
+            List your items, pick a delivery speed (Turbo or Chill), 
+            and set a drop-off spot (Dorm, Classroom).
+        </p> 
+
+        <h3>Step 2: Wait for a Shopper</h3>
+        <p>
+            A "Wes dasher" sees your request, shops for you, and updates you along the way.
+        </p>    
+
+        <h3>Step 3: Arrange Drop-off</h3>
+        <p>
+            Meet at the chosen location, check your items, then leave a rating 
+            or tip if you're happy!
+        </p>
+    </div>
+
+     <!-- “slogan” section -->
+    <div class="advert-slogans">
+        <div class="buyers">
+            <h2>Buyers:</h2>
+            <h3 class="advert-slogan">
+            “Don't want to go out?”<br>“Let Wes Dasher run the errands for you!”
+            </h3>
+        </div>
+        <div class="shoppers">
+            <h2>Shoppers:</h2>
+            <h3 class="advert-slogan">
+            “Looking to earn extra cash?”<br>“Grab a request on your next trip—it's that simple!”
+            </h3>
+        </div>
+    </div>
+
+    <!-- Signup section  -->
+    <div id="signup">
+        <h1>Join us now</h1>
+        <p>
+            Interested in this app? Pre-register now to get five discount uses!
+        </p>
+    </div>
+
+
+    <div class="signup-form">
+        <form action="login_confirm.html" method="GET">
+            <div>
+                <input 
+                    type="text" 
+                    name="full_name" 
+                    placeholder="Enter your full name" 
+                    required
+                />
+            </div>
+            <div class="signup-email">
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email" 
+                    required
+                />
+            </div>
+            <div class="signup-button">
+                <input 
+                    type="button" 
+                    value="Buyer" 
+                    onclick="location.href='buyer.html'"
+                />
+                <input 
+                    type="button" 
+                    value="Shopper" 
+                    onclick="location.href='shopper.html'"
+                />
+            <p>Please select a preference if you have one</p>
+            <div class="radio-group">
+                <input 
+                    type="radio" 
+                    id="runErrands" 
+                    name="option" 
+                    value="Run Errands" 
+                />
+                <label for="runErrands">Run Errands</label>
+
+                <input 
+                    type="radio" 
+                    id="beUser" 
+                    name="option" 
+                    value="Be User" 
+                />
+                <label for="beUser">Be User</label>
+            </div>
+            <input 
+                type="hidden" 
+                name="hidden-field" 
+                value="pass-in-cookie-value-here"
+            />
+            <input 
+                type="submit" 
+                value="Register" 
+            />
+        </form>
+    </div>
+
+    <div class reviews-iframe>
+        <iframe src="reviews.html" width="100%" height="500px"></iframe>
+    </div>
+
+</body>
+</html>
