@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+=======
+/* 
+    COMP 333: Software Engineering
+    Brief introduction: Red/black style 
+    Similar to Wesleyan official website
+    Brown for header, black/white for text, etc.
+*/
+>>>>>>> 26f2058 (Added file from main (issue#9))
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
 
@@ -250,6 +259,7 @@ figcaption {
     background: rgba(255, 255, 255, 0.8);
     border-radius: 8px;
     text-align: center;
+<<<<<<< HEAD
 }
 
 .contract {
@@ -289,3 +299,6 @@ figcaption {
     color: gray;
     text-align: left;
 }
+=======
+}
+>>>>>>> 26f2058 (Added file from main (issue#9))
