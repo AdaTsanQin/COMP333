@@ -1,0 +1,47 @@
+<!-- 
+    COMP 333: Software Engineering
+    Ada Qin (aqin@wesleyan.edu)
+-->
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<h1>Join us now</h1>
+<p>
+    Interested in this app? Pre-register now to get five discount uses!
+</p>
+
+<form action="login_confirm.html"> 
+
+<div>
+  <input type="text" name="full_name" placeholder="Enter your full name" required/>
+</div>
+
+<div>
+  <input type="email" name="email" placeholder="Enter your email" required/>
+</div>
+<p>
+  Please select a perference if you have one
+</p>
+<div class="radio-group">
+    
+  <input type="radio" id="runErrands" name="option" value="Run Errands" />
+  <label for="runErrands">Buyers</label>
+
+  <input type="radio" id="beUser" name="option" value="Be User" />
+  <label for="beUser">Shoppers</label>
+
+</div>
+
+  <input
+    type="hidden"
+    name="hidden-field"
+    value="pass-in-cookie-value-here"
+  />
+
+  <input type="submit" value="register" />
+</form>

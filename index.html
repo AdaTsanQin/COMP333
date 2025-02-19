@@ -76,7 +76,10 @@
         <p>
             Interested in this app? Pre-register now to get five discount uses!
         </p>
-        
+    </div>
+
+
+    <div class="signup-form">
         <form action="login_confirm.html" method="GET">
             <div>
                 <input 
@@ -86,7 +89,7 @@
                     required
                 />
             </div>
-            <div>
+            <div class="signup-email">
                 <input 
                     type="email" 
                     name="email" 
@@ -94,6 +97,17 @@
                     required
                 />
             </div>
+            <div class="signup-button">
+                <input 
+                    type="button" 
+                    value="Buyer" 
+                    onclick="location.href='buyer.html'"
+                />
+                <input 
+                    type="button" 
+                    value="Shopper" 
+                    onclick="location.href='shopper.html'"
+                />
             <p>Please select a preference if you have one</p>
             <div class="radio-group">
                 <input 
@@ -122,6 +136,10 @@
                 value="Register" 
             />
         </form>
+    </div>
+
+    <div class reviews-iframe>
+        <iframe src="reviews.html" width="100%" height="500px"></iframe>
     </div>
 
 </body>
