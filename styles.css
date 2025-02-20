@@ -257,3 +257,41 @@ figcaption {
     border-radius: 8px;
     text-align: center;
 }
+
+.contract {
+    text-align: left; 
+    max-width: 90%; 
+    margin: 0 auto; 
+    font-size: 1rem; 
+}
+
+.contract dt {
+    font-size: 1.2rem;
+    font-weight: bold; 
+    margin-bottom: 0.625rem;
+    color: #600000;
+}
+
+.contract ol {
+    margin-left: 1.5rem; 
+    list-style-type: decimal; 
+}
+
+.contract li {
+    margin-bottom: 0.3125rem; 
+}
+
+.contract p,
+.contract h1 {
+    text-align: left;
+}
+
+.contract dd {
+    margin-bottom: 0.9375rem;
+}
+
+.contract .last-line {
+    font-size: 0.8rem; 
+    color: gray;
+    text-align: left;
+}
