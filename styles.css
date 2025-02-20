@@ -130,13 +130,14 @@ input {
     padding: 20px;     
   }
   
-.hero-btn {
+  .hero-btn {
     background-color: #fff;
     color: #900000;
     text-decoration: none;
-    padding: 12px 24px;
-    border-radius: 4px;
+    padding: 18px 28px;
+    border-radius: 8px;
     font-weight: bold;
+    font-size: 1.4rem; 
     transition: background-color 0.3s ease;
 }
 
