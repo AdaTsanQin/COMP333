@@ -319,3 +319,7 @@ figcaption {
     color: gray;
     text-align: left;
 }
+
+.center-text {
+    text-align: center;
+  }
