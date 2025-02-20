@@ -37,15 +37,15 @@ p {
     display: flex; 
     justify-content: space-evenly; 
     align-items: center; 
-    height: 60px;
+    height: 4rem;
 }
 
 .navbar li {
     flex: 1; 
     border-top: none;      
     border-bottom: none; 
-    padding: 10px;
-    line-height: 38px; 
+    padding: 0.6rem;
+    line-height: 2.5rem; 
 }
 
 .navbar a {
@@ -56,12 +56,28 @@ p {
 .navbar li:last-child a {
     background-color: white;  
     color: black;            
-    padding: 10px 20px;       
-    border-radius: 5px;      
+    padding: 0.5rem 1.25rem;       
+    border-radius: 0.5rem;      
     font-weight: bold;       
 }
 
+@media (max-width: 600px) {
+    .navbar ul {
+        flex-direction: column;
+        height: auto;
+    }
 
+    .navbar li {
+        width: 100%;
+        padding: 0.6rem 0;
+        text-align: left;
+    }
+
+    .navbar a {
+        font-size: 1rem;
+        padding-left: 1.2rem;
+    }
+}
 form {
     display: flex;
     flex-direction: column;
@@ -129,7 +145,7 @@ input {
 }
 
 .implicit-link{
-    color: gray;
+    color: #900000;
 
 }
 
@@ -207,7 +223,7 @@ th {
 
 .reviews-iframe {
     width: 100%;
-    height: 500px;
+    height: 30vh;
     margin-top: 50px
 }
 
@@ -220,42 +236,50 @@ th {
 }
 
 figure {
-    position: relative; 
     display: flex;
     flex-direction: column;
-    align-items: center; 
+    align-items: center;
     text-align: center;
 }
 
 img {
     width: 50%; 
     height: auto;
-}
-
-@media screen and (max-width: 600px) {
-    img {
-        width: 100%; 
-        max-width: 300px; 
-        height: auto; 
-    }
+    margin-bottom: 10px; 
 }
 
 figcaption {
-    font-size: 1em;
+    font-size: 1.1em; 
     width: 50vw;
-    max-width: 50%;
-    color: #555;
-    padding: 10px;
-    
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    
-
-    background: rgba(255, 255, 255, 0.8);
+    max-width: 80%; 
+    color: #333; 
+    padding: 12px; 
+    background: rgba(255, 255, 255, 0.9); 
     border-radius: 8px;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    margin-top: 10px; 
+}
+
+@media screen and (max-width: 600px) {
+    .gallery {
+        padding: 15px;
+    }
+    
+    figure {
+        align-items: center;
+    }
+
+    img {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+
+    figcaption {
+        font-size: 1em;
+        width: 90%; 
+    }
 }
 
 .contract {
