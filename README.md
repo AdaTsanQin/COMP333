@@ -26,15 +26,15 @@ Price_list.html: A page displaying the charging of using the app, including the 
 styles.css: The main stylesheet used for styling both the main page and contract page, containing a responsive design, color scheme, and layout definitions.
 
 # How to run code
-##locally
-do the following things in the terminal:
-1. git clone git clone https://github.com/AdaTsanQin/COMP333.git
-2. cd COMP333
-do the following things outside of the terminal:
-3. open COMP333 file and click index.html to see the page
+locally:
+1.do the following things in the terminal:
+   1. git clone git clone https://github.com/AdaTsanQin/COMP333.git
+   2. cd COMP333
+2.do the following things outside of the terminal:
+   3. open COMP333 file and click index.html to see the page
    
-##in the browser
-Put this URL : https://adatsanqin.github.io/COMP333/ in your browser
+in the browser:
+1.Put this URL : https://adatsanqin.github.io/COMP333/ in your browser
 # Notification by Ada Qin
 Mistakes and actions made while using Github:
 1. merge styles.css, login.html, and login_confirm.html into the main branch without a pull request.
