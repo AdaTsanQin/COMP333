@@ -283,19 +283,24 @@ figcaption {
         font-size: 1em;
         width: 90%; 
     }
+    .contract {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
 }
 
 .contract {
     text-align: left; 
-    max-width: 90%; 
+    max-width: 100%; 
     margin: 0 auto; 
-    font-size: 1rem; 
+    font-size: 1rem;
+    padding: 15px; 
 }
 
 .contract dt {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold; 
-    margin-bottom: 0.625rem;
+    margin-bottom: 0.5rem;
     color: #600000;
 }
 
@@ -305,7 +310,7 @@ figcaption {
 }
 
 .contract li {
-    margin-bottom: 0.3125rem; 
+    margin-bottom: 0.25rem; 
 }
 
 .contract p,
@@ -314,7 +319,7 @@ figcaption {
 }
 
 .contract dd {
-    margin-bottom: 0.9375rem;
+    margin-bottom: 0.75rem;
 }
 
 
