@@ -257,6 +257,13 @@ th {
     align-items: center; /* Align items vertically */
     justify-content: center; /* Center everything */
 }
+.flex-container > div {
+    transition: 0.3s; /* Smooth effect */
+}
+
+.flex-container > div:hover {
+    transform: scale(1.1); /* Slightly enlarge the box */
+}
 
 .description {
     max-width: 300px; 
