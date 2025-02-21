@@ -6,8 +6,11 @@ This is for the first assignment of Wesleyan University, COMP333 Software Engine
 The website is the landing page of a fictional app: WesDash.
 
 # Teammate and work distribution
+
 Ada Qin/AdaTsanQin: Navigation bar/ Our Strength and Technology/Hyperlink(4)/Style adjustment/Log in 
+
 Haihan Wang/2274006014: Hero section/ How it works/Style adjustment
+
 Cheruiyot Allan/CptRono: Customer Reviews/Style adjustment
 
 # Purpose of code
@@ -28,13 +31,19 @@ styles.css: The main stylesheet used for styling both the main page and contract
 
 # How to run code locally
 do the following things in the terminal:
+
 1. git clone git clone https://github.com/AdaTsanQin/COMP333.git
+
 2. cd COMP333
+
 do the following things outside of the terminal:
+
 3. open COMP333 file and click index.html to see the page
 
 # Notification by Ada Qin
-Mistakes and actions made while using Github:
+
+Mistakes and actions made while Ada Qin using Github:
+
 1. merge styles.css, login.html, and login_confirm.html into the main branch without a pull request.
 2. Part of feature/issue-27 has been changed under HaihanWang's account. The command d50efda bbdead5 d5e961d 74f5128 58f95ee bb2a1a8 is changed by Ada Qin under account 2274006014
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
