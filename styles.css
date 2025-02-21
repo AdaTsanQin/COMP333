@@ -37,16 +37,15 @@ p {
     display: flex; 
     justify-content: space-evenly; 
     align-items: center; 
-    height: 60px;
+    height: 4rem;
 }
 
 .navbar li {
     flex: 1; 
-    border: 1px solid white;
     border-top: none;      
     border-bottom: none; 
-    padding: 10px;
-    line-height: 38px; 
+    padding: 0.6rem;
+    line-height: 2.5rem; 
 }
 
 .navbar a {
@@ -54,6 +53,31 @@ p {
     text-decoration: none;
 }
 
+.navbar li:last-child a {
+    background-color: white;  
+    color: black;            
+    padding: 0.5rem 1.25rem;       
+    border-radius: 0.5rem;      
+    font-weight: bold;       
+}
+
+@media (max-width: 600px) {
+    .navbar ul {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .navbar li {
+        width: 100%;
+        padding: 0.6rem 0;
+        text-align: left;
+    }
+
+    .navbar a {
+        font-size: 1rem;
+        padding-left: 1.2rem;
+    }
+}
 form {
     display: flex;
     flex-direction: column;
@@ -106,13 +130,14 @@ input {
     padding: 20px;     
   }
   
-.hero-btn {
+  .hero-btn {
     background-color: #fff;
     color: #900000;
     text-decoration: none;
-    padding: 12px 24px;
-    border-radius: 4px;
+    padding: 18px 28px;
+    border-radius: 8px;
     font-weight: bold;
+    font-size: 1.4rem; 
     transition: background-color 0.3s ease;
 }
 
@@ -121,7 +146,7 @@ input {
 }
 
 .implicit-link{
-    color: gray;
+    color: #900000;
 
 }
 
@@ -198,9 +223,101 @@ th {
 }
 
 .reviews-iframe {
-    background-color: #900000; 
-    width: 400px; 
-    height: 300px;
-    text-align: center;
-    border-radius: 10px;
+
+
+    width: 100%;
+    height: 30vh;
+    margin-top: 5vh;
 }
+
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+}
+
+figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+img {
+    width: 50%; 
+    height: auto;
+    margin-bottom: 10px; 
+}
+
+figcaption {
+    font-size: 1.1em; 
+    width: 50vw;
+    max-width: 80%; 
+    color: #333; 
+    padding: 12px; 
+    background: rgba(255, 255, 255, 0.9); 
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    margin-top: 10px; 
+}
+
+@media screen and (max-width: 600px) {
+    .gallery {
+        padding: 15px;
+    }
+    
+    figure {
+        align-items: center;
+    }
+
+    img {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+
+    figcaption {
+        font-size: 1em;
+        width: 90%; 
+    }
+}
+
+.contract {
+    text-align: left; 
+    max-width: 90%; 
+    margin: 0 auto; 
+    font-size: 1rem; 
+}
+
+.contract dt {
+    font-size: 1.2rem;
+    font-weight: bold; 
+    margin-bottom: 0.625rem;
+    color: #600000;
+}
+
+.contract ol {
+    margin-left: 1.5rem; 
+    list-style-type: decimal; 
+}
+
+.contract li {
+    margin-bottom: 0.3125rem; 
+}
+
+.contract p,
+.contract h1 {
+    text-align: left;
+}
+
+.contract dd {
+    margin-bottom: 0.9375rem;
+}
+
+
+.center-text {
+    text-align: center;
+  }
