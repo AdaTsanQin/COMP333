@@ -55,7 +55,7 @@ Mistakes and actions made while using Github:
 
 
 # Teammate and work distribution
-Haihan Wang: login.php, create.php, update.php
+Haihan Wang: login.php, create.php, read.php, updata.php(some part)
 
 # screenshot
 Haihan Wang: ![Haihan Wang screenshot](HaihanWang.jpg)
