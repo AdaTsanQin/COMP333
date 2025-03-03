@@ -1,5 +1,9 @@
 # COMP333
 This is for a homework assignment for Wesleyan University, COMP333 Software Engineering.
+
+—--------------------------
+# Homework 1:
+
 # Introduction
 This is for the first assignment of Wesleyan University, COMP333 Software Engineering.
 The website is the landing page of a fictional app: WesDash.
@@ -42,3 +46,16 @@ Mistakes and actions made while using Github:
 1. merge styles.css, login.html, and login_confirm.html into the main branch without a pull request.
 2. Part of feature/issue-27 has been changed under HaihanWang's account. The command d50efda bbdead5 d5e961d 74f5128 58f95ee bb2a1a8 is changed by Ada Qin under account 2274006014
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
+
+—--------------------------
+
+# Homework 2: Backend, Database & Additional Features
+
+# Introduction
+
+
+# Teammate and work distribution
+Haihan Wang: login.php, create.php, update.php
+
+# screenshot
+Haihan Wang: Haihanwang.jpg
