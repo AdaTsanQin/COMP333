@@ -58,4 +58,4 @@ Mistakes and actions made while using Github:
 Haihan Wang: login.php, create.php, update.php
 
 # screenshot
-Haihan Wang: Haihanwang.jpg
+Haihan Wang: ![Haihan Wang screenshot](HaihanWang.jpg)
