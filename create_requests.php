@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("ssssss", $username, $item, $dropOffLocation, $deliverySpeed, $status, $createdAt);
 
     if ($stmt->execute()) {
-  
-        header("Location: read_requests.php?msg=created");
+        //Ada: changed the location to a valid new site
+        header("Location: delete_requests.php");
         exit;
     } else {
         die("Insert failed: " . $stmt->error);
