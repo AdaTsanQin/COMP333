@@ -1,0 +1,132 @@
+<!-- page that allows the user to update their review of an item bought-->
+
+<!-- page that allows the user to update their review of an item bought-->
+<form action="/update-review" method="POST">
+    <label for="review">Update your review:</label>
+    <textarea id="review" name="review" rows="4" cols="50"></textarea>
+    <input type="submit" value="Update Review">
+</form>
+
+
+<?php
+// start session
+session_start();
+// connect with db
+require_once 'db_conect.php';
+
+// check if logged input
+if (!isset($_SESSION["user_id"])) {
+    die("Oops! Please log in and try again.");
+}
+
+$user_id = $_SESSION["user_id"];
+
+// sql query for reviews - using placeholder
+$sql_statement = "SELECT item_id, price, review WHERE user_id= :placeholder";
+
+// use pdo to pass the user_id/username into the sql statement to avoid injections
+$statement = $pdo->prepare(sql_statement);
+$statement->execute(["placeholder" => $user_id]);
+
+// fetch items in executed sql statement as an array
+$items = statement->fetchAll();
+?>
+
+<!--   SECTION 1: Display section: display items bought and buyer's reveiws beside them-->
+<!DOCTYPE html>
+<html lang="'en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Purchased Items and Reviews</title>
+</head>
+<body>
+    <?php if (count($items) > 0): ?>
+        <table>
+            <!--table headers-->
+            <tr>
+                <th>Item</th>
+                <th>Your Review</th>
+            </tr>
+            <!--iterate thru each item and display as a table row-->
+            <?php foreach($items as $item): ?>
+                <tr>
+                <!-- use htmlspecialchar to escape special chars so they are not interpreted as html -->
+                    <td> <?php echo htmlspecialchars($item['name']); ?> </td>
+                    <td> <?php echo htmlspecialchars($item['review']); ?> </td>
+                    <!--send user to wesdash.com/?edit=<some_id>-->
+                    <!--authentication checks have been done so need not worry about other user accessing a different user's reviews-->
+                    <a href="?edit= <?php echo $item['item_id']; ?>">Edit Review</a>"
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <!-- If no items are found, display a message indicating that -->
+    <?php else: ?>
+        <p>You have not purchased any items yet.</p>
+    <?php endif; ?>
+    
+</body>
+
+<!--SECTION 2: FORM EDITING -->
+
+<?php
+// check if user wants to edit for (whether they clicked 'edit' link)
+if (isset($_GET['edit'])) {
+
+    // sql statement that ensures the user owns the review they are accessing
+    $sqlstmt = "SELECT item_id, item_name, review FROM reviews WHERE user_id=:userplaceholder";
+    // prepare the statement using pdo to ensure clean inputs
+    $pdostmt = $pdo->prepare($sql_statement);
+    // execute prepared statement 
+    $pdostmt->execute(["userplaceholder" => $user_id]);
+    // fetch the data 
+    $review_to_edit = $pdostmt->fetch();
+    // does the row belong to the user?
+    if(!$review_to_edit){
+        echo "<p>Error encountered: Review not found/you do not have edit access to the review</p>";
+    }
+    if($review_to_edit){
+    ?>
+        <h2> Edit your review below </h2>
+        <form method="post" action="">
+            <!-- Include a hidden field to pass the item id back on submission -->
+            <input type="hidden" name="edit_id" value="<?php echo htmlspecialchars($review_to_edit['item_id']); ?>">
+            <!-- A text area for updating the review content -->
+            <label for="new_review">Review:</label><br>
+            <textarea name="new_review" id="new_review" rows="4" cols="50">
+                <?php echo htmlspecialchars($review_to_edit["review"]); ?>
+            </textarea><br>
+            <!-- A submit button to process the update -->
+            <input type="submit" name="submit_edit" value="Update Review">
+        </form>
+    <?php
+    }
+}
+?>
+
+
+<!-- SECTION 3: UPDATE and give feedback -->
+<?php
+if (isset($_POST["submit_edit"])) {
+    // Retrieve the review id and new review text from POST data
+    $editId = $_POST["edit_id"];
+    $newReview = $_POST["new_review"];
+    
+    // Prepare an SQL statement to update the review for the given id and username
+    $sqlUpdate = "UPDATE purchases SET review = :newReview WHERE id = :id AND username = :username";
+    $stmtUpdate = $pdo->prepare($sqlUpdate);
+    
+    // Execute the statement with the new review data, review id, and the logged in username
+    $result = $stmtUpdate->execute([
+        "newReview" => $newReview,
+        "id" => $editId,
+        "username" => $username
+    ]);
+    
+    // Provide simple feedback if the update was successful
+    if ($result) {
+        echo "<p>Review updated successfully.</p>";
+    } else {
+        echo "<p>Error updating review.</p>";
+    }
+}
+?>
