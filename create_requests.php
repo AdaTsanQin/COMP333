@@ -77,6 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <br><br>
 
     <button type="submit">Create</button>
+
+    <a href="logout.php">
+    <button type="button">Logout</button>
+    </a>
 </form>
 </body>
 </html>
