@@ -44,6 +44,33 @@ Mistakes and actions made while using Github:
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
 
 
+## Screenshot of Allan's Xampp
+![xampp screenshot](Allan_cheruiyot.png)
+
+## how to run Allan's user review files - create_review.php, update_review.php delete_review.php
+Change line 80 in dashboard.html from 
+`<a href="update.php">Update Order</a>` to 
+`<a href="update_task.php">Update Order</a>`
+
+Now run the following SQL queries:
+
+`
+CREATE TABLE `tasks` (
+  `task_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `request_id` INT(11) DEFAULT NULL,
+  `username` VARCHAR(255) DEFAULT NULL,
+  `dashername` VARCHAR(255) DEFAULT NULL,
+  `item` TEXT,
+  `status` VARCHAR(50) DEFAULT NULL,
+  `rating` INT(11) DEFAULT NULL,
+  `comment` TEXT,
+  PRIMARY KEY (`task_id`)
+)
+`
+
+Now you can add, update, and delete reviews after an order is dropped. Use the Manage Reviews tab.
+
+
 ## Assignment-2
 People who register the program can log in and out of the program repeatedly.
 As a Buyer, the user can request someone to run errands for him: create a new order, fill in the detailed product name and address in the order, and always check whether someone has accepted the order and whether it has been delivered. There will be a prompt when the order is delivered. After confirming the items, the Buyer ends the order.
@@ -84,3 +111,4 @@ ada-qin.ct.ws
 # local enviornment
 1.Ada:
 ![Ada's local enviornment](Ada_local.jpg)
+
