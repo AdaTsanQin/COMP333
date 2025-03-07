@@ -42,3 +42,6 @@ Mistakes and actions made while using Github:
 1. merge styles.css, login.html, and login_confirm.html into the main branch without a pull request.
 2. Part of feature/issue-27 has been changed under HaihanWang's account. The command d50efda bbdead5 d5e961d 74f5128 58f95ee bb2a1a8 is changed by Ada Qin under account 2274006014
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
+
+## Ada's local enviornment
+![Ada's local enviornment](Ada_local.jpg)
