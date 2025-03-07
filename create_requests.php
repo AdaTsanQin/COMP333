@@ -19,6 +19,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item              = $_POST['item']              ?? '';
     $dropOffLocation   = $_POST['drop_off_location'] ?? '';
@@ -52,7 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Insert failed: " . $stmt->error);
     }
 } 
-
+if (!isset($_SESSION['username'])) {
+    die("Please log in before creating a request.");
+}
+$username = $_SESSION['username'] ?? ''; 
 
 ?>
 <!DOCTYPE html>
@@ -62,6 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Create a new request</title>
 </head>
 <body>
+<p style="font-weight: bold; color: blue;">You are logged in as: <?php echo htmlspecialchars($username); ?></p>
+
 <h1>Create a new request</h1>
 <form method="POST" action="create_requests.php">
     <label>Item:</label>
@@ -78,9 +84,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <button type="submit">Create</button>
 
-    <a href="logout.php">
-    <button type="button">Logout</button>
-    </a>
 </form>
+
+
+<a href="manage_requests.php">
+    <button>Accept Orders</button>
+</a>
+
+<a href="delete_requests.php">
+    <button>Cancel Order</button>
+</a>  
+
+<a href ="read.php">
+    <button type="button">View all requests</button>
+</a>
+
+
+<a href="logout.php">
+    <button type="button">Logout</button>
+</a>
 </body>
 </html>
