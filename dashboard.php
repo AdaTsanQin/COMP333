@@ -77,7 +77,7 @@ if ($resultClaimed) {
     <h1>Welcome to WesDash, <?php echo htmlspecialchars($username); ?>!</h1>
     <nav>
         <a href="create_requests.php">Make Order</a>
-        <a href="update_requests.php">Update Order</a>
+        <a href="update.php">Update Order</a>
         <a href="delete_requests.php">Delete Order</a>
         <a href="manage_review.php">Manage Reviews</a>
         <a href="dashboard.php">Dashboard</a>
