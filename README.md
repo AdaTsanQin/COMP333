@@ -78,7 +78,7 @@ At the same time, as a Runner, you can also view the currently accepted orders, 
 # Work distrubution
 Ada: register/ request of Buyer / request of Runner / Readme / deployment in infinityfree
 Haihan: Login/read order list/ update order list/
-Allan: update reviews/ Dashboard page
+Allan: create,update,delete reviews/ Dashboard page
 # How to set up app
 1. in local MySQL, create a database called app-db
 2. Do following in this URL 
