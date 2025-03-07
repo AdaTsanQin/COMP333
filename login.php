@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (password_verify($password, $hashedPassword)) {
             $_SESSION['username'] = $username;
-            header("Location: create_requests.php");
+            header("Location: dashboard.php");
             exit;
         } else {
             echo "Invalid password. Please try again.";
