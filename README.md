@@ -47,8 +47,12 @@ Mistakes and actions made while using Github:
 ![xampp screenshot](Allan_cheruiyot.png)
 
 ## how to run Allan's user review files - create_review.php, update_review.php delete_review.php
-Change line 80 in dashboard.html from `<a href="update.php">Update Order</a>` to `<a href="update_task.php">Update Order</a>`
-run the following SQL queries
+Change line 80 in dashboard.html from 
+`<a href="update.php">Update Order</a>` to 
+`<a href="update_task.php">Update Order</a>`
+
+Now run the following SQL queries:
+
 `
 CREATE TABLE `tasks` (
   `task_id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -62,4 +66,5 @@ CREATE TABLE `tasks` (
   PRIMARY KEY (`task_id`)
 )
 `
-Now you can add add,update and delete reviews after an order is dropped. Use Manage Reviews tab.
+
+Now you can add, update, and delete reviews after an order is dropped. Use the Manage Reviews tab.
