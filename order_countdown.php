@@ -25,7 +25,6 @@ if (!$requestId) {
     die("Invalid request.");
 }
 
-// Handle "Dropped Off" button click
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['request_id'])) {
     $requestId = $_POST['request_id'];
 
@@ -38,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['request_id'])) {
     exit;
 }
 
-// Fetch request details including delivery_speed
 $sql = "SELECT id, status, delivery_speed FROM requests WHERE id = ? AND status = 'accepted'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $requestId);
@@ -50,16 +48,13 @@ if (!$request) {
     die("No active request found.");
 }
 
-// Determine countdown duration based on delivery_speed
 $deliverySpeed = $request['delivery_speed'] ?? 'common';
-$countdownDuration = ($deliverySpeed === 'urgent') ? 10 * 60 : 20 * 60; // 10 min for urgent, 20 min for common
+$countdownDuration = ($deliverySpeed === 'urgent') ? 10 * 60 : 20 * 60;
 
-// Ensure $_SESSION['startTime'] is an array before using it
 if (!isset($_SESSION['startTime']) || !is_array($_SESSION['startTime'])) {
-    $_SESSION['startTime'] = []; // Initialize as an array if not set
+    $_SESSION['startTime'] = []; 
 }
 
-// Start countdown timer for this specific request
 if (!isset($_SESSION['startTime'][$requestId])) {
     $_SESSION['startTime'][$requestId] = time();
 }
@@ -89,6 +84,8 @@ if ($remainingTime <= 0) {
     <title>Delivery Countdown</title>
 </head>
 <body>
+<p style="font-weight: bold; color: blue;">You are logged in as: <?php echo htmlspecialchars($username); ?></p>
+
     <h1><?php echo ucfirst($deliverySpeed); ?> Delivery Countdown</h1>
     <div id="countdown">
         <?php

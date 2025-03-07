@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Manage Requests</title>
 </head>
 <body>
+<p style="font-weight: bold; color: blue;">You are logged in as: <?php echo htmlspecialchars($username); ?></p>
 
 <h1>Manage Pending Orders</h1>
 
@@ -80,7 +81,16 @@ $conn->close();
 ?>
 
 <a href="create_requests.php">
-    <button>Back to Create New Request</button>
+    <button>Create New Request</button>
+</a>
+<a href="delete_requests.php">
+    <button>Cancel Order</button>
+</a>  
+<a href ="read.php">
+    <button type="button">View all requests</button>
+</body>
+<a href="logout.php">
+    <button type="button">Logout</button>
 </a>
 
 </body>
