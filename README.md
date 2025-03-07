@@ -106,7 +106,15 @@ CREATE TABLE requests (
 then test the code
 
 # URL(infinityfree)
-ada-qin.ct.ws not done but tried to set up the ssl
+ada-qin.ct.ws not done but tried to set up the SSL
+Having following :
+Installed SSL Status
+This is the SSL certificate that's installed on your hosting account.
+
+Status	
+Issuer	Google Trust Services
+Expires at	2025-06-05
+
 
 # local enviornment
 1.Ada:
