@@ -43,5 +43,44 @@ Mistakes and actions made while using Github:
 2. Part of feature/issue-27 has been changed under HaihanWang's account. The command d50efda bbdead5 d5e961d 74f5128 58f95ee bb2a1a8 is changed by Ada Qin under account 2274006014
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
 
-## Ada's local enviornment
+
+## Assignment-2
+People who register the program can log in and out of the program repeatedly.
+As a Buyer, the user can request someone to run errands for him: create a new order, fill in the detailed product name and address in the order, and always check whether someone has accepted the order and whether it has been delivered. There will be a prompt when the order is delivered. After confirming the items, the Buyer ends the order.
+At the same time, as a Runner, you can also view the currently accepted orders, accept the orders, and send them to the Buyer at a certain time.
+# Work distrubution
+Ada: register/ request of Buyer / request of Runner / Readme / deployment in infinityfree
+Haihan: Login/read order list/ update order list/
+Allan: update reviews/ Dashboard page
+# How to set up app
+1. in local MySQL, create a database called app-db
+2. Do following in this URL 
+http://localhost/phpmyadmin/index.php
+Click on database in navigation bar
+Under create database enter app-db in the "Database name"
+click to get into app-db
+go to SQL in navigationbar, copy the following code into it and click go:
+CREATE TABLE users (
+    username VARCHAR(255) NOT NULL PRIMARY KEY,
+    password VARCHAR(255) DEFAULT NULL
+);
+CREATE TABLE requests (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    item VARCHAR(255) NOT NULL,
+    drop_off_location VARCHAR(255) NOT NULL,
+    delivery_speed ENUM('urgent', 'common') DEFAULT 'common',
+    status ENUM('pending', 'accepted', 'completed', 'confirmed') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL,
+    accepted_by VARCHAR(255) DEFAULT NULL,
+    INDEX (username)
+);
+3. Go to the URL : http://localhost/register.php 
+then test the code
+
+# URL(infinityfree)
+ada-qin.ct.ws
+
+# local enviornment
+1.Ada:
 ![Ada's local enviornment](Ada_local.jpg)
