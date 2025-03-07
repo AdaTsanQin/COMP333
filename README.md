@@ -106,7 +106,7 @@ CREATE TABLE requests (
 then test the code
 
 # URL(infinityfree)
-ada-qin.ct.ws
+ada-qin.ct.ws not done but tried to set up the ssl
 
 # local enviornment
 1.Ada:
