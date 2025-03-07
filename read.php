@@ -36,6 +36,7 @@ $result = $stmt->get_result();
     <title>My Requests</title>
 </head>
 <body>
+<p style="font-weight: bold; color: blue;">You are logged in as: <?php echo htmlspecialchars($username); ?></p>
 <h2>My WesDash Requests</h2>
 <table border="1">
     <tr>
@@ -64,7 +65,18 @@ $result = $stmt->get_result();
     }
     ?>
 </table>
-
+<a href="create_requests.php">
+    <button>Create New Request</button>
+</a>
+<a href="manage_requests.php">
+    <button>Accept Orders</button>
+</a>
+<a href="delete_requests.php">
+    <button>Cancel Order</button>
+</a>  
+<a href="logout.php">
+    <button type="button">Logout</button>
+</a>
 </body>
 </html>
 <?php
