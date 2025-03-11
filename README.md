@@ -120,3 +120,12 @@ Expires at	2025-06-05
 1.Ada:
 ![Ada's local enviornment](Ada_local.jpg)
 
+
+
+
+# Assignment3
+
+## Resolve unfinished issues in Assignment #2
+This is not an extension of the submission of Assignment 2, it is just to complete the parts that were not completed before.
+1.Added URL ada-qin.ct.ws/dashboard.php
+2.Updated the Create_request.php which was accidentally overwritten before.
