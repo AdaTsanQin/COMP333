@@ -1,4 +1,4 @@
-<?
+<?php
 // comp333 
 ?>
 <!DOCTYPE html>
