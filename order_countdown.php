@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['request_id'])) {
     $stmt->execute();
 
     echo "<p>Order has been completed!</p>";
+    echo "<p><a href='dashboard.php' style='color: blue; font-weight: bold;'>Go back to main page</a></p>";
     exit;
 }
 
