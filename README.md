@@ -52,9 +52,7 @@ Mistakes and actions made while using Github:
 `<a href="update.php">Update Order</a>` to 
 `<a href="update_task.php">Update Order</a>`
 
-2. Now run the following SQL queries:
-
-`
+2. Now run the following SQL queries: `
 CREATE TABLE tasks(task_id INT(11) NOT NULL AUTO_INCREMENT,request_id INT(11) DEFAULT NULL,username VARCHAR(255) DEFAULT ' ',dashername VARCHAR(255) DEFAULT ' ',item TEXT,status VARCHAR(50) DEFAULT ' ', rating INT(11) DEFAULT 0,comment TEXT DEFAULT ' ', PRIMARY KEY (task_id) );
 `
 3. Make a purchase request from the dashboard
