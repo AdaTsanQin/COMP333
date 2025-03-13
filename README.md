@@ -70,7 +70,7 @@ As a Buyer, the user can request someone to run errands for him: create a new or
 At the same time, as a Runner, you can also view the currently accepted orders, accept the orders, and send them to the Buyer at a certain time.
 # Work distrubution
 Ada: register/ request of Buyer / request of Runner / Readme / deployment in infinityfree
-Haihan: Login/read order list/ update order list/
+Haihan: login.php, create.php, read.php, updata.php(some part)
 Allan: create,update,delete reviews/ Dashboard page
 # How to set up app
 1. in local MySQL, create a database called app-db
@@ -113,7 +113,8 @@ Expires at	2025-06-05
 1.Ada:
 ![Ada's local enviornment](Ada_local.jpg)
 
-
+# screenshot
+Haihan Wang: ![Haihan Wang screenshot](HaihanWang.jpg)
 
 
 # Assignment3
@@ -122,3 +123,7 @@ Expires at	2025-06-05
 This is not an extension of the submission of Assignment 2, it is just to complete the parts that were not completed before.
 1.Added URL ada-qin.ct.ws/dashboard.php
 2.Updated the Create_request.php which was accidentally overwritten before.
+
+
+
+
