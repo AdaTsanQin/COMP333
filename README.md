@@ -55,20 +55,11 @@ Change line 80 in dashboard.html from
 Now run the following SQL queries:
 
 `
-CREATE TABLE `tasks` (
-  `task_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `request_id` INT(11) DEFAULT NULL,
-  `username` VARCHAR(255) DEFAULT NULL,
-  `dashername` VARCHAR(255) DEFAULT NULL,
-  `item` TEXT,
-  `status` VARCHAR(50) DEFAULT NULL,
-  `rating` INT(11) DEFAULT NULL,
-  `comment` TEXT,
-  PRIMARY KEY (`task_id`)
-)
+CREATE TABLE tasks(task_id INT(11) NOT NULL AUTO_INCREMENT,request_id INT(11) DEFAULT NULL,username VARCHAR(255) DEFAULT ' ',dashername VARCHAR(255) DEFAULT ' ',item TEXT,status VARCHAR(50) DEFAULT ' ', rating INT(11) DEFAULT 0,comment TEXT DEFAULT ' ', PRIMARY KEY (task_id) );
 `
 
 Now you can add, update, and delete reviews after an order is dropped. Use the Manage Reviews tab.
+NOTE: The order must have a 'complete' status before adding a review. For this to happen, you must use 'Drop Off' button from the Dashboard.
 
 
 ## Assignment-2
