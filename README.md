@@ -48,17 +48,21 @@ Mistakes and actions made while using Github:
 ![xampp screenshot](Allan_cheruiyot.png)
 
 ## how to run Allan's user review files - create_review.php, update_review.php delete_review.php
-Change line 80 in dashboard.html from 
+1. Change line 80 in dashboard.html from 
 `<a href="update.php">Update Order</a>` to 
 `<a href="update_task.php">Update Order</a>`
 
-Now run the following SQL queries:
+2. Now run the following SQL queries:
 
 `
 CREATE TABLE tasks(task_id INT(11) NOT NULL AUTO_INCREMENT,request_id INT(11) DEFAULT NULL,username VARCHAR(255) DEFAULT ' ',dashername VARCHAR(255) DEFAULT ' ',item TEXT,status VARCHAR(50) DEFAULT ' ', rating INT(11) DEFAULT 0,comment TEXT DEFAULT ' ', PRIMARY KEY (task_id) );
 `
+3. Make a purchase request from the dashboard
+4. Go to the dashboard and click "Claim order"
+5. In the same dashboard, click "Drop off"
+6. Now click "Manage reviews" tab on the top of the dashboard page
+7. You should be able to see the order and Add, Update and Delete buttons. These add, update and delete reviews to orders that have been completed
 
-Now you can add, update, and delete reviews after an order is dropped. Use the Manage Reviews tab.
 NOTE: The order must have a 'complete' status before adding a review. For this to happen, you must use 'Drop Off' button from the Dashboard.
 
 
