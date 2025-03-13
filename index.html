@@ -101,59 +101,43 @@
     <!-- Signup section  -->
     <div id="signup">
         <h1>Join us now</h1>
-        <p>
-            Interested in this app? Pre-register now to get five discount uses!
-        </p>
+        <p>Interested in this app? Pre-register now to get five discount uses!</p>
     </div>
-
-
+    
     <div class="signup-form">
-        <form action="login_confirm.html" method="GET">
+        <form action="register.php" method="POST">
             <div>
                 <input 
                     type="text" 
-                    name="full_name" 
-                    placeholder="Enter your full name" 
+                    name="username" 
+                    placeholder="Enter your username" 
                     required
                 />
             </div>
-            <div class="signup-email">
+            <div>
                 <input 
-                    type="email" 
-                    name="email" 
-                    placeholder="Enter your email" 
+                    type="password" 
+                    name="password" 
+                    placeholder="Enter your password" 
                     required
                 />
             </div>
-            <p>Please select a preference if you have one</p>
-            <div class="radio-group">
+            <div>
                 <input 
-                    type="radio" 
-                    id="runErrands" 
-                    name="option" 
-                    value="Run Errands" 
+                    type="password" 
+                    name="confirm_password" 
+                    placeholder="Confirm your password" 
+                    required
                 />
-                <label for="runErrands">Run Errands</label>
-
-                <input 
-                    type="radio" 
-                    id="beUser" 
-                    name="option" 
-                    value="Be User" 
-                />
-                <label for="beUser">Be User</label>
             </div>
-            <input 
-                type="hidden" 
-                name="hidden-field" 
-                value="pass-in-cookie-value-here"
-            />
             <input 
                 type="submit" 
                 value="Register" 
             />
         </form>
     </div>
+    
+    
     <!--Strength and Technology section-->
     <div class="gallery" id="strength-technology">
     <h1>Our Strength and Technology</h1>  
