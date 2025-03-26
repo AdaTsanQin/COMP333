@@ -48,6 +48,44 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     }
 }
 
+if (isset($_POST['delete_user'])) {
+    $targetUser = $_POST['delete_user'];
+
+    $checkUser = $conn->prepare("SELECT * FROM users WHERE username = ?");
+    $checkUser->bind_param("s", $targetUser);
+    $checkUser->execute();
+    $result = $checkUser->get_result();
+
+    if ($result->num_rows > 0) {
+        $anonymizedUsername = "deleted_user_" . time(); 
+
+        $updateRequests = $conn->prepare("UPDATE requests SET username = ? WHERE username = ?");
+        $updateRequests->bind_param("ss", $anonymizedUsername, $targetUser);
+        $updateRequests->execute();
+
+        $updateTasks = $conn->prepare("UPDATE task SET username = ? WHERE username = ?");
+        $updateTasks->bind_param("ss", $anonymizedUsername, $targetUser);
+        $updateTasks->execute();
+
+        $deleteUser = $conn->prepare("DELETE FROM users WHERE username = ?");
+        $deleteUser->bind_param("s", $targetUser);
+        $deleteUser->execute();
+
+        if ($deleteUser->affected_rows > 0) {
+            echo "<p style='color: red;'>User deleted, but their associated data remains.</p>";
+        } else {
+            echo "<p style='color: red;'>Error deleting user.</p>";
+        }
+    } else {
+        echo "<p style='color: red;'>User not found.</p>";
+    }
+
+    $checkUser->close();
+    $updateRequests->close();
+    $updateTasks->close();
+    $deleteUser->close();
+}
+
 $sql = "SELECT id, item, status, accepted_by FROM requests WHERE username = ? AND status != 'confirmed'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
@@ -109,7 +147,6 @@ if ($pendingRequests->num_rows > 0) {
 } else {
     echo "You have no pending requests.";
 }
-
 ?>
 
 <h1>Finished Requests</h1>
@@ -130,8 +167,6 @@ if ($confirmedRequests->num_rows > 0) {
     echo "You have no finished requests.";
 }
 
-
-
 $stmt->close();
 $conn->close();
 ?>
@@ -150,5 +185,13 @@ $conn->close();
     <button type="button">Logout</button>
 </a>
 
+<h2>Admin: Delete a User</h2>
+<form method="POST" action="delete_requests.php">
+    <label for="delete_user">Username to Delete:</label>
+    <input type="text" name="delete_user" required>
+    <button type="submit">Delete User</button>
+</form>
+
 </body>
 </html>
+
