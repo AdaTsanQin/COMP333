@@ -48,42 +48,51 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     }
 }
 
-if (isset($_POST['delete_user'])) {
-    $targetUser = $_POST['delete_user'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
+    // Get the username and password from the form
+    $inputUsername = $_POST['username'];
+    $inputPassword = $_POST['password'];
 
-    $checkUser = $conn->prepare("SELECT * FROM users WHERE username = ?");
-    $checkUser->bind_param("s", $targetUser);
-    $checkUser->execute();
-    $result = $checkUser->get_result();
-
-    if ($result->num_rows > 0) {
-        $anonymizedUsername = "deleted_user_" . time(); 
-
-        $updateRequests = $conn->prepare("UPDATE requests SET username = ? WHERE username = ?");
-        $updateRequests->bind_param("ss", $anonymizedUsername, $targetUser);
-        $updateRequests->execute();
-
-        $updateTasks = $conn->prepare("UPDATE task SET username = ? WHERE username = ?");
-        $updateTasks->bind_param("ss", $anonymizedUsername, $targetUser);
-        $updateTasks->execute();
-
-        $deleteUser = $conn->prepare("DELETE FROM users WHERE username = ?");
-        $deleteUser->bind_param("s", $targetUser);
-        $deleteUser->execute();
-
-        if ($deleteUser->affected_rows > 0) {
-            echo "<p style='color: red;'>User deleted, but their associated data remains.</p>";
-        } else {
-            echo "<p style='color: red;'>Error deleting user.</p>";
-        }
+    // Check if the entered username matches the session username
+    if ($inputUsername !== $username) {
+        echo "Username does not match.";
     } else {
-        echo "<p style='color: red;'>User not found.</p>";
-    }
+        // Fetch the user's password from the database
+        $sql = "SELECT password FROM users WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    $checkUser->close();
-    $updateRequests->close();
-    $updateTasks->close();
-    $deleteUser->close();
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            // Verify the entered password
+            if (password_verify($inputPassword, $user['password'])) {
+                // Delete the user account
+                $sql = "UPDATE requests SET username = NULL WHERE username = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $username);
+                $stmt->execute();
+
+                $sql = "DELETE FROM users WHERE username = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $username);
+
+                if ($stmt->execute()) {
+                    // Log out the user and redirect
+                    session_destroy();
+                    header("Location: login.php?msg=account_deleted");
+                    exit;
+                } else {
+                    echo "Error deleting the account.";
+                }
+            } else {
+                echo "Incorrect password.";
+            }
+        } else {
+            echo "User not found.";
+        }
+    }
 }
 
 $sql = "SELECT id, item, status, accepted_by FROM requests WHERE username = ? AND status != 'confirmed'";
@@ -147,6 +156,7 @@ if ($pendingRequests->num_rows > 0) {
 } else {
     echo "You have no pending requests.";
 }
+
 ?>
 
 <h1>Finished Requests</h1>
@@ -171,6 +181,13 @@ $stmt->close();
 $conn->close();
 ?>
 
+<h2>Delete Your Account</h2>
+<form method="POST" action="delete_requests.php">
+    Username: <input type="text" name="username" required><br>
+    Password: <input type="password" name="password" required><br>
+    <input type="submit" name="delete_account" value="Delete Account">
+</form>
+
 <a href="create_requests.php">
     <button>Create New Request</button>
 </a>
@@ -184,14 +201,8 @@ $conn->close();
 <a href="logout.php">
     <button type="button">Logout</button>
 </a>
-
-<h2>Admin: Delete a User</h2>
-<form method="POST" action="delete_requests.php">
-    <label for="delete_user">Username to Delete:</label>
-    <input type="text" name="delete_user" required>
-    <button type="submit">Delete User</button>
-</form>
-
+<a href="delete_user.php">
+    <button type="button">delete yourself</button>
+</a>
 </body>
 </html>
-
