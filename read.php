@@ -59,7 +59,6 @@ $result = $stmt->get_result();
         echo "<td>" . $row['status'] . "</td>";
         echo "<td>" . $row['created_at'] . "</td>";
 
-        // 4) “Edit” link
         echo "<td><a href='update.php?id=" . $row['id'] . "'>Edit</a></td>";
         echo "</tr>";
     }
@@ -76,6 +75,9 @@ $result = $stmt->get_result();
 </a>  
 <a href="logout.php">
     <button type="button">Logout</button>
+</a>
+<a href="dashboard.php">
+    <button type="button">Dashboard</button>
 </a>
 </body>
 </html>
