@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 }
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -31,19 +31,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } else {
-        $stmt = $conn->prepare("SELECT username FROM users WHERE username = ?");
+        // Check if the username exists, including deleted accounts
+        $stmt = $conn->prepare("SELECT is_deleted FROM users WHERE username = ?");
         if (!$stmt) {
             die("Prepare failed: " . $conn->error);
         }
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $stmt->store_result();
-        
+        $stmt->bind_result($is_deleted);
+
         if ($stmt->num_rows > 0) {
-            $error = "Username is already taken.";
+            $stmt->fetch();
+            if ($is_deleted == 1) {
+                $error = "This username was previously used and cannot be registered again.";
+            } else {
+                $error = "Username is already taken.";
+            }
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+            $stmt = $conn->prepare("INSERT INTO users (username, password, is_deleted) VALUES (?, ?, 0)");
             if (!$stmt) {
                 die("Prepare failed: " . $conn->error);
             }
