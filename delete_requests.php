@@ -19,6 +19,7 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
+// Confirm request
 if (isset($_POST['confirm_id'])) {
     $confirmId = $_POST['confirm_id'];
     $sql = "UPDATE requests SET status = 'confirmed' WHERE id = ? AND username = ?";
@@ -33,6 +34,7 @@ if (isset($_POST['confirm_id'])) {
     }
 }
 
+// Delete request
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $requestId = $_GET['id'];
 
@@ -48,12 +50,14 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     }
 }
 
+// Fetch pending requests
 $sql = "SELECT id, item, status, accepted_by FROM requests WHERE username = ? AND status != 'confirmed'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $pendingRequests = $stmt->get_result();
 
+// Fetch confirmed requests
 $sqlConfirmed = "SELECT id, item, status, accepted_by FROM requests WHERE username = ? AND status = 'confirmed'";
 $stmt = $conn->prepare($sqlConfirmed);
 $stmt->bind_param("s", $username);
@@ -109,7 +113,6 @@ if ($pendingRequests->num_rows > 0) {
 } else {
     echo "You have no pending requests.";
 }
-
 ?>
 
 <h1>Finished Requests</h1>
@@ -130,8 +133,6 @@ if ($confirmedRequests->num_rows > 0) {
     echo "You have no finished requests.";
 }
 
-
-
 $stmt->close();
 $conn->close();
 ?>
@@ -149,6 +150,8 @@ $conn->close();
 <a href="logout.php">
     <button type="button">Logout</button>
 </a>
-
+<a href="dashboard.php">
+    <button type="button">dashboard</button>
+</a>
 </body>
 </html>
