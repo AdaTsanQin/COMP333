@@ -83,6 +83,7 @@ go to SQL in navigationbar, copy the following code into it and click go:
 CREATE TABLE users (
     username VARCHAR(255) NOT NULL PRIMARY KEY,
     password VARCHAR(255) DEFAULT NULL
+    is_deleted TINYINT(1) DEFAULT 0
 );
 CREATE TABLE requests (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
