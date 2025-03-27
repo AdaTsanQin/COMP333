@@ -8,12 +8,10 @@ $dbusername = "root";
 $dbpassword = "";
 $dbname = "app-db";
 
-
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
 }
-
 
 if (isset($_SESSION['username'])) {
     echo "You are already logged in as " . $_SESSION['username'] . ".";
@@ -23,25 +21,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-
     if (empty($username) || empty($password)) {
         die("Username and password cannot be empty.");
     }
 
-    $sql = "SELECT password FROM users WHERE username = ? LIMIT 1";
+    // Check if the user exists and retrieve is_deleted status
+    $sql = "SELECT password, is_deleted FROM users WHERE username = ? LIMIT 1";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("Prepare failed: " . $conn->error);
     }
     $stmt->bind_param("s", $username);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->store_result();
+    
+    if ($stmt->num_rows === 1) {
+        $stmt->bind_result($hashedPassword, $is_deleted);
+        $stmt->fetch();
 
-    if ($result->num_rows === 1) {
-        $row = $result->fetch_assoc();
-        $hashedPassword = $row['password'];
-
-        if (password_verify($password, $hashedPassword)) {
+        if ($is_deleted == 1) {
+            echo "This account has been deleted and cannot be accessed.";
+        } elseif (password_verify($password, $hashedPassword)) {
             $_SESSION['username'] = $username;
             header("Location: dashboard.php");
             exit;
