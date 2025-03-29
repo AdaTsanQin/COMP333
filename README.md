@@ -129,3 +129,9 @@ Expires at	2025-06-05
 This is not an extension of the submission of Assignment 2, it is just to complete the parts that were not completed before.
 1.Added URL ada-qin.ct.ws/dashboard.php
 2.Updated the Create_request.php which was accidentally overwritten before.
+
+## About solving problem's remained in Assignment#2
+DDL: Mar 28th
+1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)
+2. Allan: The whole review part/clear navigation (end up did by ada)
+3. Haihan: Forigen key of second table
