@@ -33,9 +33,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['request_id'])) {
     $stmt->bind_param("i", $requestId);
     $stmt->execute();
 
+    // 1. update tasks table
+    $sqlUpdateTasks = "UPDATE tasks SET status = 'completed' WHERE request_id = ?";
+    $stmtTasks = $conn->prepare($sqlUpdateTasks);
+    $stmtTasks->bind_param("i", $requestId);
+    $stmtTasks->execute();
+    $stmtTasks->close();
+
+    // Update the requests table: set status = 'completed'
+    $sqlUpdateRequests = "UPDATE requests SET status = 'completed' WHERE id = ?";
+    $stmtRequests = $conn->prepare($sqlUpdateRequests);
+    $stmtRequests->bind_param("i", $requestId);
+    $stmtRequests->execute();
+    $stmtRequests->close();
+
     echo "<p>Order has been completed!</p>";
     echo "<p><a href='dashboard.php' style='color: blue; font-weight: bold;'>Go back to main page</a></p>";
-    exit;
+    //exit;
 }
 
 $sql = "SELECT id, status, delivery_speed FROM requests WHERE id = ? AND status = 'accepted'";
