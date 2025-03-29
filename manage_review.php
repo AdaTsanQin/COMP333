@@ -3,100 +3,122 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Ensure the user is logged in.
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$servername = "127.0.0.1";
+// Database configuration
+$servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
-$dbname     = "app-db";
+$dbname = "app-db";
 
-// Create a MySQLi connection.
+// Create connection
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
 }
 
-$currentUser = $_SESSION['username'];
+// Ensure the user is logged in
+if (!isset($_SESSION['username'])) {
+    die("Please log in.");
+}
 
-// Fetch tasks (reviews) for the current buyer.
-// Adjust the WHERE clause if you want to display only tasks with a review (e.g. rating IS NOT NULL OR comment != '')
-$sql = "SELECT task_id, item, rating, comment, status 
+$username = $_SESSION['username'];
+
+// Query to get all completed orders from the tasks table
+$sql = "SELECT task_id, request_id, username AS buyer, dashername, item, comment, rating, status 
         FROM tasks 
-        WHERE username = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $currentUser);
-$stmt->execute();
-$result = $stmt->get_result();
-$reviews = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-$conn->close();
+        WHERE status = 'completed' 
+        ORDER BY task_id DESC";
+$result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Manage Your Reviews</title>
+    <title>Manage Reviews for Completed Orders</title>
     <style>
         table {
-            width: 100%;
             border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid #999;
+            width: 100%;
         }
         th, td {
             padding: 8px;
-            text-align: left;
+            border: 1px solid #ddd;
+            text-align: center;
         }
-        a.button {
-            text-decoration: none;
-            padding: 6px 12px;
-            background: #007BFF;
+        th {
+            background-color: #f2f2f2;
+        }
+        a.button, input.button {
+            padding: 5px 10px;
+            background-color: blue;
             color: #fff;
-            border-radius: 4px;
-            margin-right: 4px;
+            text-decoration: none;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
         }
-        a.button.delete {
-            background: #DC3545;
+        form {
+            display: inline;
         }
     </style>
 </head>
 <body>
-    <h1>Manage Your Reviews</h1>
-    <?php if (count($reviews) > 0): ?>
-        <table>
-            <tr>
-                <th>Task ID</th>
-                <th>Item</th>
-                <th>Rating</th>
-                <th>Comment</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-            <?php foreach ($reviews as $review): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($review['task_id']); ?></td>
-                    <td><?php echo htmlspecialchars($review['item']); ?></td>
-                    <td><?php echo htmlspecialchars($review['rating']); ?></td>
-                    <td><?php echo htmlspecialchars($review['comment']); ?></td>
-                    <td><?php echo htmlspecialchars($review['status']); ?></td>
-                    <td>
-                    <td>
-                        <a class="button" href="create_review.php?review=<?php echo $review['task_id']; ?>">Create Review</a>
-                        <a class="button" href="update_review.php?task_id=<?php echo $review['task_id']; ?>">Update Review</a>
-                        <a class="button delete" href="delete_review.php?task_id=<?php echo $review['task_id']; ?>" onclick="return confirm('Are you sure you want to delete this review?');">Delete Review</a>
-                    </td>
+    <h1>Manage Reviews for Completed Orders</h1>
+    <h2> Note: Only complete orders can be reviewed </h2>
+    <p style="font-weight: bold; color: blue;">Logged in as: <?php echo htmlspecialchars($username); ?></p>
 
-                    </td>
+    <?php if ($result && $result->num_rows > 0): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>Task ID</th>
+                    <th>Request ID</th>
+                    <th>Buyer</th>
+                    <th>Dasher</th>
+                    <th>Item</th>
+                    <th>Rating</th>
+                    <th>Review Comment</th>
+                    <th>Actions</th>
                 </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()):
+                    // Normalize the review (trim whitespace)
+                    $review = trim($row['comment']);
+                ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['task_id']); ?></td>
+                        <td><?php echo htmlspecialchars($row['request_id']); ?></td>
+                        <td><?php echo htmlspecialchars($row['buyer']); ?></td>
+                        <td><?php echo htmlspecialchars($row['dashername']); ?></td>
+                        <td><?php echo htmlspecialchars($row['item']); ?></td>
+                        <td><?php echo htmlspecialchars($row['rating']); ?></td>
+                        <td><?php echo htmlspecialchars($row['comment']); ?></td>
+                        <td>
+                            <?php if (empty($review)): ?>
+                                <!-- No review exists: show Create button -->
+                                <a class="button" href="create_review.php?task_id=<?php echo urlencode($row['task_id']); ?>">Create Review</a>
+                            <?php else: ?>
+                                <!-- Review exists: show Update and Delete buttons -->
+                                <a class="button" href="update_review.php?task_id=<?php echo urlencode($row['task_id']); ?>">Update Review</a>
+                                <form method="POST" action="delete_review.php" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                    <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($row['task_id']); ?>">
+                                    <input type="submit" class="button" value="Delete Review">
+                                </form>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
         </table>
     <?php else: ?>
-        <p>No reviews found.</p>
+        <p>No completed orders found.</p>
     <?php endif; ?>
+
+    <p><a href="dashboard.php">Back to Dashboard</a></p>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>
