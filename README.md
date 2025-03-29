@@ -1,9 +1,5 @@
 # COMP333
 This is for a homework assignment for Wesleyan University, COMP333 Software Engineering.
-
-—--------------------------
-# Homework 1:
-
 # Introduction
 This is for the first assignment of Wesleyan University, COMP333 Software Engineering.
 The website is the landing page of a fictional app: WesDash.
@@ -47,15 +43,97 @@ Mistakes and actions made while using Github:
 2. Part of feature/issue-27 has been changed under HaihanWang's account. The command d50efda bbdead5 d5e961d 74f5128 58f95ee bb2a1a8 is changed by Ada Qin under account 2274006014
 3. Because Python as the language was selected when the repo was created at the beginning, redundant files appeared. A line ".ds_store "was added to.gitignore and manually deleted. DS_Store file
 
-—--------------------------
 
-# Homework 2: Backend, Database & Additional Features
+## Screenshot of Allan's Xampp
+![xampp screenshot](Allan_cheruiyot.png)
 
-# Introduction
+## how to run Allan's user review files - create_review.php, update_review.php delete_review.php
+1. Change line 80 in dashboard.html from 
+`<a href="update.php">Update Order</a>` to 
+`<a href="update_task.php">Update Order</a>`
+
+2. Now run the following SQL queries: `
+CREATE TABLE tasks(task_id INT(11) NOT NULL AUTO_INCREMENT,request_id INT(11) DEFAULT NULL,username VARCHAR(255) DEFAULT ' ',dashername VARCHAR(255) DEFAULT ' ',item TEXT,status VARCHAR(50) DEFAULT ' ', rating INT(11) DEFAULT 0,comment TEXT DEFAULT ' ', PRIMARY KEY (task_id) );
+`
+3. Make a purchase request from the dashboard
+4. Go to the dashboard and click "Claim order"
+5. In the same dashboard, click "Drop off"
+6. Now click "Manage reviews" tab on the top of the dashboard page
+7. You should be able to see the order and Add, Update and Delete buttons. These add, update and delete reviews to orders that have been completed
+
+NOTE: The order must have a 'complete' status before adding a review. For this to happen, you must use 'Drop Off' button from the Dashboard.
 
 
-# Teammate and work distribution
-Haihan Wang: login.php, create.php, read.php, updata.php(some part)
+## Assignment-2
+People who register the program can log in and out of the program repeatedly.
+As a Buyer, the user can request someone to run errands for him: create a new order, fill in the detailed product name and address in the order, and always check whether someone has accepted the order and whether it has been delivered. There will be a prompt when the order is delivered. After confirming the items, the Buyer ends the order.
+At the same time, as a Runner, you can also view the currently accepted orders, accept the orders, and send them to the Buyer at a certain time.
+# Work distrubution
+Ada: register/ request of Buyer / request of Runner / Readme / deployment in infinityfree
+Haihan: login.php, create.php, read.php, updata.php(some part)
+Allan: create,update,delete reviews/ Dashboard page
+# How to set up app
+
+1. in local MySQL, create a database called app-db
+2. Do following in this URL 
+http://localhost/phpmyadmin/index.php
+Click on database in navigation bar
+Under create database enter app-db in the "Database name"
+click to get into app-db
+go to SQL in navigationbar, copy the following code into it and click go:
+CREATE TABLE users (
+    username VARCHAR(255) NOT NULL PRIMARY KEY,
+    password VARCHAR(255) DEFAULT NULL,
+    is_deleted TINYINT(1) DEFAULT 0
+) ENGINE=InnoDB;
+
+CREATE TABLE requests (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    item VARCHAR(255) NOT NULL,
+    drop_off_location VARCHAR(255) NOT NULL,
+    delivery_speed ENUM('urgent', 'common') DEFAULT 'common',
+    status ENUM('pending', 'accepted', 'completed', 'confirmed') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL,
+    accepted_by VARCHAR(255) DEFAULT NULL,
+    INDEX (username),
+    CONSTRAINT fk_requests_username
+      FOREIGN KEY (username)
+      REFERENCES users (username)
+      ON DELETE RESTRICT
+      ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
+3. Go to the URL : http://localhost/register.php 
+then test the code
+
+# URL(infinityfree)
+ada-qin.ct.ws not done but tried to set up the SSL
+Having following :
+Installed SSL Status
+This is the SSL certificate that's installed on your hosting account.
+
+Status	
+Issuer	Google Trust Services
+Expires at	2025-06-05
+
+
+# local enviornment
+1.Ada:
+![Ada's local enviornment](Ada_local.jpg)
 
 # screenshot
 Haihan Wang: ![Haihan Wang screenshot](HaihanWang.jpg)
+
+
+# Assignment3
+
+## Resolve unfinished issues in Assignment #2
+This is not an extension of the submission of Assignment 2, it is just to complete the parts that were not completed before.
+1.Added URL ada-qin.ct.ws/dashboard.php
+2.Updated the Create_request.php which was accidentally overwritten before.
+
+
+
+
