@@ -126,36 +126,6 @@ This is not an extension of the submission of Assignment 2, it is just to comple
 2.Updated the Create_request.php which was accidentally overwritten before.
 ## About solving problem's remained in Assignment#2
 DDL: Mar 28th
-1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)/clear navigation(checked)
-2. Allan: The whole review part(checked)/review crud(checked)/review navigation/(checked)
-3. Haihan: Forigen key of second table 
-
-## Local Enviornmet
-the branch behind file name means the newest version of file is currently on which branch <br>
-WesDash/ <br>
-├── .expo/ <br>
-├── .idea/ <br>
-├── assets/  <br>
-├── node_modules/ <br>
-├── screen/ <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── AcceptOrderScreen.js / branch 3.4 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── CreateRequestScreen.js / branch 3.2 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── DashboardScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── HomeScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── LoginScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── RegisterScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ViewRequestScreen.js / branch 3.3 <br>
-├── App.js  / branch 3.1 <br>
-├── package.json <br>
-├── babel.config.js <br>
-
-Applications/XAMPP/xamppfiles/htdocs/ <br>
-├── WesDashAPI/ <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_order.php / branch 3.4 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_requests.php / branch 3.3 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── create_requests.php / branch 3.2 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── edit.php / branch 3.3 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── login.php / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── register.php / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── delete_user.php / branch 3.1 <br>
-
+1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)
+2. Allan: The whole review part/clear navigation (end up did by ada)
+3. Haihan: Forigen key of second table
