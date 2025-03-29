@@ -3,106 +3,101 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Ensure the user is logged in.
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$currentUser = $_SESSION['username'];
-
-$servername = "127.0.0.1";
+// Database configuration
+$servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
-$dbname     = "app-db";
+$dbname = "app-db";
 
+// Create connection
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
 }
 
-// Ensure task_id is provided via GET.
+// Ensure the user is logged in
+if (!isset($_SESSION['username'])) {
+    die("Please log in.");
+}
+$username = $_SESSION['username'];
+
+// Ensure task_id is provided
 if (!isset($_GET['task_id'])) {
     die("No task ID provided.");
 }
+$task_id = $_GET['task_id'];
 
-$taskId = intval($_GET['task_id']);
+// Retrieve current review and rating for the task
+$stmt = $conn->prepare("SELECT comment, rating FROM tasks WHERE task_id = ?");
+$stmt->bind_param("i", $task_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$stmt->close();
 
-// Process form submission.
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
-    $rating  = intval($_POST['rating']);
-    $comment = $_POST['comment'] ?? '';
+// If no review exists, advise the user to use the create functionality
+if (!$row || trim($row['comment']) === "") {
+    die("No existing review found for this task. Please use the create review functionality.");
+}
 
-    // Update the review in the tasks table.
-    $sqlUpdate = "UPDATE tasks SET rating = ?, comment = ? WHERE task_id = ? AND username = ?";
-    $stmt = $conn->prepare($sqlUpdate);
-    if (!$stmt) {
-        die("Update prepare failed: " . $conn->error);
+$currentReview = $row['comment'];
+$currentRating = $row['rating'];
+
+// Process form submission to update review
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $newRating = $_POST['rating'] ?? '';
+    $newReview = $_POST['review'] ?? '';
+
+    // Basic validation: ensure both fields are provided
+    if (empty($newRating) || empty($newReview)) {
+        die("Both rating and review are required.");
     }
-    $stmt->bind_param("isis", $rating, $comment, $taskId, $currentUser);
-    if ($stmt->execute()) {
-        // Redirect to manage.php after a successful update.
+    $newRating = (int)$newRating;
+
+    // Update the tasks table with the new review and rating
+    $stmtUpdate = $conn->prepare("UPDATE tasks SET comment = ?, rating = ? WHERE task_id = ?");
+    if (!$stmtUpdate) {
+        die("Prepare failed: " . $conn->error);
+    }
+    $stmtUpdate->bind_param("sii", $newReview, $newRating, $task_id);
+    $stmtUpdate->execute();
+
+    if ($stmtUpdate->affected_rows > 0) {
         header("Location: manage_review.php");
         exit;
     } else {
-        die("Update failed: " . $stmt->error);
+        echo "Failed to update review.";
     }
-    $stmt->close();
-}
-
-// If not a POST, fetch the current review details to pre-fill the form.
-$sqlFetch = "SELECT rating, comment FROM tasks WHERE task_id = ? AND username = ?";
-$stmtFetch = $conn->prepare($sqlFetch);
-if (!$stmtFetch) {
-    die("Fetch prepare failed: " . $conn->error);
-}
-$stmtFetch->bind_param("is", $taskId, $currentUser);
-$stmtFetch->execute();
-$result = $stmtFetch->get_result();
-$review = $result->fetch_assoc();
-$stmtFetch->close();
-$conn->close();
-
-if (!$review) {
-    die("Review not found or you do not have permission to edit this review.");
+    $stmtUpdate->close();
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Update Review</title>
     <style>
-        form {
-            max-width: 500px;
-            margin: auto;
-        }
         label {
-            display: block;
-            margin-top: 10px;
-        }
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 8px 16px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Update Your Review</h1>
-    <form method="POST" action="update_review.php?task_id=<?php echo $taskId; ?>">
-        <label for="rating">Rating (1-5):</label>
-        <input type="number" name="rating" id="rating" min="1" max="5" required value="<?php echo htmlspecialchars($review['rating']); ?>">
+    <h1>Update Review for Task <?php echo htmlspecialchars($task_id); ?></h1>
+    <form method="POST" action="update_review.php?task_id=<?php echo urlencode($task_id); ?>">
+        <label for="rating">Rating (1-5):</label><br>
+        <input type="number" name="rating" id="rating" min="1" max="5" required value="<?php echo htmlspecialchars($currentRating); ?>"><br><br>
         
-        <label for="comment">Comment (optional):</label>
-        <textarea name="comment" id="comment" rows="4" cols="50"><?php echo htmlspecialchars($review['comment']); ?></textarea>
+        <label for="review">Review:</label><br>
+        <textarea name="review" id="review" rows="5" cols="50" required><?php echo htmlspecialchars($currentReview); ?></textarea><br><br>
         
-        <button type="submit" name="submit_update">Update Review</button>
+        <button type="submit">Update Review</button>
     </form>
+    <p><a href="manage_review.php">Back to Manage Review</a></p>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>
