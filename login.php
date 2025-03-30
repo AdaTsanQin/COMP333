@@ -1,81 +1,51 @@
 <?php
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
+$username = "root";
+$password = "";
 $dbname = "app-db";
 
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit();
 }
 
-if (isset($_SESSION['username'])) {
-    echo "You are already logged in as " . $_SESSION['username'] . ".";
+$data = json_decode(file_get_contents("php://input"), true);
+$username = trim($data['username']);
+$password = $data['password'];
+
+if (empty($username) || empty($password)) {
+    echo json_encode(["success" => false, "message" => "Username and password are required."]);
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+$stmt = $conn->prepare("SELECT password FROM users WHERE username = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$stmt->store_result();
+$stmt->bind_result($hashed_password);
 
-    if (empty($username) || empty($password)) {
-        die("Username and password cannot be empty.");
-    }
-
-    // Check if the user exists and retrieve is_deleted status
-    $sql = "SELECT password, is_deleted FROM users WHERE username = ? LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $stmt->store_result();
-    
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($hashedPassword, $is_deleted);
-        $stmt->fetch();
-
-        if ($is_deleted == 1) {
-            echo "This account has been deleted and cannot be accessed.";
-        } elseif (password_verify($password, $hashedPassword)) {
-            $_SESSION['username'] = $username;
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            echo "Invalid password. Please try again.";
-        }
+if ($stmt->num_rows > 0) {
+    $stmt->fetch();
+    if (password_verify($password, $hashed_password)) {
+        echo json_encode(["success" => true, "message" => "Login successful!"]);
     } else {
-        echo "Username not found. Please register or try again.";
+        echo json_encode(["success" => false, "message" => "Invalid password."]);
     }
-
-    $stmt->close();
+} else {
+    echo json_encode(["success" => false, "message" => "Username not found."]);
 }
 
+$stmt->close();
 $conn->close();
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>WesDash Login</title>
-</head>
-<body>
-<h2>Login to WesDash</h2>
-<form method="POST" action="login.php">
-    <label for="username">Username:</label>
-    <input type="text" name="username" required><br><br>
-
-    <label for="password">Password:</label>
-    <input type="password" name="password" required><br><br>
-
-    <button type="submit">Log In</button>
-</form>
-
-<p>Don't have an account? <a href="register.php">Register here</a>.</p>
-</body>
-</html>
