@@ -1,18 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    // Add logic to check user credentials here
-    if (email && password) {
-      navigation.navigate('Dashboard'); // Navigate to Dashboard screen after login
-    } else {
-      alert('Please enter both email and password');
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Please enter both username and password');
+      return;
+    }
+
+    try {
+        //Ada's comment: IMPORTANT!!
+        // When testing, please change the 172.21.161.56 to your computer local IP, which
+        // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
+      const response = await fetch('http://172.21.161.56/WesDashAPI/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Alert.alert('Success', 'Login successful!');
+        navigation.navigate('Dashboard'); // Redirect to Dashboard screen
+      } else {
+        Alert.alert('Error', data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Something went wrong.');
     }
   };
 
@@ -21,9 +47,9 @@ const LoginScreen = () => {
       <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
@@ -35,7 +61,7 @@ const LoginScreen = () => {
       <Button title="Login" onPress={handleLogin} />
       <Button
         title="Go to Register"
-        onPress={() => navigation.navigate('Register')} // Navigate to register screen
+        onPress={() => navigation.navigate('Register')}
       />
     </View>
   );
