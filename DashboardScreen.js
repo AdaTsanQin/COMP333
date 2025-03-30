@@ -1,26 +1,19 @@
-// screens/HomeScreen.js
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const HomeScreen = () => {
+const DashboardScreen = () => {
   const navigation = useNavigation();
+
+  const handleLogout = () => {
+    navigation.navigate('Home'); 
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to WesDash</Text>
-      <Text style={styles.subtitle}>Your ultimate order management platform</Text>
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Login"
-          onPress={() => navigation.navigate('Login')} // Navigate to login screen
-        />
-        <Button
-          title="Register"
-          onPress={() => navigation.navigate('Register')} // Navigate to register screen
-        />
-      </View>
+      <Text style={styles.title}>Dashboard</Text>
+      <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
+      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 };
@@ -43,11 +36,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#555',
   },
-  buttonContainer: {
-    width: '100%',
-    marginTop: 20,
-    padding: 10,
-  },
 });
 
-export default HomeScreen;
+export default DashboardScreen;
