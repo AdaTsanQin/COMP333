@@ -5,8 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 const HomeScreen = () => {
   const navigation = useNavigation();
 
-  // Example of checking if user is logged in
-  const isLoggedIn = false; // This should be dynamically checked from your state or AsyncStorage
+  const isLoggedIn = false;
 
   return (
     <View style={styles.container}>
@@ -17,22 +16,22 @@ const HomeScreen = () => {
         <View style={styles.buttonContainer}>
           <Button
             title="Go to Dashboard"
-            onPress={() => navigation.navigate('Dashboard')} // Navigate to Dashboard
+            onPress={() => navigation.navigate('Dashboard')}
           />
           <Button
             title="Logout"
-            onPress={() => navigation.navigate('Login')} // Logout logic here
+            onPress={() => navigation.navigate('Login')}
           />
         </View>
       ) : (
         <View style={styles.buttonContainer}>
           <Button
             title="Login"
-            onPress={() => navigation.navigate('Login')} // Navigate to login screen
+            onPress={() => navigation.navigate('Login')} 
           />
           <Button
             title="Register"
-            onPress={() => navigation.navigate('Register')} // Navigate to register screen
+            onPress={() => navigation.navigate('Register')}
           />
         </View>
       )}
