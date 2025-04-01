@@ -35,6 +35,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($updateSql);
         $stmt->bind_param("si", $username, $requestId);
         $stmt->execute();
+        
+        // Add orders accepted by a dasher to the tasks table
+        $stmtFetchRequest = "SELECT id, username, item FROM requests WHERE id=?";
+        $stmtFetchRequest = $conn->prepare($stmtFetchRequest);
+        $stmtFetchRequest->bind_param("i", $requestId);
+        $stmtFetchRequest->execute();
+        $stmtFetchRequest = $stmtFetchRequest->get_result()->fetch_assoc();
+
+        $stmtUpdateTasks = "INSERT INTO tasks (request_id, username, dashername, item, status)
+                            VALUES (?,?,?,?,'accepted')";
+        $stmtUpdateTasks = $conn->prepare($stmtUpdateTasks);
+        $stmtUpdateTasks->bind_param("isss", $requestId, $username, $username, $stmtFetchRequest['item']);
+        $stmtUpdateTasks->execute();
+
 
         header("Location: order_countdown.php?request_id=$requestId");
         exit;
