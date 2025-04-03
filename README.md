@@ -126,6 +126,33 @@ This is not an extension of the submission of Assignment 2, it is just to comple
 2.Updated the Create_request.php which was accidentally overwritten before.
 ## About solving problem's remained in Assignment#2
 DDL: Mar 28th
-1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)
-2. Allan: The whole review part/clear navigation (end up did by ada)
+1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)/clear navigation(checked)
+2. Allan: The whole review part(checked)/review crud(checked)/review navigation/(checked)
 3. Haihan: Forigen key of second table
+
+## Local Enviornmet
+WesDash/ 
+├── .expo/ 
+├── .idea/ 
+├── assets/  
+├── node_modules/ 
+├── screen/ 
+│       ├── AcceptOrderScreen.js 
+│       ├── CreateRequestScreen.js 
+│       ├── DashboardScreen.js 
+│       ├── HomeScreen.js 
+│       ├── LoginScreen.js 
+│       ├── RegisterScreen.js 
+│       ├── ViewRequestScreen.js 
+├── App.js  
+├── package.json 
+├── babel.config.js
+
+Applications/XAMPP/xamppfiles/htdocs/
+├── WesDashAPI/ 
+│       ├── accpte_order.php
+│       ├── accpte_requests.php
+│       ├── create_requests.php
+│       ├── edit.php
+│       ├── login.php
+│       ├── register.php
