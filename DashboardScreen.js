@@ -6,7 +6,7 @@ const DashboardScreen = () => {
   const navigation = useNavigation();
 
   const handleLogout = () => {
-    navigation.navigate('Home'); 
+    navigation.navigate('Home');
   };
 
   return (
@@ -14,6 +14,9 @@ const DashboardScreen = () => {
       <Text style={styles.title}>Dashboard</Text>
       <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
       <Button title="Logout" onPress={handleLogout} />
+      <Button title="Create Request" onPress={() => navigation.navigate('CreateRequestScreen')} />
+      <Button title="View Request" onPress={() => navigation.navigate('ViewRequestScreen')} />
+      <Button title="Accept Order" onPress={() => navigation.navigate('AcceptOrderScreen')} />
     </View>
   );
 };
