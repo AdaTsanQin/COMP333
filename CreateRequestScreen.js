@@ -18,25 +18,36 @@ const CreateRequestScreen = ({ navigation }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           item,
           drop_off_location: dropOffLocation,
           delivery_speed: deliverySpeed,
-        }).toString(),
-        credentials: "include", // To maintain session (important for PHPSESSID)
+        }),
+        credentials: "include",
       });
 
-      const text = await response.text();
-      if (response.ok) {
-        Alert.alert("Success", "Request created successfully!");
-      } else {
-        Alert.alert("Error", text);
+      const text = await response.text();  // Log raw response before JSON parsing
+      console.log("Raw response:", text);
+
+      // Try to parse JSON response
+      try {
+        const data = JSON.parse(text);
+
+        if (response.ok && data.success) {
+          Alert.alert("Success", data.success);
+        } else {
+          Alert.alert("Error", data.error || "Failed to create request.");
+        }
+      } catch (jsonError) {
+        console.error("JSON Parse Error:", jsonError);
+        Alert.alert("Error", "Unexpected response from server.");
       }
     } catch (error) {
       console.error("Request failed", error);
       Alert.alert("Error", "Failed to create request. Please try again.");
     }
   };
+
 
   return (
     <View style={styles.container}>

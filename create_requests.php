@@ -3,18 +3,26 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-header("Content-Type: application/json"); 
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
 
 $servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
 $dbname = "app-db";
 
+// Debug
+file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
+file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
+
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
     die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
 }
 
+// Must login first
 if (!isset($_SESSION['username'])) {
     die(json_encode(["error" => "Please log in before creating a request."]));
 }
@@ -30,6 +38,7 @@ if ($inputData) {
     $deliverySpeed   = $_POST['delivery_speed'] ?? 'common';
 }
 
+// Validate data
 if (empty($item) || empty($dropOffLocation)) {
     die(json_encode(["error" => "Item and Drop-off location cannot be empty!"]));
 }
@@ -55,4 +64,5 @@ if ($stmt->execute()) {
 
 $stmt->close();
 $conn->close();
+exit();
 ?>
