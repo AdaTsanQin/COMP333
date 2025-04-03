@@ -20,70 +20,39 @@ $username = $_SESSION['username'];
 $servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
-$dbname = "app-db";
+$dbname     = "app-db";
 
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
-    echo json_encode([
-        "success" => false,
-        "message" => "DB connection failed: " . $conn->connect_error
-    ]);
+    echo json_encode(["success" => false, "message" => "DB connection failed: " . $conn->connect_error]);
     exit;
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    if (empty($data['id']) || empty($data['item']) || empty($data['drop_off_location']) || empty($data['delivery_speed']) || empty($data['status'])) {
-        echo json_encode([
-            "success" => false,
-            "message" => "Missing required fields."
-        ]);
+    if (!isset($data['id'], $data['item'], $data['drop_off_location'], $data['delivery_speed'], $data['status'])) {
+        echo json_encode(["success" => false, "message" => "Missing required fields."]);
         exit;
     }
 
-    $id = (int)$data['id'];
+    $id = $data['id'];
     $item = $data['item'];
     $drop_off_location = $data['drop_off_location'];
     $delivery_speed = $data['delivery_speed'];
     $status = $data['status'];
 
-    $sql = "UPDATE requests
-            SET item = ?,
-                drop_off_location = ?,
-                delivery_speed = ?,
-                status = ?
-            WHERE id = ? AND username = ?";
-
+    $sql = "UPDATE requests SET item=?, drop_off_location=?, delivery_speed=?, status=? WHERE id=? AND username=?";
     $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        echo json_encode([
-            "success" => false,
-            "message" => "Failed to prepare statement: " . $conn->error
-        ]);
-        exit;
-    }
-
     $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
 
     if ($stmt->execute()) {
-        echo json_encode([
-            "success" => true,
-            "message" => "Request updated successfully."
-        ]);
+        echo json_encode(["success" => true, "message" => "Request updated successfully."]);
     } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "Failed to update request: " . $stmt->error
-        ]);
+        echo json_encode(["success" => false, "message" => "Failed to update request."]);
     }
-    
+
     $stmt->close();
-} else {
-    echo json_encode([
-        "success" => false,
-        "message" => "Invalid request method."
-    ]);
 }
 
 $conn->close();
