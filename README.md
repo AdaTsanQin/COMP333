@@ -128,31 +128,34 @@ This is not an extension of the submission of Assignment 2, it is just to comple
 DDL: Mar 28th
 1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)/clear navigation(checked)
 2. Allan: The whole review part(checked)/review crud(checked)/review navigation/(checked)
-3. Haihan: Forigen key of second table
+3. Haihan: Forigen key of second table 
 
 ## Local Enviornmet
-WesDash/ 
-├── .expo/ 
-├── .idea/ 
-├── assets/  
-├── node_modules/ 
-├── screen/ 
-│       ├── AcceptOrderScreen.js 
-│       ├── CreateRequestScreen.js 
-│       ├── DashboardScreen.js 
-│       ├── HomeScreen.js 
-│       ├── LoginScreen.js 
-│       ├── RegisterScreen.js 
-│       ├── ViewRequestScreen.js 
-├── App.js  
-├── package.json 
-├── babel.config.js
+the branch behind file name means the newest version of file is currently on which branch <br>
+WesDash/ <br>
+├── .expo/ <br>
+├── .idea/ <br>
+├── assets/  <br>
+├── node_modules/ <br>
+├── screen/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── AcceptOrderScreen.js / branch 3.4 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── CreateRequestScreen.js / branch 3.2 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── DashboardScreen.js / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── HomeScreen.js / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── LoginScreen.js / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── RegisterScreen.js / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ViewRequestScreen.js / branch 3.3 <br>
+├── App.js  / branch 3.1 <br>
+├── package.json <br>
+├── babel.config.js <br>
 
-Applications/XAMPP/xamppfiles/htdocs/
-├── WesDashAPI/ 
-│       ├── accpte_order.php
-│       ├── accpte_requests.php
-│       ├── create_requests.php
-│       ├── edit.php
-│       ├── login.php
-│       ├── register.php
+Applications/XAMPP/xamppfiles/htdocs/ <br>
+├── WesDashAPI/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_order.php / branch 3.4 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_requests.php / branch 3.3 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── create_requests.php / branch 3.2 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── edit.php / branch 3.3 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── login.php / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── register.php / branch 3.1 <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── delete_user.php / branch 3.1 <br>
+
