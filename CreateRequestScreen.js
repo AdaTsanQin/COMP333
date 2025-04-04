@@ -23,13 +23,11 @@ const CreateRequestScreen = ({ navigation }) => {
           drop_off_location: dropOffLocation,
           delivery_speed: deliverySpeed,
         }),
-        credentials: "include",
       });
 
-      const text = await response.text();  // Log raw response before JSON parsing
+      const text = await response.text();
       console.log("Raw response:", text);
 
-      // Try to parse JSON response
       try {
         const data = JSON.parse(text);
 
@@ -47,7 +45,6 @@ const CreateRequestScreen = ({ navigation }) => {
       Alert.alert("Error", "Failed to create request. Please try again.");
     }
   };
-
 
   return (
     <View style={styles.container}>

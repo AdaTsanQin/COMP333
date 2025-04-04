@@ -1,4 +1,7 @@
 <?php
+if (isset($_GET['PHPSESSID'])) {
+    session_id($_GET['PHPSESSID']);
+}
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -13,9 +16,6 @@ $dbusername = "root";
 $dbpassword = "";
 $dbname = "app-db";
 
-// Debug
-file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
-file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
 
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
@@ -27,12 +27,21 @@ if (!isset($_SESSION['username'])) {
     die(json_encode(["error" => "Please log in before creating a request."]));
 }
 
+// Check if request is JSON or form data
 $inputData = json_decode(file_get_contents("php://input"), true);
+
+// Debugging
+file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
+file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
+
+
 if ($inputData) {
+    // JSON request
     $item            = $inputData['item'] ?? '';
     $dropOffLocation = $inputData['drop_off_location'] ?? '';
     $deliverySpeed   = $inputData['delivery_speed'] ?? 'common';
 } else {
+    // Form-encoded request
     $item            = $_POST['item'] ?? '';
     $dropOffLocation = $_POST['drop_off_location'] ?? '';
     $deliverySpeed   = $_POST['delivery_speed'] ?? 'common';
@@ -66,3 +75,4 @@ $stmt->close();
 $conn->close();
 exit();
 ?>
+
