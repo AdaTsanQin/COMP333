@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -14,9 +15,9 @@ const LoginScreen = () => {
     }
 
     try {
-        //Ada's comment: IMPORTANT!!
-        // When testing, please change the 172.21.161.56 to your computer local IP, which
-        // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
+      //Ada's comment: IMPORTANT!!
+      // When testing, please change the 172.21.161.56 to your computer local IP, which
+      // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
       const response = await fetch('http://172.21.161.56/WesDashAPI/login.php', {
         method: 'POST',
         headers: {
@@ -28,13 +29,23 @@ const LoginScreen = () => {
         }),
       });
 
-      const data = await response.json();
+      // Log the raw response for debugging
+      const text = await response.text();
+      console.log("Raw response:", text);
 
-      if (data.success) {
-        Alert.alert('Success', 'Login successful!');
-        navigation.navigate('Dashboard'); // Redirect to Dashboard screen
-      } else {
-        Alert.alert('Error', data.message);
+      // Try parsing the response
+      try {
+        const data = JSON.parse(text);
+        if (data.success) {
+          await AsyncStorage.setItem("PHPSESSID", data.session_id);
+          Alert.alert('Success', 'Login successful!');
+          navigation.navigate('Dashboard', { username, password });
+        } else {
+          Alert.alert('Error', data.message);
+        }
+      } catch (jsonError) {
+        console.error("JSON Parse Error:", jsonError);
+        Alert.alert('Error', 'Unexpected response from server.');
       }
     } catch (error) {
       console.error(error);
