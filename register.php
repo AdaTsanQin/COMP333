@@ -1,9 +1,9 @@
 <?php
+session_start();
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:8081");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-session_start();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
