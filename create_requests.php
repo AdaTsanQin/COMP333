@@ -1,5 +1,13 @@
 <?php
 session_start();
+
+// Set headers for JSON response and CORS
+header("Content-Type: application/json; charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Enable error reporting in dev
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -8,100 +16,61 @@ $dbusername = "root";
 $dbpassword = "";
 $dbname = "app-db";
 
+// Connect DB
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+    echo json_encode(["error" => "Database connection failed: " . $conn->connect_error]);
+    exit();
 }
 
-//must login first
+// Check if user is logged in
 if (!isset($_SESSION['username'])) {
-    die("Please log in before creating a request.");
+    echo json_encode(["error" => "Please log in before creating a request."]);
+    exit();
 }
 
+// Read raw JSON from request
+$rawInput = file_get_contents("php://input");
+$data = json_decode($rawInput, true);
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $item              = $_POST['item']              ?? '';
-    $dropOffLocation   = $_POST['drop_off_location'] ?? '';
-    $deliverySpeed     = $_POST['delivery_speed']     ?? 'common';
-    $status            = 'pending'; 
-    $createdAt         = date('Y-m-d H:i:s');  
-
-    $username = $_SESSION['username'];
-
- 
-    if (empty($item) || empty($dropOffLocation)) {
-        die("Item and Drop-off location cannot be empty!");
-    }
-
-
-    $sql = "INSERT INTO requests (username, item, drop_off_location, delivery_speed, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-
-
-    $stmt->bind_param("ssssss", $username, $item, $dropOffLocation, $deliverySpeed, $status, $createdAt);
-
-    if ($stmt->execute()) {
-        //Ada: changed the location to a valid new site
-        header("Location: delete_requests.php");
-        exit;
-    } else {
-        die("Insert failed: " . $stmt->error);
-    }
-} 
-if (!isset($_SESSION['username'])) {
-    die("Please log in before creating a request.");
+// If parse fails, return error
+if (!$data && json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(["error" => "Invalid JSON received."]);
+    exit();
 }
-$username = $_SESSION['username'] ?? ''; 
 
-?>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Create a new request</title>
-</head>
-<body>
-<p style="font-weight: bold; color: blue;">You are logged in as: <?php echo htmlspecialchars($username); ?></p>
+// Extract fields
+$item            = $data['item'] ?? '';
+$dropOffLocation = $data['drop_off_location'] ?? '';
+$deliverySpeed   = $data['delivery_speed'] ?? 'common';
 
-<h1>Create a new request</h1>
-<form method="POST" action="create_requests.php">
-    <label>Item:</label>
-    <input type="text" name="item" required><br><br>
+// Validate
+if (empty($item) || empty($dropOffLocation)) {
+    echo json_encode(["error" => "Item and Drop-off location cannot be empty!"]);
+    exit();
+}
 
-    <label>Drop-off location:</label>
-    <input type="text" name="drop_off_location" required><br><br>
+$status    = 'pending';
+$createdAt = date('Y-m-d H:i:s');
+$username  = $_SESSION['username'];
 
+// Insert
+$sql = "INSERT INTO requests (username, item, drop_off_location, delivery_speed, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    echo json_encode(["error" => "Prepare failed: " . $conn->error]);
+    exit();
+}
 
-    <label>Delivery Speed:</label>
-    <input type="radio" name="delivery_speed" value="urgent"> Urgent
-    <input type="radio" name="delivery_speed" value="common" checked> Common
-    <br><br>
+$stmt->bind_param("ssssss", $username, $item, $dropOffLocation, $deliverySpeed, $status, $createdAt);
 
-    <button type="submit">Create</button>
+if ($stmt->execute()) {
+    echo json_encode(["success" => "Request created successfully!"]);
+} else {
+    echo json_encode(["error" => "Insert failed: " . $stmt->error]);
+}
 
-</form>
-
-
-<a href="manage_requests.php">
-    <button>Accept Orders</button>
-</a>
-
-<a href="delete_requests.php">
-    <button>Cancel Order</button>
-</a>  
-
-<a href ="read.php">
-    <button type="button">View all requests</button>
-</a>
-
-
-<a href="logout.php">
-    <button type="button">Logout</button>
-</a>
-</body>
-</html>
+$stmt->close();
+$conn->close();
+exit();
