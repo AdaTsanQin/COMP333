@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, Button, StyleSheet, Alert, FlatList, ActivityIndicator } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ViewRequestsScreen = () => {
+const ViewRequestsScreen = ({ navigation }) => {
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_requests.php", {
+      setLoading(true);
+      
+      // Get the session ID from storage
+      const sessionId = await AsyncStorage.getItem('PHPSESSID');
+      
+      // Construct URL with session ID if available
+      const url = sessionId 
+        ? `http://10.0.2.2/WesDashAPI/accept_requests.php?PHPSESSID=${sessionId}` 
+        : 'http://10.0.2.2/WesDashAPI/accept_requests.php';
+
+      const response = await fetch(url, {
         method: "GET",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
         credentials: "include",
-        headers: { "Accept": "application/json", "Content-Type": "application/json" }
       });
 
       const data = await response.json();
@@ -19,7 +31,10 @@ const ViewRequestsScreen = () => {
         Alert.alert("Error", data.message || "Failed to fetch requests.");
       }
     } catch (error) {
+      console.error("Error fetching requests:", error);
       Alert.alert("Error", "Failed to fetch requests. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,7 +44,15 @@ const ViewRequestsScreen = () => {
 
   const handleDeleteRequest = async (id) => {
     try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_requests.php", {
+      // Get the session ID from storage
+      const sessionId = await AsyncStorage.getItem('PHPSESSID');
+      
+      // Construct URL with session ID if available
+      const url = sessionId 
+        ? `http://10.0.2.2/WesDashAPI/accept_requests.php?PHPSESSID=${sessionId}` 
+        : 'http://10.0.2.2/WesDashAPI/accept_requests.php';
+      
+      const response = await fetch(url, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ delete_id: id }),
@@ -48,66 +71,53 @@ const ViewRequestsScreen = () => {
     }
   };
 
-  const handleEditRequest = async (id, item, dropOffLocation, deliverySpeed, status) => {
-    try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/edit.php", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, item, drop_off_location: dropOffLocation, delivery_speed: deliverySpeed, status }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        Alert.alert("Success", data.message);
-        fetchRequests();
-      } else {
-        Alert.alert("Error", data.message || "Failed to edit request.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to edit request. Please try again.");
-    }
-  };
+  // Removed handleEditRequest since we're now using a separate screen for editing
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>All Requests</Text>
-      <FlatList
+      
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0066cc" />
+          <Text style={styles.loadingText}>Loading requests...</Text>
+        </View>
+      ) : requests.length === 0 ? (
+        <Text style={styles.emptyText}>No requests found.</Text>
+      ) : (
+        <FlatList
         data={requests}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <RequestItem item={item} onEdit={handleEditRequest} onDelete={handleDeleteRequest} />}
+        renderItem={({ item }) => (
+          <RequestItem 
+            item={item} 
+            onDelete={handleDeleteRequest}
+            onNavigateToUpdate={() => navigation.navigate('UpdateRequestScreen', { requestId: item.id })} 
+          />
+        )}
       />
+      )}
     </View>
   );
 };
 
-const RequestItem = ({ item, onEdit, onDelete }) => {
-  const [itemText, setItemText] = useState(item.item);
-  const [dropOffText, setDropOffText] = useState(item.drop_off_location);
-  const [deliverySpeed, setDeliverySpeed] = useState(item.delivery_speed);
-
+const RequestItem = ({ item, onDelete, onNavigateToUpdate }) => {
   return (
     <View style={styles.requestItem}>
       <Text style={styles.label}>Item Name:</Text>
-      <TextInput style={styles.input} value={itemText} onChangeText={setItemText} />
+      <Text style={styles.valueText}>{item.item}</Text>
 
       <Text style={styles.label}>Drop Off Location:</Text>
-      <TextInput style={styles.input} value={dropOffText} onChangeText={setDropOffText} />
+      <Text style={styles.valueText}>{item.drop_off_location}</Text>
 
       <Text style={styles.label}>Delivery Speed:</Text>
-      <View style={styles.radioGroup}>
-        <TouchableOpacity
-          style={[styles.radioButton, deliverySpeed === "urgent" && styles.selectedButton]}
-          onPress={() => setDeliverySpeed("urgent")}
-        >
-          <Text style={styles.radioText}>Urgent</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.radioButton, deliverySpeed === "common" && styles.selectedButton]}
-          onPress={() => setDeliverySpeed("common")}
-        >
-          <Text style={styles.radioText}>Common</Text>
-        </TouchableOpacity>
+      <View style={styles.deliverySpeedContainer}>
+        <Text style={[
+          styles.deliverySpeedText, 
+          item.delivery_speed === "urgent" ? styles.urgentText : styles.commonText
+        ]}>
+          {item.delivery_speed.toUpperCase()}
+        </Text>
       </View>
 
       <Text style={styles.label}>Status:</Text>
@@ -115,8 +125,18 @@ const RequestItem = ({ item, onEdit, onDelete }) => {
         <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
       </View>
 
-      <Button title="Confirm Edit" onPress={() => onEdit(item.id, itemText, dropOffText, deliverySpeed, item.status)} />
-      <Button title="Delete" onPress={() => onDelete(item.id)} />
+      <View style={styles.buttonContainer}>
+        <View style={styles.buttonWrapper}>
+          <Button 
+            title="Edit Request" 
+            color="#007bff"
+            onPress={onNavigateToUpdate} 
+          />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <Button title="Delete" color="#dc3545" onPress={() => onDelete(item.id)} />
+        </View>
+      </View>
     </View>
   );
 };
@@ -125,21 +145,40 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   heading: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
   requestItem: { padding: 10, marginBottom: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 5, backgroundColor: "#f8f8f8" },
-  input: { borderWidth: 1, padding: 5, marginBottom: 5, borderRadius: 5, backgroundColor: "#fff" },
   label: { fontSize: 16, fontWeight: "bold", marginTop: 5 },
-
-  // Radio button group styling
-  radioGroup: { flexDirection: "row", justifyContent: "space-around", marginBottom: 10 },
-  radioButton: { padding: 10, borderWidth: 1, borderColor: "#333", borderRadius: 5, minWidth: 100, alignItems: "center" },
-  selectedButton: { backgroundColor: "#007bff" },
-  radioText: { fontWeight: "bold", color: "#333" },
-  selectedText: { color: "#fff" },
+  valueText: { padding: 8, marginBottom: 5, backgroundColor: "#fff", borderRadius: 5, fontSize: 16 },
+  
+  // Delivery speed styling
+  deliverySpeedContainer: { marginVertical: 5 },
+  deliverySpeedText: { fontWeight: "bold", padding: 8, borderRadius: 5 },
+  urgentText: { color: "#d9534f", backgroundColor: "#f9e6e5" },
+  commonText: { color: "#5cb85c", backgroundColor: "#e7f4e7" },
 
   // Status display (non-editable)
   statusContainer: { padding: 8, borderRadius: 5, alignItems: "center", marginBottom: 5 },
   urgent: { backgroundColor: "#ff6666" },
   common: { backgroundColor: "#66cc66" },
   statusText: { fontWeight: "bold", color: "#fff" },
+  buttonContainer: { marginTop: 10, flexDirection: "row", justifyContent: "space-between" },
+  buttonWrapper: { flex: 1, marginHorizontal: 5 },
+  buttonSpacer: { width: 10 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#555"
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: "#555",
+    marginTop: 30
+  },
 });
 
 export default ViewRequestsScreen;
