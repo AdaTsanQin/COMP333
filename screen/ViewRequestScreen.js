@@ -6,7 +6,7 @@ const ViewRequestsScreen = () => {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_requests.php", {
+      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
         method: "GET",
         credentials: "include",
         headers: { "Accept": "application/json", "Content-Type": "application/json" }
@@ -29,7 +29,7 @@ const ViewRequestsScreen = () => {
 
   const handleDeleteRequest = async (id) => {
     try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_requests.php", {
+      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ delete_id: id }),
@@ -50,7 +50,7 @@ const ViewRequestsScreen = () => {
 
   const handleEditRequest = async (id, item, dropOffLocation, deliverySpeed, status) => {
     try {
-      const response = await fetch("http://172.21.161.56/WesDashAPI/edit.php", {
+      const response = await fetch("http://129.133.74.116/WesDashAPI/edit.php", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, item, drop_off_location: dropOffLocation, delivery_speed: deliverySpeed, status }),
@@ -68,6 +68,26 @@ const ViewRequestsScreen = () => {
       Alert.alert("Error", "Failed to edit request. Please try again.");
     }
   };
+  const handleConfirmRequest = async (id) => {
+  try {
+    const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ request_id: id }),  // adjust to match what your PHP expects
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      Alert.alert("Success", data.message || "Request accepted!");
+      fetchRequests(); // refresh the list
+    } else {
+      Alert.alert("Error", data.message || "Failed to accept request.");
+    }
+  } catch (error) {
+    Alert.alert("Error", "Network error while accepting request.");
+   }
+  };
 
   return (
     <View style={styles.container}>
@@ -75,13 +95,20 @@ const ViewRequestsScreen = () => {
       <FlatList
         data={requests}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <RequestItem item={item} onEdit={handleEditRequest} onDelete={handleDeleteRequest} />}
+          renderItem={({ item }) => (
+            <RequestItem
+              item={item}
+              onEdit={handleEditRequest}
+              onDelete={handleDeleteRequest}
+              onConfirm={handleConfirmRequest}
+            />
+          )}
       />
     </View>
   );
 };
 
-const RequestItem = ({ item, onEdit, onDelete }) => {
+const RequestItem = ({ item, onEdit, onDelete, onConfirm }) => {
   const [itemText, setItemText] = useState(item.item);
   const [dropOffText, setDropOffText] = useState(item.drop_off_location);
   const [deliverySpeed, setDeliverySpeed] = useState(item.delivery_speed);
@@ -116,7 +143,10 @@ const RequestItem = ({ item, onEdit, onDelete }) => {
       </View>
 
       <Button title="Confirm Edit" onPress={() => onEdit(item.id, itemText, dropOffText, deliverySpeed, item.status)} />
-      <Button title="Delete" onPress={() => onDelete(item.id)} />
+        {item.status === "completed" && (
+           <Button title="Confirm Order" onPress={() => onConfirm(item.id)} />
+        )}
+       <Button title="Delete" onPress={() => onDelete(item.id)} />
     </View>
   );
 };
