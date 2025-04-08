@@ -25,7 +25,7 @@ const RegisterScreen = () => {
     }
 
     try {
-      const response = await fetch('http://172.21.161.56/WesDashAPI/register.php', {
+      const response = await fetch('http://129.133.74.116/WesDashAPI/register.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
