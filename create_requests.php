@@ -31,8 +31,8 @@ if (!isset($_SESSION['username'])) {
 $inputData = json_decode(file_get_contents("php://input"), true);
 
 // Debugging
-file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
-file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
+#file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
+#file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
 
 
 if ($inputData) {
