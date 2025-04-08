@@ -1,62 +1,74 @@
 <?php
 session_start();
-header("Access-Control-Allow-Origin: http://localhost:8081");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, PUT");
-header("Access-Control-Allow-Headers: Content-Type");
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+header("Content-Type: application/json; charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, PUT, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Cookie, Accept");
+header("Access-Control-Allow-Credentials: true");
+
+$method = $_SERVER['REQUEST_METHOD'];
 
 $servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
-$dbname = "app-db";
+$dbname     = "app-db";
 
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
-    exit;
+    echo json_encode(["success" => false, "message" => "DB connection failed: " . $conn->connect_error]);
+    exit();
 }
 
 if (!isset($_SESSION['username'])) {
-    echo json_encode(["success" => false, "message" => "Please log in before managing your request."]);
-    exit;
+    echo json_encode(["success" => false, "message" => "User not logged in."]);
+    exit();
 }
+$loggedInUser = $_SESSION['username'];
 
+if ($method === 'GET') {
+    $stmt = $conn->prepare("SELECT * FROM requests WHERE status='pending' AND username != ?");
+    $stmt->bind_param("s", $loggedInUser);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $orders = $result->fetch_all(MYSQLI_ASSOC);
+    echo json_encode(["success" => true, "orders" => $orders]);
+    exit();
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-if ($method == 'GET') {
-    // Fetch all requests with 'pending' status
-    $query = "SELECT * FROM orders WHERE status = 'pending'";
-    $result = $conn->query($query);
-
-    if ($result->num_rows > 0) {
-        $orders = [];
-        while ($row = $result->fetch_assoc()) {
-            $orders[] = $row;
-        }
-        echo json_encode(["success" => true, "requests" => $orders]);
-    } else {
-        echo json_encode(["success" => false, "message" => "No pending requests found."]);
+} elseif ($method === 'PUT') {
+    $raw = file_get_contents("php://input");
+    $input = json_decode($raw, true);
+    if (!isset($input['id'])) {
+        echo json_encode(["success" => false, "message" => "Missing order id."]);
+        exit();
     }
-} elseif ($method == 'PUT') {
-    // Update order status to 'accepted'
-    $data = json_decode(file_get_contents("php://input"), true);
+    $id = $input['id'];
 
-    if (isset($data['id']) && !empty($data['id'])) {
-        $id = $conn->real_escape_string($data['id']);
-
-        $updateQuery = "UPDATE orders SET status = 'accepted' WHERE id = '$id'";
-        if ($conn->query($updateQuery) === TRUE) {
-            echo json_encode(["success" => true, "message" => "Order accepted successfully."]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Failed to update order status."]);
-        }
-    } else {
-        echo json_encode(["success" => false, "message" => "Invalid order ID."]);
+    // 将该订单设为 accepted，accepted_by=当前用户，但前提：status='pending' AND username!=当前用户
+    $stmt = $conn->prepare("
+        UPDATE requests
+           SET status='accepted', accepted_by=?
+         WHERE id=? 
+           AND status='pending'
+           AND username != ?
+    ");
+    $stmt->bind_param("sis", $loggedInUser, $id, $loggedInUser);
+    if (!$stmt->execute()) {
+        echo json_encode(["success" => false, "message" => "Execute error: " . $stmt->error]);
+        exit();
     }
+    if ($stmt->affected_rows > 0) {
+        echo json_encode(["success" => true, "message" => "Order accepted successfully."]);
+    } else {
+        echo json_encode(["success" => false, "message" => "No matching pending order found or that order is yours."]);
+    }
+    exit();
+
 } else {
-    echo json_encode(["success" => false, "message" => "Invalid request method."]);
+    echo json_encode(["success" => false, "message" => "Invalid request method"]);
+    exit();
 }
 
 $conn->close();
