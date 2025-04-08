@@ -81,6 +81,13 @@ Under create database enter app-db in the "Database name"
 click to get into app-db
 go to SQL in navigationbar, copy the following code into it and click go:
 
+CREATE TABLE users (
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) DEFAULT NULL,
+    is_deleted TINYINT(1) DEFAULT 0,
+    PRIMARY KEY (username)
+);
+
 CREATE TABLE requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
@@ -97,6 +104,7 @@ CREATE TABLE requests (
       ON UPDATE CASCADE
       ON DELETE RESTRICT
 );
+
 4. Go to the URL : http://localhost/register.php 
 then test the code
 
