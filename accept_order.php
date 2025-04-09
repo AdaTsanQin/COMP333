@@ -1,10 +1,11 @@
 <?php
 session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 header("Content-Type: application/json; charset=utf-8");
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: *"); 
 header("Access-Control-Allow-Methods: GET, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Cookie, Accept");
 header("Access-Control-Allow-Credentials: true");
@@ -29,45 +30,71 @@ if (!isset($_SESSION['username'])) {
 $loggedInUser = $_SESSION['username'];
 
 if ($method === 'GET') {
-    $stmt = $conn->prepare("SELECT * FROM requests WHERE status='pending' AND username != ?");
-    $stmt->bind_param("s", $loggedInUser);
+    $sql = "
+        SELECT * 
+          FROM requests 
+         WHERE (status = 'pending' AND username != ?)
+            OR (status = 'accepted' AND accepted_by = ?)
+    ";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        echo json_encode(["success" => false, "message" => "SQL prepare error: " . $conn->error]);
+        exit();
+    }
+    $stmt->bind_param("ss", $loggedInUser, $loggedInUser);
     $stmt->execute();
     $result = $stmt->get_result();
     $orders = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode(["success" => true, "orders" => $orders]);
     exit();
-
 } elseif ($method === 'PUT') {
-    $raw = file_get_contents("php://input");
-    $input = json_decode($raw, true);
-    if (!isset($input['id'])) {
-        echo json_encode(["success" => false, "message" => "Missing order id."]);
+    $rawData = file_get_contents("php://input");
+    $input   = json_decode($rawData, true);
+
+    if (!$input || !isset($input['id'])) {
+        echo json_encode(["success" => false, "message" => "Invalid input: missing id."]);
         exit();
     }
     $id = $input['id'];
 
-    // 将该订单设为 accepted，accepted_by=当前用户，但前提：status='pending' AND username!=当前用户
-    $stmt = $conn->prepare("
-        UPDATE requests
-           SET status='accepted', accepted_by=?
-         WHERE id=? 
-           AND status='pending'
-           AND username != ?
-    ");
-    $stmt->bind_param("sis", $loggedInUser, $id, $loggedInUser);
-    if (!$stmt->execute()) {
-        echo json_encode(["success" => false, "message" => "Execute error: " . $stmt->error]);
+    if (isset($input['action']) && $input['action'] === 'drop_off') {
+        $stmt = $conn->prepare("UPDATE requests SET status = 'completed' WHERE id = ? AND status = 'accepted' AND accepted_by = ?");
+        if (!$stmt) {
+            echo json_encode(["success" => false, "message" => "SQL prepare error: " . $conn->error]);
+            exit();
+        }
+        $stmt->bind_param("is", $id, $loggedInUser);
+        if (!$stmt->execute()) {
+            echo json_encode(["success" => false, "message" => "SQL execute error: " . $stmt->error]);
+            exit();
+        }
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(["success" => true, "message" => "Order dropped off (completed) successfully"]);
+        } else {
+            echo json_encode(["success" => false, "message" => "No matching accepted order found or you are not the acceptor."]);
+        }
         exit();
     }
-    if ($stmt->affected_rows > 0) {
-        echo json_encode(["success" => true, "message" => "Order accepted successfully."]);
-    } else {
-        echo json_encode(["success" => false, "message" => "No matching pending order found or that order is yours."]);
+    else {
+        $stmt = $conn->prepare("UPDATE requests SET status = 'accepted', accepted_by = ? WHERE id = ? AND status = 'pending' AND username != ?");
+        if (!$stmt) {
+            echo json_encode(["success" => false, "message" => "SQL prepare error: " . $conn->error]);
+            exit();
+        }
+        $stmt->bind_param("sis", $loggedInUser, $id, $loggedInUser);
+        if (!$stmt->execute()) {
+            echo json_encode(["success" => false, "message" => "SQL execute error: " . $stmt->error]);
+            exit();
+        }
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(["success" => true, "message" => "Order accepted successfully"]);
+        } else {
+            echo json_encode(["success" => false, "message" => "No matching pending order found or you cannot accept your own order."]);
+        }
+        exit();
     }
-    exit();
-
 } else {
-    echo json_encode(["success" => false, "message" => "Invalid request method"]);
+    echo json_encode(["success" => false, "message" => "Invalid request method: $method"]);
     exit();
 }
 
