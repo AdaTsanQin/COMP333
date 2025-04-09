@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ViewRequestsScreen = () => {
   const [requests, setRequests] = useState([]);
+  const [sessionID, setSessionID] = useState(null);
 
   const fetchRequests = async () => {
     try {
       const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
         method: "GET",
         credentials: "include",
-        headers: { "Accept": "application/json", "Content-Type": "application/json" }
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": `PHPSESSID=${sessionID}`, // Include the session ID in the request
+        }
       });
 
       const data = await response.json();
@@ -24,14 +30,26 @@ const ViewRequestsScreen = () => {
   };
 
   useEffect(() => {
+    const getSessionID = async () => {
+      const id = await AsyncStorage.getItem("PHPSESSID");
+      if (id) {
+        setSessionID(id);
+        fetchRequests(); // Fetch requests after setting session ID
+      } else {
+        Alert.alert("Error", "Session ID not found. Please log in again.");
+      }
+    };
     fetchRequests();
+    getSessionID();
   }, []);
 
   const handleDeleteRequest = async (id) => {
     try {
       const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+        "Content-Type": "application/json",
+        "Cookie": `PHPSESSID=${sessionID}`,},
         body: JSON.stringify({ delete_id: id }),
         credentials: "include",
       });
@@ -52,7 +70,9 @@ const ViewRequestsScreen = () => {
     try {
       const response = await fetch("http://10.0.2.2/WesDashAPI/edit.php", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+        "Content-Type": "application/json",
+        "Cookie": `PHPSESSID=${sessionID}`,},
         body: JSON.stringify({ id, item, drop_off_location: dropOffLocation, delivery_speed: deliverySpeed, status }),
         credentials: "include",
       });
@@ -72,7 +92,9 @@ const ViewRequestsScreen = () => {
   try {
     const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+      "Content-Type": "application/json",
+      "Cookie": `PHPSESSID=${sessionID}`,},
       body: JSON.stringify({ request_id: id }), 
       credentials: "include",
     });
