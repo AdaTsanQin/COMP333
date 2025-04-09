@@ -1,100 +1,99 @@
 <?php
+if (isset($_GET['PHPSESSID'])) {
+    session_id($_GET['PHPSESSID']);
+}
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
+// Set headers for JSON API
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 $servername = "localhost";
 $dbusername = "root";
 $dbpassword = "";
 $dbname = "app-db";
 
-// Create a connection
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+// Create database connection with port 3307
+$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname, 3307);
 if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+    echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
+    exit;
 }
 
-// Ensure the user is logged in
+// Must login first
 if (!isset($_SESSION['username'])) {
-    die("Please log in.");
+    echo json_encode(["success" => false, "message" => "Please log in before creating a review."]);
+    exit;
 }
 
-$username = $_SESSION['username'];
+// Get JSON data
+$data = json_decode(file_get_contents("php://input"), true);
 
-// Ensure task_id is provided
-if (!isset($_GET['task_id'])) {
-    die("No task ID provided.");
+// Validate required fields
+if (!isset($data['task_id']) || !isset($data['rating']) || !isset($data['comment'])) {
+    echo json_encode(["success" => false, "message" => "Task ID, rating, and comment are required."]);
+    exit;
 }
-$task_id = $_GET['task_id'];
+
+$taskId = intval($data['task_id']);
+$rating = intval($data['rating']);
+$comment = $data['comment'];
+
+// Validate rating
+if ($rating < 1 || $rating > 5) {
+    echo json_encode(["success" => false, "message" => "Rating must be between 1 and 5."]);
+    exit;
+}
 
 // Check if a review already exists for this task
-$stmt = $conn->prepare("SELECT comment FROM tasks WHERE task_id = ?");
-$stmt->bind_param("i", $task_id);
+$sql = "SELECT comment FROM tasks WHERE task_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
+    exit;
+}
+
+$stmt->bind_param("i", $taskId);
 $stmt->execute();
 $result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    echo json_encode(["success" => false, "message" => "Task not found."]);
+    exit;
+}
+
 $row = $result->fetch_assoc();
+if ($row && !empty(trim($row['comment']))) {
+    echo json_encode(["success" => false, "message" => "A review already exists for this task. Please use update instead."]);
+    exit;
+}
+
+// Update the tasks table with the new review
+$updateSql = "UPDATE tasks SET comment = ?, rating = ? WHERE task_id = ?";
+$updateStmt = $conn->prepare($updateSql);
+if (!$updateStmt) {
+    echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
+    exit;
+}
+
+$updateStmt->bind_param("sii", $comment, $rating, $taskId);
+if ($updateStmt->execute()) {
+    echo json_encode(["success" => true, "message" => "Review created successfully."]);
+} else {
+    echo json_encode(["success" => false, "message" => "Failed to create review: " . $updateStmt->error]);
+}
+
+$updateStmt->close();
 $stmt->close();
-
-// If a nonempty review already exists, do not allow creation
-if ($row && trim($row['comment']) !== "") {
-    die("A review already exists for this task. Please use the update functionality.");
-}
-
-// Process form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rating = $_POST['rating'] ?? '';
-    $review = $_POST['review'] ?? '';
-    
-    // Basic validation: both fields are required
-    if (empty($rating) || empty($review)) {
-        die("Both rating and review are required.");
-    }
-    
-    // Cast rating to integer (ensure it's numeric)
-    $rating = (int)$rating;
-    
-    // Update the tasks table with the new review and rating
-    $stmt = $conn->prepare("UPDATE tasks SET comment = ?, rating = ? WHERE task_id = ?");
-    if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $stmt->bind_param("sii", $review, $rating, $task_id);
-    $stmt->execute();
-    
-    if ($stmt->affected_rows > 0) {
-        // Redirect back to the manage reviews page after creation
-        header("Location: manage_review.php");
-        exit;
-    } else {
-        echo "Failed to create review.";
-    }
-    $stmt->close();
-}
+$conn->close();
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Create Review</title>
-    <style>
-        label {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <h1>Create Review for Task <?php echo htmlspecialchars($task_id); ?></h1>
-    <form method="POST" action="create_review.php?task_id=<?php echo urlencode($task_id); ?>">
-        <label for="rating">Rating (1-5):</label><br>
-        <input type="number" name="rating" id="rating" min="1" max="5" required><br><br>
-        
-        <label for="review">Review:</label><br>
-        <textarea name="review" id="review" rows="5" cols="50" required></textarea><br><br>
-        
-        <button type="submit">Submit Review</button>
-    </form>
-    <p><a href="manage_review.php">Back to Manage Reviews</a></p>
-</body>
-</html>
