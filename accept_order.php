@@ -1,11 +1,10 @@
 <?php
 session_start();
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 header("Content-Type: application/json; charset=utf-8");
-header("Access-Control-Allow-Origin: *"); 
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Cookie, Accept");
 header("Access-Control-Allow-Credentials: true");
@@ -23,11 +22,13 @@ if ($conn->connect_error) {
     exit();
 }
 
+// Ensure user is logged in
 if (!isset($_SESSION['username'])) {
     echo json_encode(["success" => false, "message" => "User not logged in."]);
     exit();
 }
 $loggedInUser = $_SESSION['username'];
+
 
 if ($method === 'GET') {
     $sql = "
@@ -47,6 +48,9 @@ if ($method === 'GET') {
     $orders = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode(["success" => true, "orders" => $orders]);
     exit();
+
+
+// 2) PUT => Accept or DropOff
 } elseif ($method === 'PUT') {
     $rawData = file_get_contents("php://input");
     $input   = json_decode($rawData, true);
@@ -57,8 +61,15 @@ if ($method === 'GET') {
     }
     $id = $input['id'];
 
+    // --- Drop off an order (status=completed) ---
     if (isset($input['action']) && $input['action'] === 'drop_off') {
-        $stmt = $conn->prepare("UPDATE requests SET status = 'completed' WHERE id = ? AND status = 'accepted' AND accepted_by = ?");
+        $stmt = $conn->prepare("
+            UPDATE requests
+               SET status = 'completed'
+             WHERE id = ?
+               AND status = 'accepted'
+               AND accepted_by = ?
+        ");
         if (!$stmt) {
             echo json_encode(["success" => false, "message" => "SQL prepare error: " . $conn->error]);
             exit();
@@ -74,9 +85,16 @@ if ($method === 'GET') {
             echo json_encode(["success" => false, "message" => "No matching accepted order found or you are not the acceptor."]);
         }
         exit();
-    }
-    else {
-        $stmt = $conn->prepare("UPDATE requests SET status = 'accepted', accepted_by = ? WHERE id = ? AND status = 'pending' AND username != ?");
+
+    // --- Accept an order (status=pending => accepted) ---
+    } else {
+        $stmt = $conn->prepare("
+            UPDATE requests
+               SET status = 'accepted', accepted_by = ?
+             WHERE id = ?
+               AND status = 'pending'
+               AND username != ?
+        ");
         if (!$stmt) {
             echo json_encode(["success" => false, "message" => "SQL prepare error: " . $conn->error]);
             exit();
@@ -93,6 +111,8 @@ if ($method === 'GET') {
         }
         exit();
     }
+
+// 3) other methods => invalid
 } else {
     echo json_encode(["success" => false, "message" => "Invalid request method: $method"]);
     exit();

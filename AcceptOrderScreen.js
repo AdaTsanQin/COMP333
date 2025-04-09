@@ -17,6 +17,7 @@ const AcceptOrderScreen = () => {
       console.log("GET response status:", response.status);
       const data = await response.json();
       console.log("GET response data:", data);
+
       if (data.success) {
         setOrders(data.orders);
       } else {
@@ -44,7 +45,7 @@ const AcceptOrderScreen = () => {
       console.log("PUT accept response data:", data);
       if (data.success) {
         Alert.alert("Success", "Order accepted successfully!");
-        fetchOrders(); 
+        fetchOrders();
       } else {
         Alert.alert("Error", data.message || "Failed to accept order.");
       }
@@ -54,6 +55,7 @@ const AcceptOrderScreen = () => {
     }
   };
 
+  // Drop off 
   const handleDropOffOrder = async (id) => {
     try {
       const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
@@ -88,11 +90,16 @@ const AcceptOrderScreen = () => {
       <Text style={styles.text}>{item.delivery_speed}</Text>
 
       <Text style={styles.label}>Status:</Text>
-      <View style={[
-        styles.statusContainer, 
-        item.status === "pending" ? styles.pending : 
-        item.status === "accepted" ? styles.accepted : styles.completed
-      ]}>
+      <View
+        style={[
+          styles.statusContainer,
+          item.status === "pending"
+            ? styles.pending
+            : item.status === "accepted"
+            ? styles.accepted
+            : styles.completed
+        ]}
+      >
         <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
       </View>
 
@@ -121,17 +128,51 @@ const AcceptOrderScreen = () => {
 export default AcceptOrderScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  heading: { fontSize: 24, fontWeight: "bold", marginBottom: 10, textAlign: "center" },
-  orderItem: { 
-    padding: 10, marginBottom: 10, borderWidth: 1, borderColor: "#ccc",
-    borderRadius: 5, backgroundColor: "#f8f8f8"
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff"
   },
-  label: { fontSize: 16, fontWeight: "bold", marginTop: 5 },
-  text: { fontSize: 16, marginBottom: 5 },
-  statusContainer: { padding: 8, borderRadius: 5, alignItems: "center", marginBottom: 5 },
-  pending: { backgroundColor: "#ffcc00" },
-  accepted: { backgroundColor: "#66cc66" },
-  completed: { backgroundColor: "#007bff" },
-  statusText: { fontWeight: "bold", color: "#fff" }
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center"
+  },
+  orderItem: {
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    backgroundColor: "#f8f8f8"
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 5
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 5
+  },
+  statusContainer: {
+    padding: 8,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 5
+  },
+  pending: {
+    backgroundColor: "#ffcc00"
+  },
+  accepted: {
+    backgroundColor: "#66cc66"
+  },
+  completed: {
+    backgroundColor: "#007bff"
+  },
+  statusText: {
+    fontWeight: "bold",
+    color: "#fff"
+  }
 });
