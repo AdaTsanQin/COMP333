@@ -213,11 +213,12 @@ npx react-native start
 
 1. **Register** an account (`register.php`)
 2. **Login** (`login.php`), which sets a session cookie
-3. **Create** a request from the React Native UI
-4. **Edit** (PUT to `edit.php`)
-5. **Accept** an order (PUT to your accept endpoint)
-6. **Drop off** the order (status changed to completed)
-7. **Delete** a request or account
+3. **Create** user create a request from the React Native UI
+4. **Edit** user edit the request(PUT to `edit.php`)
+5. **Accept** runner accept an order (PUT to your accept endpoint)
+6. **Drop off** runner drop off order (status changed to completed)
+7. **Confirm** user confirm the order(status changed to comfirmed)
+8. **Delete** a request or account
 
 ## REST API Documentation
 
