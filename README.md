@@ -187,6 +187,7 @@ B.Frontend / React Native
 1. Install dependencies:
 
 cd react-native-frontend
+
 npm install
 
 2.If using Expo, run:
