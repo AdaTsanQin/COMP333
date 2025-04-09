@@ -1,21 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for logged-in status
-  const isLoggedIn = false;
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const sessionId = await AsyncStorage.getItem("PHPSESSID");
-      if (sessionId) {
-        setIsLoggedIn(true);
-      }
-    };
-    checkLoginStatus();
-  }, []);
 
   const isLoggedIn = false;
 
@@ -39,7 +27,7 @@ const HomeScreen = () => {
         <View style={styles.buttonContainer}>
           <Button
             title="Login"
-            onPress={() => navigation.navigate('Login')} 
+            onPress={() => navigation.navigate('Login')}
           />
           <Button
             title="Register"
