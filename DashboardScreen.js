@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const DashboardScreen = ({ route, navigation }) => {
   const { username, password } = route.params || {};
+
   const [showDeleteFields, setShowDeleteFields] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
@@ -18,7 +19,7 @@ const DashboardScreen = ({ route, navigation }) => {
       }
 
       try {
-        const response = await fetch("http://129.133.72.74/WesDashAPI/delete_user.php", {
+        const response = await fetch("http://10.0.2.2/WesDashAPI/delete_user.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: passwordToDelete }),
@@ -47,7 +48,9 @@ const DashboardScreen = ({ route, navigation }) => {
       <Button title="Create Request" onPress={() => navigation.navigate('CreateRequestScreen')} />
       <Button title="View Request" onPress={() => navigation.navigate('ViewRequestScreen')} />
       <Button title="Accept Order" onPress={() => navigation.navigate('AcceptOrderScreen')} />
+
       <Button title="Manage Reviews" onPress={() => navigation.navigate('ManageReviews')} />
+
       <Button
         title="Delete Account"
         color="red"

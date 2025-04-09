@@ -13,6 +13,8 @@ import ManageReviewsScreen from './screen/ManageReviewsScreen';
 import CreateReviewScreen from './screen/CreateReviewScreen';
 import UpdateReviewScreen from './screen/UpdateReviewScreen';
 
+import AcceptOrderScreen from './screen/AcceptOrderScreen';
+
 const Stack = createStackNavigator();
 
 const App = () => {
