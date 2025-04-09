@@ -7,7 +7,11 @@ import RegisterScreen from './screen/RegisterScreen';
 import DashboardScreen from './screen/DashboardScreen';
 import CreateRequestScreen from './screen/CreateRequestScreen';
 import ViewRequestScreen from './screen/ViewRequestScreen';
+import UpdateRequestScreen from './screen/UpdateRequestScreen';
 import AcceptOrderScreen from './screen/AcceptOrderScreen';
+import ManageReviewsScreen from './screen/ManageReviewsScreen';
+import CreateReviewScreen from './screen/CreateReviewScreen';
+import UpdateReviewScreen from './screen/UpdateReviewScreen';
 
 const Stack = createStackNavigator();
 
@@ -21,7 +25,11 @@ const App = () => {
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="CreateRequestScreen" component={CreateRequestScreen} />
         <Stack.Screen name="ViewRequestScreen" component={ViewRequestScreen} />
+        <Stack.Screen name="UpdateRequestScreen" component={UpdateRequestScreen} options={{ title: 'Update Request' }} />
         <Stack.Screen name="AcceptOrderScreen" component={AcceptOrderScreen} />
+        <Stack.Screen name="ManageReviews" component={ManageReviewsScreen} options={{ title: 'Manage Reviews' }} />
+        <Stack.Screen name="CreateReview" component={CreateReviewScreen} options={{ title: 'Create Review' }} />
+        <Stack.Screen name="UpdateReview" component={UpdateReviewScreen} options={{ title: 'Update Review' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
