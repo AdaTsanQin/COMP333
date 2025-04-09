@@ -182,6 +182,10 @@ CREATE TABLE requests (
       ON DELETE RESTRICT
 );
 
+Create table `tasks`:
+
+`CREATE TABLE tasks(task_id INT(11) NOT NULL AUTO_INCREMENT,request_id INT(11) DEFAULT NULL,username VARCHAR(255) DEFAULT ' ',dashername VARCHAR(255) DEFAULT ' ',item TEXT,status VARCHAR(50) DEFAULT ' ', rating INT(11) DEFAULT 0,comment TEXT DEFAULT ' ', PRIMARY KEY (task_id) );`
+
 B.Frontend / React Native
 
 1. Install dependencies:
