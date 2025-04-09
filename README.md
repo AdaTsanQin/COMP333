@@ -190,7 +190,7 @@ cd react-native-frontend
 
 npm install
 
-2.If using Expo, run:
+2. If using Expo, run:
 
 npx expo start
 
@@ -198,7 +198,11 @@ Or if React Native CLI:
 
 npx react-native start
 
-3.IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
+3. IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
+
+4. if you encountered any issue by using command line above, please first run:
+rm -rf node_modules package-lock.json
+then start with npx expo start
 
 ## Running the APP
 1.Start Apache & MySQL (XAMPP).
@@ -213,11 +217,12 @@ npx react-native start
 
 1. **Register** an account (`register.php`)
 2. **Login** (`login.php`), which sets a session cookie
-3. **Create** a request from the React Native UI
-4. **Edit** (PUT to `edit.php`)
-5. **Accept** an order (PUT to your accept endpoint)
-6. **Drop off** the order (status changed to completed)
-7. **Delete** a request or account
+3. **Create** user create a request from the React Native UI
+4. **Edit** user edit the request(PUT to `edit.php`)
+5. **Accept** runner accept an order (PUT to your accept endpoint)
+6. **Drop off** runner drop off order (status changed to completed)
+7. **Confirm** user confirm the order(status changed to comfirmed)
+8. **Delete** a request or account
 
 ## REST API Documentation
 
@@ -300,14 +305,16 @@ PUT body { "id": 123, "action": "drop_off" } -> sets status to 'completed'
 HaihanWang：![GET request screenshot](postman_post.png)
 ![GET request screenshot](postman_get.png)
 
-Ada:
+Ada:![GET request screenshot](Ada_POST.jpg)
+![GET request screenshot](Ada_GET.jpg)
 
 
 Allan:
-
+![POST request screenshot](allan-postman-post.png)
+![GET request screenshot](allan-postman-get.png)
 
 
 ## Work distribution：
-Haihan Wang：accpept_order,dropoff_order,fix error, ReadMe
-Ada: Register,login,delete_account,edit,viewrequest,
-Allan:review,
+1. Haihan Wang：accpept_order,dropoff_order,fix error, ReadMe
+2. Ada: Register,login,delete_account,edit,viewrequest,
+3. Allan:review,
