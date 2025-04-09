@@ -219,52 +219,81 @@ npx react-native start
 7. **Delete** a request or account
 
 ## REST API Documentation
-register.php  
 
-Method: POST
+### 1. `register.php`
+- **Method**: `POST`
+- **Body** (JSON):
+  ```json
+  {
+    "username": "...",
+    "password": "..."
+  }
+  {
+  "success": true,
+  "message": "...",
+  "session_id": "..."
+}
 
-Body: { "username": "...", "password": "..." }
+### 2. `login.php`
+- **Method**: `POST`
+- **Body** (JSON):
+  ```json
+  {
+    "username": "...",
+    "password": "..."
+  }
+  {
+  "success": true,
+  "session_id": "..."
+}
 
-Response: {"success": true, "message":"...", "session_id":"..."}
+### 3. `create_requests.php
+- **Method**: `POST`
+- **Body** (JSON):
+  ```json
+  {
+  "item": "...",
+  "drop_off_location": "...",
+  "delivery_speed": "urgent/common"
+   }
+   {
+  "success": true,
+  "message": "Request created"
+ }
 
-login.php
+### 4. `edit.php'
+- **Method**: `PUT`
+- **Body** (JSON):
+  ```json
+   {
+  "id": 123,
+  "item": "...",
+  "drop_off_location": "...",
+  "delivery_speed": "...",
+  "status": "..."
+   }
+  {
+  "success": true or false,
+  "message": "..."
+}
 
-Method: POST
-
-Body: { "username":"...", "password":"..." }
-
-Response: {"success": true, "session_id":"..."}
-
-create_requests.php
-
-Method: POST
-
-Body: { "item":"...", "drop_off_location":"...", "delivery_speed":"urgent/common" }
-
-Response: {"success":true, "message":"Request created"}
-
-edit.php
-
-Method: PUT
-
-Body: { "id":..., "item":"...", "drop_off_location":"...", "delivery_speed":"...", "status":"..." }
-
-Response: {"success":true or false, "message":"..."}
-
-accept_order.php
-
-GET: Return a list of pending or accepted orders (depending on your logic).
-
-PUT: Accept or drop off an order. Example usage:
-
-PUT body { "id": 123 } -> sets status to 'accepted'
+### 5. `accept_order.php'
+- **Method**: `PUT``GET`
+- **Body** (JSON):
+  ```json
+  Method: GET ：Returns a list of pending or accepted orders。
+PUT body { "id": 123 } -> sets status to 'accepted'  
 PUT body { "id": 123, "action": "drop_off" } -> sets status to 'completed'
 
-delete_user.php
+### 6. `delete_user.php‘
+- **Method**: `POST’：Removes or marks the user as deleted
+- **Body** (JSON):
+  ```json
+  {
+  "username": "...",
+  "password": "..."
+}
 
-Method: POST
-
-Removes or marks the user as deleted.
 
 ## Postman Screenshots：
 HaihanWang：![GET request screenshot](postman_post.png)
