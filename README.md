@@ -273,7 +273,7 @@ npx react-native start
   "status": "..."
    }
   {
-  "success": true or false,
+  "success": true,
   "message": "..."
       }
 
