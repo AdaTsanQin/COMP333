@@ -13,7 +13,7 @@ const CreateRequestScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/create_requests.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

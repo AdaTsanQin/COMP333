@@ -17,7 +17,7 @@ const handleLogin = async () => {
   try {//Ada's comment: IMPORTANT!!
     // When testing, please change the 172.21.161.56 to your computer local IP, which
     // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
-    const response = await fetch('http://129.133.74.116/WesDashAPI/login.php', {
+    const response = await fetch('http://10.0.2.2/WesDashAPI/login.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
