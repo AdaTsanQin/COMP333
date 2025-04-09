@@ -46,7 +46,7 @@ if (empty($username) || empty($password)) {
 }
 
 // Prepare and execute query
-$stmt = $conn->prepare("SELECT password FROM users WHERE username = ?");
+$stmt = $conn->prepare("SELECT password FROM users WHERE username = ? AND is_deleted=0");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $stmt->store_result();
