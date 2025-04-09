@@ -304,7 +304,8 @@ Ada:
 
 
 Allan:
-
+![POST request screenshot](allan-postman-post.png)
+![GET request screenshot](allan-postman-get.png)
 
 
 ## Work distribution：
