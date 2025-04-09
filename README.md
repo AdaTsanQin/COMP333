@@ -183,57 +183,93 @@ CREATE TABLE requests (
 );
 
 B.Frontend / React Native
+
 1. Install dependencies:
+
 cd react-native-frontend
 npm install
+
 2.If using Expo, run:
+
 npx expo start
+
 Or if React Native CLI:
+
 npx react-native start
+
 3.IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
 
 ## running the APP
 Start Apache & MySQL (XAMPP).
+
 Start React Native server (Expo or CLI).
+
 Launch your Android emulator (Pixel 6A, API 34) or plug in a physical device with USB debugging enabled.
+
 In your emulator, run the app. Confirm the requests are reaching your local PHP server.
+
 Example flows:
+
 Register an account (register.php)
+
 Login (login.php), sets a session cookie
+
 Create a request from your React Native UI
+
 Edit (PUT to edit.php)
+
 Accept an order (PUT to your accept endpoint)
+
+Dropoff the order(as completed)
+
 Delete a request or account.
 
 ## REST API Documentation
 register.php  
+
 Method: POST
+
 Body: { "username": "...", "password": "..." }
+
 Response: {"success": true, "message":"...", "session_id":"..."}
 
 login.php
+
 Method: POST
+
 Body: { "username":"...", "password":"..." }
+
 Response: {"success": true, "session_id":"..."}
 
 create_requests.php
+
 Method: POST
+
 Body: { "item":"...", "drop_off_location":"...", "delivery_speed":"urgent/common" }
+
 Response: {"success":true, "message":"Request created"}
 
 edit.php
+
 Method: PUT
+
 Body: { "id":..., "item":"...", "drop_off_location":"...", "delivery_speed":"...", "status":"..." }
+
 Response: {"success":true or false, "message":"..."}
 
 accept_order.php
+
 GET: Return a list of pending or accepted orders (depending on your logic).
+
 PUT: Accept or drop off an order. Example usage:
+
 PUT body { "id": 123 } -> sets status to 'accepted'
 PUT body { "id": 123, "action": "drop_off" } -> sets status to 'completed'
 
 delete_user.php
+
 Method: POST
+
 Removes or marks the user as deleted.
 
 ## Postman Screenshots：
