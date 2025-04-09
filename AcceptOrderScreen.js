@@ -6,9 +6,9 @@ const AcceptOrderScreen = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_order.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
         method: "GET",
-        credentials: "include", 
+        credentials: "include",
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json"
@@ -35,24 +35,46 @@ const AcceptOrderScreen = () => {
 
   const handleAcceptOrder = async (id) => {
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_order.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id })
       });
       const data = await response.json();
-      console.log("PUT response data:", data);
-
+      console.log("PUT accept response data:", data);
       if (data.success) {
         Alert.alert("Success", "Order accepted successfully!");
-        fetchOrders();  
+        fetchOrders();
       } else {
         Alert.alert("Error", data.message || "Failed to accept order.");
       }
     } catch (error) {
       console.error("Accept order error:", error);
       Alert.alert("Error", "Failed to accept order. Please try again.");
+    }
+  };
+
+  // Drop off 
+  const handleDropOffOrder = async (id) => {
+    try {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action: "drop_off" })
+      });
+      const data = await response.json();
+      console.log("PUT drop off response data:", data);
+      if (data.success) {
+        Alert.alert("Success", "Order dropped off (completed) successfully!");
+        fetchOrders();
+      } else {
+        Alert.alert("Error", data.message || "Failed to drop off order.");
+      }
+    } catch (error) {
+      console.error("Drop off order error:", error);
+      Alert.alert("Error", "Failed to drop off order. Please try again.");
     }
   };
 
@@ -68,25 +90,35 @@ const AcceptOrderScreen = () => {
       <Text style={styles.text}>{item.delivery_speed}</Text>
 
       <Text style={styles.label}>Status:</Text>
-      <View style={[
-        styles.statusContainer,
-        item.status === "pending" ? styles.pending : styles.accepted
-      ]}>
+      <View
+        style={[
+          styles.statusContainer,
+          item.status === "pending"
+            ? styles.pending
+            : item.status === "accepted"
+            ? styles.accepted
+            : styles.completed
+        ]}
+      >
         <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
       </View>
 
       {item.status === "pending" && (
         <Button title="Accept" onPress={() => handleAcceptOrder(item.id)} />
       )}
+
+      {item.status === "accepted" && (
+        <Button title="Drop Off" onPress={() => handleDropOffOrder(item.id)} />
+      )}
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Pending Orders (Others Only)</Text>
+      <Text style={styles.heading}>Orders for Acceptance</Text>
       <FlatList
         data={orders}
-        keyExtractor={(order) => order.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <OrderItem item={item} />}
       />
     </View>
@@ -135,6 +167,9 @@ const styles = StyleSheet.create({
   },
   accepted: {
     backgroundColor: "#66cc66"
+  },
+  completed: {
+    backgroundColor: "#007bff"
   },
   statusText: {
     fontWeight: "bold",
