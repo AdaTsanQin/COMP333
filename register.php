@@ -1,7 +1,7 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:8081");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
@@ -43,29 +43,33 @@ if ($password !== $confirm_password) {
     exit();
 }
 
-// Check if username exists **(Fixed version)**
-$stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
+// Check if username exists and if it is deleted
+$stmt = $conn->prepare("SELECT is_deleted FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
-$stmt->bind_result($count);
+$stmt->bind_result($is_deleted);
 $stmt->fetch();
 $stmt->close();
 
-if ($count > 0) {
-    echo json_encode(["success" => false, "message" => "Username is already taken."]);
+if ($is_deleted === 1) {
+    echo json_encode(["success" => false, "message" => "This account has already been deleted."]);
     exit();
-}
+} elseif ($is_deleted === null) {
+    // The username does not exist, proceed to create a new account
+    // Hash password and insert new user
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    $stmt->bind_param("ss", $username, $hashed_password);
 
-// Hash password and insert new user
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
-$stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-$stmt->bind_param("ss", $username, $hashed_password);
-
-if ($stmt->execute()) {
-    $_SESSION['username'] = $username;
-    echo json_encode(["success" => true, "message" => "Account created successfully!", "session_id" => session_id()]);
+    if ($stmt->execute()) {
+        $_SESSION['username'] = $username;
+        echo json_encode(["success" => true, "message" => "Account created successfully!", "session_id" => session_id()]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Something went wrong. Please try again."]);
+    }
 } else {
-    echo json_encode(["success" => false, "message" => "Something went wrong. Please try again."]);
+    // Username is already taken, but not deleted
+    echo json_encode(["success" => false, "message" => "Username is already taken."]);
 }
 
 $stmt->close();
