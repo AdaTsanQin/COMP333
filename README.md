@@ -199,30 +199,24 @@ npx react-native start
 
 3.IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
 
-## running the APP
-Start Apache & MySQL (XAMPP).
+## Running the APP
+1.Start Apache & MySQL (XAMPP).
 
-Start React Native server (Expo or CLI).
+2.Start React Native server (Expo or CLI).
 
-Launch your Android emulator (Pixel 6A, API 34) or plug in a physical device with USB debugging enabled.
+3.Launch your Android emulator (Pixel 6A, API 34) or plug in a physical device with USB debugging enabled.
 
-In your emulator, run the app. Confirm the requests are reaching your local PHP server.
+4.In your emulator, run the app. Confirm the requests are reaching your local PHP server.
 
-Example flows:
+**Example flows:**
 
-Register an account (register.php)
-
-Login (login.php), sets a session cookie
-
-Create a request from your React Native UI
-
-Edit (PUT to edit.php)
-
-Accept an order (PUT to your accept endpoint)
-
-Dropoff the order(as completed)
-
-Delete a request or account.
+1. **Register** an account (`register.php`)
+2. **Login** (`login.php`), which sets a session cookie
+3. **Create** a request from the React Native UI
+4. **Edit** (PUT to `edit.php`)
+5. **Accept** an order (PUT to your accept endpoint)
+6. **Drop off** the order (status changed to completed)
+7. **Delete** a request or account
 
 ## REST API Documentation
 register.php  
