@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, StyleSheet, Alert, FlatList } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AcceptOrderScreen = () => {
   const [orders, setOrders] = useState([]);
+  const [sessionID, setSessionID] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -11,7 +13,8 @@ const AcceptOrderScreen = () => {
         credentials: "include",
         headers: {
           "Accept": "application/json",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Cookie": `PHPSESSID=${sessionID}` // Include the session ID in the request
         }
       });
       console.log("GET response status:", response.status);
@@ -30,8 +33,18 @@ const AcceptOrderScreen = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const getSessionID = async () => {
+      const id = await AsyncStorage.getItem("PHPSESSID");
+      if (id) {
+        setSessionID(id);
+        fetchOrders(); // Fetch orders after setting the session ID
+      } else {
+        Alert.alert("Error", "Session ID not found. Please log in again.");
+      }
+    };
+    getSessionID();
   }, []);
+
 
   const handleAcceptOrder = async (id) => {
     try {

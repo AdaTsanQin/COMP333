@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = () => {
   const [username, setUsername] = useState('');
@@ -41,6 +42,7 @@ const RegisterScreen = () => {
       const data = await response.json();
 
       if (data.success) {
+        await AsyncStorage.setItem("PHPSESSID", data.session_id);
         Alert.alert('Success', 'Account created successfully!');
         navigation.navigate('Login');
       } else {

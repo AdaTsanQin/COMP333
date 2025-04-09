@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Button, StyleSheet,TextInput, Alert }  from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({ route, navigation }) => {
   const { username, password } = route.params;
   const [showDeleteFields, setShowDeleteFields] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
-
+  const [sessionID, setSessionID] = useState(null);
+  useEffect(() => {
+    const getSessionID = async () => {
+      const id = await AsyncStorage.getItem("PHPSESSID");
+      if (id) {
+        setSessionID(id);
+      } else {
+        Alert.alert("Error", "Session ID not found. Please log in again.");
+      }
+    };
+    getSessionID();
+  }, []);
   const handleLogout = () => {
     navigation.navigate('Home');
   };

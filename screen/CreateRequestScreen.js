@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CreateRequestScreen = ({ navigation }) => {
   const [item, setItem] = useState("");
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
-
+  const [sessionID, setSessionID] = useState(null);
+  useEffect(() => {
+    const getSessionID = async () => {
+      const id = await AsyncStorage.getItem("PHPSESSID");
+      if (id) {
+        setSessionID(id);
+      } else {
+        Alert.alert("Error", "Session ID not found. Please log in again.");
+      }
+    };
+    getSessionID();
+  }, []);
   const handleSubmit = async () => {
     if (!item || !dropOffLocation) {
       Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
@@ -17,6 +29,7 @@ const CreateRequestScreen = ({ navigation }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cookie": `PHPSESSID=${sessionID}`,
         },
         credentials: 'include',
         body: JSON.stringify({
