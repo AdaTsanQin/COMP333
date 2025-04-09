@@ -232,13 +232,19 @@ then 'start with npx expo start'
 
 **Example flows:**
 
-1. **Register** an account (`register.php`)
+1. **Register** an account (`register.php`) 
 2. **Login** (`login.php`), which sets a session cookie
 3. **Create** a request from the React Native UI
 4. **Edit** (PUT to `edit.php`)
 5. **Accept** an order (PUT to your accept endpoint)
 6. **Drop off** the order (status changed to completed)
 7. **Delete** a request or account
+
+## CRUD 
+1. **Create** by clicking "Create Request" button in DashboardScreen 
+2. **Read** by clicking "View Request" button in DashboardScreen
+3. **Update** by clicking "View Request" button in DashboardScreen, change the context of order,and hit "Confirm Edit" button to update requests, and the order with status 'completed' could be change to 'confirmed' by clicking "Confirm Order". by clicking "Accept Order" button in DashboardScreen, then click "Accept", "Drop off" to change the status of request
+4. **Delete** by clicking "View Request" button in DashboardScreen
 
 ## REST API Documentation
 
