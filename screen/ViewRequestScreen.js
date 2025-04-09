@@ -6,7 +6,7 @@ const ViewRequestsScreen = () => {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
         method: "GET",
         credentials: "include",
         headers: { "Accept": "application/json", "Content-Type": "application/json" }
@@ -29,7 +29,7 @@ const ViewRequestsScreen = () => {
 
   const handleDeleteRequest = async (id) => {
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ delete_id: id }),
@@ -50,7 +50,7 @@ const ViewRequestsScreen = () => {
 
   const handleEditRequest = async (id, item, dropOffLocation, deliverySpeed, status) => {
     try {
-      const response = await fetch("http://129.133.74.116/WesDashAPI/edit.php", {
+      const response = await fetch("http://10.0.2.2/WesDashAPI/edit.php", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, item, drop_off_location: dropOffLocation, delivery_speed: deliverySpeed, status }),
@@ -70,10 +70,10 @@ const ViewRequestsScreen = () => {
   };
   const handleConfirmRequest = async (id) => {
   try {
-    const response = await fetch("http://129.133.74.116/WesDashAPI/accept_requests.php", {
+    const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ request_id: id }),  // adjust to match what your PHP expects
+      body: JSON.stringify({ request_id: id }), 
       credentials: "include",
     });
 
