@@ -127,44 +127,127 @@ Expires at	2025-06-05
 Haihan Wang: ![Haihan Wang screenshot](HaihanWang.jpg)
 
 
-# Assignment3
+# HOMEWORK 3
 
-## Resolve unfinished issues in Assignment #2
-This is not an extension of the submission of Assignment 2, it is just to complete the parts that were not completed before.
-1.Added URL ada-qin.ct.ws/dashboard.php
-2.Updated the Create_request.php which was accidentally overwritten before.
-## About solving problem's remained in Assignment#2
-DDL: Mar 28th
-1. Ada: Deployment of website(checked)/Logout function(checked)/Database consistency(checked)/clear navigation(checked)
-2. Allan: The whole review part(checked)/review crud(checked)/review navigation/(checked)
-3. Haihan: Forigen key of second table 
+## Overview
+This repository contains both a React Native frontend (for iOS/Android) and a PHP/MySQL backend. The app supports:
+Account Management: Create user accounts, log in, log out, delete accounts/Requests Management (CRUD): Create, read, edit (update), and delete requests/ Order Flow: Accept order, drop off order, and confirm status changes
 
-## Local Enviornmet
-the branch behind file name means the newest version of file is currently on which branch <br>
-WesDash/ <br>
-├── .expo/ <br>
-├── .idea/ <br>
-├── assets/  <br>
-├── node_modules/ <br>
-├── screen/ <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── AcceptOrderScreen.js / branch 3.4 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── CreateRequestScreen.js / branch 3.2 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── DashboardScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── HomeScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── LoginScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── RegisterScreen.js / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ViewRequestScreen.js / branch 3.3 <br>
-├── App.js  / branch 3.1 <br>
-├── package.json <br>
-├── babel.config.js <br>
+We have also partially tested deployment via InfinityFree hosting (see InfinityFree below). The following sections explain how to set up the project locally, how the database is structured, and how to run the code.
 
-Applications/XAMPP/xamppfiles/htdocs/ <br>
-├── WesDashAPI/ <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_order.php / branch 3.4 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_requests.php / branch 3.3 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── create_requests.php / branch 3.2 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── edit.php / branch 3.3 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── login.php / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── register.php / branch 3.1 <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── delete_user.php / branch 3.1 <br>
+## Project structure
+├── README.md      
+├── php-backend/ (XAMPP htdocs folder)
+│   ├── login.php
+│   ├── register.php
+│   ├── ...
+│   └── edit.php
+├── react-native-frontend/
+│   ├── App.js
+│   ├── package.json
+│   ├── screens/
+│   │   ├── HomeScreen.js
+│   │   ├── LoginScreen.js
+│   │   ├── ...
+│   └── ...
+└── ...
 
+## How to Set Up the App
+A. Database & PHP (Backend)
+1. Start MySQL (XAMPP, MAMP, etc.).
+2. Open http://localhost/phpmyadmin/
+3. Create a database, e.g., app-db.
+Run the following SQL：
+CREATE TABLE users (
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) DEFAULT NULL,
+    is_deleted TINYINT(1) DEFAULT 0,
+    PRIMARY KEY (username)
+);
+
+CREATE TABLE requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    item VARCHAR(255) NOT NULL,
+    drop_off_location VARCHAR(255) NOT NULL,
+    delivery_speed ENUM('urgent', 'common') DEFAULT 'common',
+    status ENUM('pending', 'accepted', 'completed', 'confirmed') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL,
+    accepted_by VARCHAR(255) DEFAULT NULL,
+
+    CONSTRAINT fk_requests_username
+      FOREIGN KEY (username)
+      REFERENCES users(username)
+      ON UPDATE CASCADE
+      ON DELETE RESTRICT
+);
+
+B.Frontend / React Native
+1. Install dependencies:
+cd react-native-frontend
+npm install
+2.If using Expo, run:
+npx expo start
+Or if React Native CLI:
+npx react-native start
+3.IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
+
+## running the APP
+Start Apache & MySQL (XAMPP).
+Start React Native server (Expo or CLI).
+Launch your Android emulator (Pixel 6A, API 34) or plug in a physical device with USB debugging enabled.
+In your emulator, run the app. Confirm the requests are reaching your local PHP server.
+Example flows:
+Register an account (register.php)
+Login (login.php), sets a session cookie
+Create a request from your React Native UI
+Edit (PUT to edit.php)
+Accept an order (PUT to your accept endpoint)
+Delete a request or account.
+
+## REST API Documentation
+register.php  
+Method: POST
+Body: { "username": "...", "password": "..." }
+Response: {"success": true, "message":"...", "session_id":"..."}
+
+login.php
+Method: POST
+Body: { "username":"...", "password":"..." }
+Response: {"success": true, "session_id":"..."}
+
+create_requests.php
+Method: POST
+Body: { "item":"...", "drop_off_location":"...", "delivery_speed":"urgent/common" }
+Response: {"success":true, "message":"Request created"}
+
+edit.php
+Method: PUT
+Body: { "id":..., "item":"...", "drop_off_location":"...", "delivery_speed":"...", "status":"..." }
+Response: {"success":true or false, "message":"..."}
+
+accept_order.php
+GET: Return a list of pending or accepted orders (depending on your logic).
+PUT: Accept or drop off an order. Example usage:
+PUT body { "id": 123 } -> sets status to 'accepted'
+PUT body { "id": 123, "action": "drop_off" } -> sets status to 'completed'
+
+delete_user.php
+Method: POST
+Removes or marks the user as deleted.
+
+## Postman Screenshots：
+HaihanWang：![GET request screenshot](postman_post.png)
+![GET request screenshot](postman_get.png)
+
+Ada:
+
+
+Allan:
+
+
+
+## Work distribution：
+Haihan Wang：accpept_order,dropoff_order,fix error, ReadMe
+Ada: Register,login,delete_account,edit,viewrequest,
+Allan:review,
