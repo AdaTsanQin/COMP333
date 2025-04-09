@@ -280,7 +280,8 @@ npx react-native start
 ### 5. `accept_order.php'
 - **Method**: `PUT``GET`
 - **Body** (JSON):
-Method: GET ：Returns a list of pending or accepted orders。
+Method: GET ：Returns a list of pending or accepted orders  
+
 PUT body { "id": 123 } -> sets status to 'accepted'  
 PUT body { "id": 123, "action": "drop_off" } -> sets status to 'completed'
 
