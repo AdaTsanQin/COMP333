@@ -136,21 +136,37 @@ Account Management: Create user accounts, log in, log out, delete accounts/Reque
 We have also partially tested deployment via InfinityFree hosting (see InfinityFree below). The following sections explain how to set up the project locally, how the database is structured, and how to run the code.
 
 ## Project structure
-├── README.md      
-├── php-backend/ (XAMPP htdocs folder)
-│   ├── login.php
-│   ├── register.php
-│   ├── ...
-│   └── edit.php
-├── react-native-frontend/
-│   ├── App.js
-│   ├── package.json
-│   ├── screens/
-│   │   ├── HomeScreen.js
-│   │   ├── LoginScreen.js
-│   │   ├── ...
-│   └── ...
-└── ...
+WesDash/ <br>
+├── .expo/ <br>
+├── .idea/ <br>
+├── assets/  <br>
+├── node_modules/ <br>
+├── screen/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── AcceptOrderScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── CreateRequestScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── DashboardScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── HomeScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── LoginScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── RegisterScreen.js <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ViewRequestScreen.js <br>
+├── App.js <br>
+├── package.json <br>
+.<br>
+.<br>
+.<br>
+Note: the project run by opening the main branch file in Android Studio
+
+Applications/XAMPP/xamppfiles/htdocs/ <br>
+├── WesDashAPI/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_order.php  <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accpte_requests.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── create_requests.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── edit.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── login.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── register.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── delete_user.php <br>
+
+Note: downlaod all the files in main that are in WesDashAPI, create a WesDashAPI under htcods folder, and put all the files downloaded from WesDashPAI folder in main.
 
 ## How to Set Up the App
 A. Database & PHP (Backend)
@@ -193,6 +209,8 @@ npm install
 
 npx expo start
 
+Note: if 'npx expo start' still not working, then enter the next command 'a' and click return
+
 Or if React Native CLI:
 
 npx react-native start
@@ -200,8 +218,8 @@ npx react-native start
 3. IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
 
 4. if you encountered any issue by using command line above, please first run:
-rm -rf node_modules package-lock.json
-then start with npx expo start
+'rm -rf node_modules package-lock.json'
+then 'start with npx expo start'
 
 ## Running the APP
 1.Start Apache & MySQL (XAMPP).
@@ -313,5 +331,5 @@ Allan:
 
 ## Work distribution：
 1. Haihan Wang：accpept_order,dropoff_order,fix error, ReadMe
-2. Ada: Register,login,delete_account,edit,viewrequest,
-3. Allan:review,
+2. Ada: Register,login,delete_account,edit,viewrequest, ReadMe
+3. Allan:review,fix error
