@@ -45,16 +45,24 @@ if (empty($username) || empty($password)) {
     exit();
 }
 
-// Prepare and execute query
-$stmt = $conn->prepare("SELECT password FROM users WHERE username = ? AND is_deleted=0");
+// Prepare and execute query to check if the user exists and if the account is deleted
+$stmt = $conn->prepare("SELECT password, is_deleted FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $stmt->store_result();
-$stmt->bind_result($hashed_password);
+$stmt->bind_result($hashed_password, $is_deleted);
 
 // Validate login
 if ($stmt->num_rows > 0) {
     $stmt->fetch();
+    
+    // Check if the account is deleted
+    if ($is_deleted == 1) {
+        echo json_encode(["success" => false, "message" => "This account has been deleted."]);
+        exit();
+    }
+
+    // Validate password
     if (password_verify($password, $hashed_password)) {
         $_SESSION['username'] = $username;
         echo json_encode([

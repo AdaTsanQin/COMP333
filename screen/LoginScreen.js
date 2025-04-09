@@ -8,50 +8,47 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
 
-  const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert('Error', 'Please enter both username and password');
-      return;
-    }
+const handleLogin = async () => {
+  if (!username || !password) {
+    Alert.alert('Error', 'Please enter both username and password');
+    return;
+  }
+
+  try {//Ada's comment: IMPORTANT!!
+    // When testing, please change the 172.21.161.56 to your computer local IP, which
+    // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
+    const response = await fetch('http://129.133.74.116/WesDashAPI/login.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    });
+
+    const text = await response.text();
+    console.log("Raw response:", text);
 
     try {
-      //Ada's comment: IMPORTANT!!
-      // When testing, please change the 172.21.161.56 to your computer local IP, which
-      // can gain by input 'ipconfig getifaddr en0' in to the terminal of your computer
-      const response = await fetch('http://129.133.74.116/WesDashAPI/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
-
-      // Log the raw response for debugging
-      const text = await response.text();
-      console.log("Raw response:", text);
-
-      // Try parsing the response
-      try {
-        const data = JSON.parse(text);
-        if (data.success) {
-          await AsyncStorage.setItem("PHPSESSID", data.session_id);
-          Alert.alert('Success', 'Login successful!');
-          navigation.navigate('Dashboard', { username, password });
-        } else {
-          Alert.alert('Error', data.message);
-        }
-      } catch (jsonError) {
-        console.error("JSON Parse Error:", jsonError);
-        Alert.alert('Error', 'Unexpected response from server.');
+      const data = JSON.parse(text);
+      if (data.success) {
+        await AsyncStorage.setItem("PHPSESSID", data.session_id);
+        Alert.alert('Success', 'Login successful!');
+        navigation.navigate('Dashboard', { username, password });
+      } else {
+        Alert.alert('Error', data.message);
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Something went wrong.');
+    } catch (jsonError) {
+      console.error("JSON Parse Error:", jsonError);
+      Alert.alert('Error', 'Unexpected response from server.');
     }
-  };
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Error', 'Something went wrong.');
+  }
+};
 
   return (
     <View style={styles.container}>
