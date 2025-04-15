@@ -208,13 +208,18 @@ there are two ways to run the project:
 
 1.
 Navigate into the main branch folder.
+
 rm -rf node_modules package-lock.json
+
 npm install
+
 npx expo start
+
 a
 
-2.
+3.
 You can create a folder named WesDash and consider it as the frontend folder.
+
 Configure the WesDash folder according to the strcutre below. All necessary files can be found in the main branch.
 
 ## Project structure
@@ -251,8 +256,11 @@ Applications/XAMPP/xamppfiles/htdocs/ <br>
 Note: downlaod all the files in main that are in WesDashAPI, create a WesDashAPI under htcods folder, and put all the files downloaded from WesDashPAI folder in main.
 
 cd WesDash
+
 npm install
+
 npx expo start
+
 a
 
 Or if React Native CLI:
