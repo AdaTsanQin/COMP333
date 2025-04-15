@@ -217,7 +217,7 @@ npx expo start
 
 a
 
-3.
+2.
 You can create a folder named WesDash and consider it as the frontend folder.
 
 Configure the WesDash folder according to the strcutre below. All necessary files can be found in the main branch.
