@@ -448,18 +448,18 @@ login.php----Return 201 on both successful and failed logins (per assignment).
 
 ### 3 running the test
 
-# clone and enter repo
+#### clone and enter repo
 git clone
 cd COMP333（main branch）
 
-# copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
+#### copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
 cp -r WesDashAPI /Applications/XAMPP/xamppfiles/htdocs/
 
-# install test dependencies
+#### install test dependencies
 cd WesDashAPI/tests-project
 composer install        # installs PHPUnit + Guzzle
 
-# run the entire suite
+#### run the entire suite
 php vendor/bin/phpunit test
 
 
