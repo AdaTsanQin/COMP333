@@ -446,7 +446,7 @@ register.php----POST creates user 201 (already implemented).
 login.php----Return 201 on both successful and failed logins (per assignment).
 
 
-### 3 running the test
+### 3 Running the test
 
 #### 1. clone and enter repo
 git clone
