@@ -11,65 +11,120 @@ header("Access-Control-Allow-Headers: Content-Type");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Database connection
+$servername   = "localhost";
+$db_username  = "root";
+$db_password  = "";
+$dbname       = "app-db";
 
 $mysqli = new mysqli("localhost", "root", "", "app-db");
 if ($mysqli->connect_error) {
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Database connection failed"]);
-    exit;
+    echo json_encode([
+      "success" => false,
+      "message" => "Database connection failed"
+    ]);
+    exit();
 }
 
+// Get raw POST body and decode JSON
+$rawInput = file_get_contents("php://input");
+$data     = json_decode($rawInput, true);
 
-$raw  = file_get_contents("php://input");
-$data = json_decode($raw, true);
-
-if ($data === null || !isset($data['username'], $data['password'])) {
-    http_response_code(201);          // ← per assignment
-    echo json_encode(["success" => false, "message" => "Invalid JSON or missing fields."]);
-    exit;
+if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode([
+      "success" => false,
+      "message" => "Invalid JSON received."
+    ]);
+    exit();
 }
 
-$username = trim($data['username']);
-$password = $data['password'];
+// Sanitize inputs
+$username = trim($data['username'] ?? '');
+$password = $data['password'] ?? '';
+$role     = trim($data['role']     ?? 'user');
 
+// Whitelist roles
+$allowed = ['user','dasher'];
+if (!in_array($role, $allowed, true)) {
+    $role = 'user';
+}
 
-$stmt = $mysqli->prepare("SELECT password, is_deleted FROM users WHERE username = ?");
+if ($username === '' || $password === '') {
+    http_response_code(400);
+    echo json_encode([
+      "success" => false,
+      "message" => "Username and password are required."
+    ]);
+    exit();
+}
+
+// Check credentials
+$stmt = $conn->prepare("
+  SELECT password, is_deleted
+    FROM users
+   WHERE username = ?
+");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $stmt->store_result();
 
 if ($stmt->num_rows === 0) {
-    // user not found → still return 201 (negative test)
-    http_response_code(201);          // ← per assignment
-    echo json_encode(["success" => false, "message" => "Username not found."]);
-    exit;
+    echo json_encode([
+      "success" => false,
+      "message" => "Username not found."
+    ]);
+    $stmt->close();
+    $conn->close();
+    exit();
 }
 
-$stmt->bind_result($hashedPwd, $isDeleted);
+$stmt->bind_result($hashed_password, $is_deleted);
 $stmt->fetch();
 
-if ($isDeleted == 1) {
-    http_response_code(201);          // ← per assignment
-    echo json_encode(["success" => false, "message" => "Account has been deleted."]);
-    exit;
-}
-
-
-if (password_verify($password, $hashedPwd)) {
-    // success
-    $_SESSION['username'] = $username;
-    http_response_code(201);          // ← per assignment
+// Check if deleted
+if ($is_deleted == 1) {
     echo json_encode([
-        "success"    => true,
-        "message"    => "Login successful!",
-        "session_id" => session_id()
+      "success" => false,
+      "message" => "This account has been deleted."
     ]);
-} else {
-    // wrong password
-    http_response_code(201);          // ← per assignment
-    echo json_encode(["success" => false, "message" => "Invalid password."]);
+    $stmt->close();
+    $conn->close();
+    exit();
 }
 
+// Verify password
+if (!password_verify($password, $hashed_password)) {
+    echo json_encode([
+      "success" => false,
+      "message" => "Invalid password."
+    ]);
+    $stmt->close();
+    $conn->close();
+    exit();
+}
 
+// At this point login is successful: update role
+$update = $conn->prepare("
+  UPDATE users
+     SET role = ?
+   WHERE username = ?
+");
+$update->bind_param("ss", $role, $username);
+$update->execute();
+$update->close();
+
+// Store session and return success
+$_SESSION['username'] = $username;
+
+echo json_encode([
+  "success"    => true,
+  "message"    => "Login successful!",
+  "session_id" => session_id(),
+  "role"       => $role
+]);
+
+// Clean up
 $stmt->close();
-$mysqli->close();
+$conn->close();
