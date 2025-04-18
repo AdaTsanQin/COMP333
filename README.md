@@ -448,22 +448,21 @@ login.php----Return 201 on both successful and failed logins (per assignment).
 
 ### 3 running the test
 
-#### clone and enter repo
+#### 1. clone and enter repo
 git clone
 cd COMP333（main branch）
 
-#### copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
+#### 2. copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
 cp -r WesDashAPI /Applications/XAMPP/xamppfiles/htdocs/
 
-#### install test dependencies
+#### 3. install test dependencies
 cd WesDashAPI/tests-project
 composer install        # installs PHPUnit + Guzzle
 
-#### run the entire suite
+#### 4. run the entire suite
 php vendor/bin/phpunit test
 
-
-Expected output:
+#### 5. Expected output:
 PHPUnit 12.x by Sebastian Bergmann and contributors.
 
 ....                                                         4 / 4 (100%)
