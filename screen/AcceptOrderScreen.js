@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Button, StyleSheet, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AcceptOrderScreen = () => {
+const AcceptOrderScreen = ({ route, navigation }) => {
+  const { username, role } = route.params;
   const [orders, setOrders] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
