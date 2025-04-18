@@ -393,3 +393,81 @@ Allan:
 1. Haihan Wang：accpept_order,dropoff_order,fix error, ReadMe
 2. Ada: Register,login,delete_account,edit,viewrequest, ReadMe
 3. Allan:review,fix error
+
+
+# PROJECT
+
+## Problem1-Backend Unit Tests (PHPUnit)
+
+WesDashAPI/
+└── tests-project/
+    ├── composer.json
+    ├── composer.lock
+    ├── vendor/
+    └── test/
+        └── UserTest.php ← contains all 4 required tests
+
+
+### 1  Environment Setup
+
+| Step | Command / Action |
+|------|------------------|
+| 1.  | **Start XAMPP** → launch **Apache** and **MySQL**.<br>Leave Apache on port **80** (or update `base_uri` in the tests). |
+| 2.  | Create database **`app-db`** in phpMyAdmin. |
+| 3.  | Run the schema: |
+
+CREATE TABLE users (
+  username     VARCHAR(255) PRIMARY KEY,
+  password     VARCHAR(255) NOT NULL,
+  is_deleted   TINYINT(1)   DEFAULT 0
+);
+
+CREATE TABLE requests (
+  id               INT AUTO_INCREMENT PRIMARY KEY,
+  username         VARCHAR(255) NOT NULL,
+  item             VARCHAR(255) NOT NULL,
+  drop_off_location VARCHAR(255) NOT NULL,
+  delivery_speed   ENUM('urgent','common') DEFAULT 'common',
+  status           ENUM('pending','accepted','completed','confirmed') DEFAULT 'pending',
+  created_at       DATETIME NOT NULL,
+  accepted_by      VARCHAR(255) DEFAULT NULL,
+  CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
+);
+
+| Step | Command / Action |
+|------|------------------|
+4. | Insert a test user (needed for valid‑login):INSERT INTO users VALUES ('testuser', PASSWORD('password123'), 0);|
+5. | Install test dependencies|
+
+### 2  Backend tweaks to match the spec
+
+register.php----GET returns full user list 200.
+register.php----POST creates user 201 (already implemented).
+login.php----Return 201 on both successful and failed logins (per assignment).
+
+
+### 3 running the test
+
+# clone and enter repo
+git clone
+cd COMP333（main branch）
+
+# copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
+cp -r WesDashAPI /Applications/XAMPP/xamppfiles/htdocs/
+
+# install test dependencies
+cd WesDashAPI/tests-project
+composer install        # installs PHPUnit + Guzzle
+
+# run the entire suite
+php vendor/bin/phpunit test
+
+
+Expected output:
+PHPUnit 12.x by Sebastian Bergmann and contributors.
+
+....                                                         4 / 4 (100%)
+
+Time: 00:00.x, Memory: 8.00 MB
+
+OK (4 tests, 4 assertions)
