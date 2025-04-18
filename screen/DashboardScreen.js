@@ -52,68 +52,74 @@ const DashboardScreen = ({ route, navigation }) => {
       }
     };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
-      <Text style={styles.infoText}>Logged in as: {username}</Text>
-      <Text style={styles.infoText}>Role: {role === 'dasher' ? 'Dasher' : 'User'}</Text>
+return (
+  <View style={styles.container}>
+    <Text style={styles.title}>Dashboard</Text>
+    <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
+    <Text style={styles.infoText}>Logged in as: {username}</Text>
+    <Text style={styles.infoText}>
+      Role: {role === 'dasher' ? 'Dasher' : 'User'}
+    </Text>
 
-      <Button title="Logout" onPress={handleLogout} />
-      <Button
-        title="Create Request"
-        onPress={() =>
-            navigation.navigate('CreateRequestScreen', {
-            username,
-            role
-            })
-           }
+    <Button title="Logout" onPress={handleLogout} />
+
+    {role === 'user' && (
+      <>
+        <Button
+          title="Create Request"
+          onPress={() =>
+            navigation.navigate('CreateRequestScreen', { username, role })
+          }
         />
-      <Button
-        title="View Request"
-        onPress={() =>
-            navigation.navigate('ViewRequestScreen', {
-            username,
-            role
-            })
-           }
+        <Button
+          title="View Request"
+          onPress={() =>
+            navigation.navigate('ViewRequestScreen', { username, role })
+          }
         />
+      </>
+    )}
+
+    {role === 'dasher' && (
       <Button
         title="Accept Order"
         onPress={() =>
-            navigation.navigate('AcceptOrderScreen', {
-            username,
-            role
-            })
-           }
-        />
-      <Button
-        title="Delete Account"
-        color="red"
-        onPress={() => setShowDeleteFields(!showDeleteFields)}
+          navigation.navigate('AcceptOrderScreen', { username, role })
+        }
       />
+    )}
 
-      {showDeleteFields && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Password"
-            secureTextEntry
-            value={passwordToDelete}
-            onChangeText={setPasswordToDelete}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            secureTextEntry
-            value={confirmPasswordToDelete}
-            onChangeText={setConfirmPasswordToDelete}
-          />
-          <Button title="Confirm Deletion" onPress={handleDeleteAccount} color="red" />
-        </>
-      )}
-    </View>
-  );
+    <Button
+      title="Delete Account"
+      color="red"
+      onPress={() => setShowDeleteFields(!showDeleteFields)}
+    />
+
+    {showDeleteFields && (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password"
+          secureTextEntry
+          value={passwordToDelete}
+          onChangeText={setPasswordToDelete}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry
+          value={confirmPasswordToDelete}
+          onChangeText={setConfirmPasswordToDelete}
+        />
+        <Button
+          title="Confirm Deletion"
+          onPress={handleDeleteAccount}
+          color="red"
+        />
+      </>
+    )}
+  </View>
+);
 };
 
 const styles = StyleSheet.create({

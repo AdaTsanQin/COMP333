@@ -65,12 +65,12 @@ const CreateRequestScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* 2) show who is logged in */}
+    <View style={styles.infoContainer}>
       <Text style={styles.infoText}>Logged in as: {username}</Text>
       <Text style={styles.infoText}>
         Role: {role === 'dasher' ? 'Dasher' : 'User'}
       </Text>
-
+        </View>
       <Text style={styles.label}>Item:</Text>
       <TextInput style={styles.input} value={item} onChangeText={setItem} />
 
@@ -121,6 +121,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginVertical: 10
   },
+  infoContainer: {
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderColor: '#eee',
+      marginBottom: 12,
+    },
 });
 
 export default CreateRequestScreen;
