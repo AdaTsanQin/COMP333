@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ViewRequestsScreen = () => {
+const ViewRequestsScreen = ({ route, navigation }) => {
+  const { username = 'Unknown', role = 'user' } = route.params ?? {};
   const [requests, setRequests] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
@@ -113,6 +114,10 @@ const ViewRequestsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.infoText}>Logged in as: {username}</Text>
+      <Text style={styles.infoText}>
+        Role: {role === 'dasher' ? 'Dasher' : 'User'}
+      </Text>
       <Text style={styles.heading}>All Requests</Text>
       <FlatList
         data={requests}
