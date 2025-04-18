@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AcceptOrderScreen = ({ route, navigation }) => {
-  const { username, role } = route.params;
+  const { username = 'Unknown', role = 'user' } = route.params ?? {};
   const [orders, setOrders] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
@@ -129,6 +129,12 @@ const AcceptOrderScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+    <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>Logged in as: {username}</Text>
+          <Text style={styles.infoText}>
+            Role: {role === 'dasher' ? 'Dasher' : 'User'}
+          </Text>
+        </View>
       <Text style={styles.heading}>Orders for Acceptance</Text>
       <FlatList
         data={orders}
@@ -188,5 +194,17 @@ const styles = StyleSheet.create({
   statusText: {
     fontWeight: "bold",
     color: "#fff"
-  }
+  },
+  infoContainer: {
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderColor: '#eee',
+      marginBottom: 12,
+    },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: '500',
+    color: '#333',
+  },
 });

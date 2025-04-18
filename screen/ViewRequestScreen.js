@@ -114,10 +114,12 @@ const ViewRequestsScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.infoText}>Logged in as: {username}</Text>
-      <Text style={styles.infoText}>
-        Role: {role === 'dasher' ? 'Dasher' : 'User'}
-      </Text>
+    <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>Logged in as: {username}</Text>
+          <Text style={styles.infoText}>
+            Role: {role === 'dasher' ? 'Dasher' : 'User'}
+          </Text>
+        </View>
       <Text style={styles.heading}>All Requests</Text>
       <FlatList
         data={requests}
@@ -197,6 +199,9 @@ const styles = StyleSheet.create({
   urgent: { backgroundColor: "#ff6666" },
   common: { backgroundColor: "#66cc66" },
   statusText: { fontWeight: "bold", color: "#fff" },
+
+  infoContainer: { paddingVertical: 8, borderBottomWidth: 1,  borderColor: '#eee',  marginBottom: 12,},
+  infoText: { fontSize: 16, marginBottom: 8, fontWeight: '500', color: '#333',},
 });
 
 export default ViewRequestsScreen;
