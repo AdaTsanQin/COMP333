@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CreateRequestScreen = ({ navigation }) => {
+const CreateRequestScreen = ({ route, navigation }) => {
+  const { username = 'Unknown', role = 'user' } = route.params ?? {};
   const [item, setItem] = useState("");
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
   const [sessionID, setSessionID] = useState(null);
+
   useEffect(() => {
     const getSessionID = async () => {
       const id = await AsyncStorage.getItem("PHPSESSID");
@@ -18,6 +20,7 @@ const CreateRequestScreen = ({ navigation }) => {
     };
     getSessionID();
   }, []);
+
   const handleSubmit = async () => {
     if (!item || !dropOffLocation) {
       Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
@@ -62,6 +65,12 @@ const CreateRequestScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+    <View style={styles.infoContainer}>
+      <Text style={styles.infoText}>Logged in as: {username}</Text>
+      <Text style={styles.infoText}>
+        Role: {role === 'dasher' ? 'Dasher' : 'User'}
+      </Text>
+        </View>
       <Text style={styles.label}>Item:</Text>
       <TextInput style={styles.input} value={item} onChangeText={setItem} />
 
@@ -93,6 +102,12 @@ const CreateRequestScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: '500',
+    color: '#333',
+  },
   label: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
   input: {
     borderWidth: 1,
@@ -101,7 +116,17 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderRadius: 5,
   },
-  radioGroup: { flexDirection: "row", justifyContent: "space-around", marginVertical: 10 },
+  radioGroup: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 10
+  },
+  infoContainer: {
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderColor: '#eee',
+      marginBottom: 12,
+    },
 });
 
 export default CreateRequestScreen;
