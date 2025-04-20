@@ -17,10 +17,12 @@ const HomeScreen = () => {
           <Button
             title="Go to Dashboard"
             onPress={() => navigation.navigate('Dashboard')}
+            color="#cb2f2f"
           />
           <Button
             title="Logout"
             onPress={() => navigation.navigate('Login')}
+            color="#cb2f2f"
           />
         </View>
       ) : (
@@ -28,10 +30,12 @@ const HomeScreen = () => {
           <Button
             title="Login"
             onPress={() => navigation.navigate('Login')}
+            color="#cb2f2f"
           />
           <Button
             title="Register"
             onPress={() => navigation.navigate('Register')}
+            color="#cb2f2f"
           />
         </View>
       )}

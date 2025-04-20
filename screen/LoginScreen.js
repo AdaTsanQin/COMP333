@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Alert,color } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -106,12 +106,23 @@ const handleLogin = async () => {
       </View>
 
 
-      <Button title="Login" onPress={handleLogin} />
-      <Button
-        title="Go to Register"
-        onPress={() => navigation.navigate('Register')}
-      />
+    <View style={styles.buttonGroup}>
+      <View style={styles.buttonWrapper}>
+        <Button
+          title="Login"
+          onPress={handleLogin}
+          color="#cb2f2f"
+        />
+      </View>
+      <View style={styles.buttonWrapper}>
+        <Button
+          title="Go to Register"
+          onPress={() => navigation.navigate('Register')}
+          color="#cb2f2f"
+        />
+      </View>
     </View>
+  </View>
   );
 };
 
@@ -150,8 +161,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleButtonSelected: {
-    backgroundColor: '#007bff',
-    borderColor: '#0056b3',
+    backgroundColor: '#cb2f2f',
+    borderColor: '#f8f8f8',
   },
   roleText: {
     color: '#333',
@@ -160,6 +171,15 @@ const styles = StyleSheet.create({
   roleTextSelected: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  buttonGroup: {
+    width: '100%',
+    marginTop: 20,
+  },
+  buttonWrapper: {
+    marginVertical: 5,
+    width: '80%',
+    alignSelf: 'center',
   },
 });
 
