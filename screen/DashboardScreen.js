@@ -4,7 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({ route, navigation }) => {
-  const { username, password } = route.params;
+  const { username, role } = route.params;
+  const { password } = route.params;
   const [showDeleteFields, setShowDeleteFields] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
@@ -51,41 +52,74 @@ const DashboardScreen = ({ route, navigation }) => {
       }
     };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
-      <Button title="Logout" onPress={handleLogout} />
-      <Button title="Create Request" onPress={() => navigation.navigate('CreateRequestScreen')} />
-      <Button title="View Request" onPress={() => navigation.navigate('ViewRequestScreen')} />
-      <Button title="Accept Order" onPress={() => navigation.navigate('AcceptOrderScreen')} />
-      <Button
-        title="Delete Account"
-        color="red"
-        onPress={() => setShowDeleteFields(!showDeleteFields)}
-      />
+return (
+  <View style={styles.container}>
+    <Text style={styles.title}>Dashboard</Text>
+    <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
+    <Text style={styles.infoText}>Logged in as: {username}</Text>
+    <Text style={styles.infoText}>
+      Role: {role === 'dasher' ? 'Dasher' : 'User'}
+    </Text>
 
-      {showDeleteFields && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Password"
-            secureTextEntry
-            value={passwordToDelete}
-            onChangeText={setPasswordToDelete}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            secureTextEntry
-            value={confirmPasswordToDelete}
-            onChangeText={setConfirmPasswordToDelete}
-          />
-          <Button title="Confirm Deletion" onPress={handleDeleteAccount} color="red" />
-        </>
-      )}
-    </View>
-  );
+    <Button title="Logout" onPress={handleLogout} />
+
+    {role === 'user' && (
+      <>
+        <Button
+          title="Create Request"
+          onPress={() =>
+            navigation.navigate('CreateRequestScreen', { username, role })
+          }
+        />
+        <Button
+          title="View Request"
+          onPress={() =>
+            navigation.navigate('ViewRequestScreen', { username, role })
+          }
+        />
+      </>
+    )}
+
+    {role === 'dasher' && (
+      <Button
+        title="Accept Order"
+        onPress={() =>
+          navigation.navigate('AcceptOrderScreen', { username, role })
+        }
+      />
+    )}
+
+    <Button
+      title="Delete Account"
+      color="red"
+      onPress={() => setShowDeleteFields(!showDeleteFields)}
+    />
+
+    {showDeleteFields && (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password"
+          secureTextEntry
+          value={passwordToDelete}
+          onChangeText={setPasswordToDelete}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry
+          value={confirmPasswordToDelete}
+          onChangeText={setConfirmPasswordToDelete}
+        />
+        <Button
+          title="Confirm Deletion"
+          onPress={handleDeleteAccount}
+          color="red"
+        />
+      </>
+    )}
+  </View>
+);
 };
 
 const styles = StyleSheet.create({
@@ -105,6 +139,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     color: '#555',
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
+  },
+  input: {
+    width: '100%', height: 40,
+    borderColor: '#ccc', borderWidth: 1,
+    marginBottom: 12, paddingHorizontal: 8,
   },
 });
 
