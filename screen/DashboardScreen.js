@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet,TextInput, Alert }  from 'react-native';
+import { View, Text, Button, StyleSheet,TextInput, Alert, Switch }  from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({ route, navigation }) => {
-  const { username, role } = route.params;
-  const { password } = route.params;
+  const { username, password, role: initialRole } = route.params;
+  const [currentRole, setCurrentRole] = useState(initialRole);
   const [showDeleteFields, setShowDeleteFields] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
   const [sessionID, setSessionID] = useState(null);
+
   useEffect(() => {
     const getSessionID = async () => {
       const id = await AsyncStorage.getItem("PHPSESSID");
@@ -53,38 +54,44 @@ const DashboardScreen = ({ route, navigation }) => {
     };
 
 return (
-  <View style={styles.container}>
-    <Text style={styles.title}>Dashboard</Text>
-    <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
-    <Text style={styles.infoText}>Logged in as: {username}</Text>
-    <Text style={styles.infoText}>
-      Role: {role === 'dasher' ? 'Dasher' : 'User'}
-    </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Dashboard</Text>
+      <Text style={styles.subtitle}>Welcome, {username}!</Text>
 
-    <Button title="Logout" onPress={handleLogout} />
+      <View style={styles.toggleRow}>
+        <Text style={styles.infoText}>Role: {currentRole}</Text>
+        <Switch
+          value={currentRole === "dasher"}
+          onValueChange={(isDasher) =>
+            setCurrentRole(isDasher ? "dasher" : "user")
+          }
+        />
+      </View>
 
-    {role === 'user' && (
+      <Button title="Logout" onPress={handleLogout} />
+
+    {currentRole === 'user' && (
       <>
         <Button
           title="Create Request"
           onPress={() =>
-            navigation.navigate('CreateRequestScreen', { username, role })
+            navigation.navigate('CreateRequestScreen', { username, role: currentRole })
           }
         />
         <Button
           title="View Request"
           onPress={() =>
-            navigation.navigate('ViewRequestScreen', { username, role })
+            navigation.navigate('ViewRequestScreen', { username, role: currentRole })
           }
         />
       </>
     )}
 
-    {role === 'dasher' && (
+    {currentRole === 'dasher' && (
       <Button
         title="Accept Order"
         onPress={() =>
-          navigation.navigate('AcceptOrderScreen', { username, role })
+          navigation.navigate('AcceptOrderScreen', { username, role: currentRole })
         }
       />
     )}
@@ -150,6 +157,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc', borderWidth: 1,
     marginBottom: 12, paddingHorizontal: 8,
   },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20}
 });
 
 export default DashboardScreen;
