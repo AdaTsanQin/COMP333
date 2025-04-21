@@ -4,8 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({ route, navigation }) => {
-  const { username, password, role: initialRole } = route.params;
-  const [currentRole, setCurrentRole] = useState(initialRole);
+  // Use optional chaining to safely access route.params 
+  const { username, password, role: initialRole } = route.params || {};
+  const [currentRole, setCurrentRole] = useState(initialRole || "user");
   const [showDeleteFields, setShowDeleteFields] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
@@ -56,7 +57,7 @@ const DashboardScreen = ({ route, navigation }) => {
 return (
     <View style={styles.container}>
       <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome, {username}!</Text>
+      <Text style={styles.subtitle}>Welcome, {username || 'User'}!</Text>
 
       <View style={styles.toggleRow}>
         <Text style={styles.infoText}>Role: {currentRole}</Text>
@@ -82,6 +83,11 @@ return (
           title="View Request"
           onPress={() =>
             navigation.navigate('ViewRequestScreen', { username, role: currentRole })
+          }
+        />
+        <Button
+          title="Search Products"
+          onPress={() => navigation.navigate('Search Items', { username, role: currentRole })
           }
         />
       </>
