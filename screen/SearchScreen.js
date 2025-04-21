@@ -184,7 +184,7 @@ const SearchScreen = ({ navigation, route }) => {
       ) : (
         <FlatList
           data={results}
-          keyExtractor={item => item.productId || item.upc || String(Math.random())}
+          keyExtractor={(item, index) => item.productId || item.upc || `${item.description || 'unknown'}-${item.brand || 'unknown'}-${index}`}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
