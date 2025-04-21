@@ -44,48 +44,75 @@ useEffect(() => {
 
 
 
-  const handleSubmit = async () => {
-    if (!selectedItem || !dropOffLocation) {
-      Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
-      return;
-    }
+const handleSubmit = async () => {
+  if (!selectedItem || !dropOffLocation) {
+    Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
+    return;
+  }
+
+  const selectedItemDetails = items.find(item => item.name === selectedItem);
+  const requestedQuantity = parseInt(quantity, 10);
+
+  // Check if the requested quantity exceeds available stock
+  if (selectedItemDetails && requestedQuantity > selectedItemDetails.number) {
+    Alert.alert(
+      "Alert",
+      "Your current request is larger than the storage, may be pending for a long time until the storage of the shop increases.",
+      [
+        {
+          text: "Proceed Anyway",
+          onPress: async () => {
+            await createOrder();
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  } else {
+    await createOrder();
+  }
+};
+
+const createOrder = async () => {
+  try {
+    const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": `PHPSESSID=${sessionID}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        item: selectedItem,
+        quantity: parseInt(quantity, 10),
+        drop_off_location: dropOffLocation,
+        delivery_speed: deliverySpeed,
+      }),
+    });
+
+    const text = await response.text();
+    console.log("Raw response:", text);
 
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Cookie": `PHPSESSID=${sessionID}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          item: selectedItem,
-          quantity : parseInt(quantity,10),
-          drop_off_location: dropOffLocation,
-          delivery_speed: deliverySpeed,
-        }),
-      });
+      const data = JSON.parse(text);
 
-      const text = await response.text();
-      console.log("Raw response:", text);
-
-      try {
-        const data = JSON.parse(text);
-
-        if (response.ok && data.success) {
-          Alert.alert("Success", data.success);
-        } else {
-          Alert.alert("Error", data.error || "Failed to create request.");
-        }
-      } catch (jsonError) {
-        console.error("JSON Parse Error:", jsonError);
-        Alert.alert("Error", "Unexpected response from server.");
+      if (response.ok && data.success) {
+        Alert.alert("Success", data.success);
+      } else {
+        Alert.alert("Error", data.error || "Failed to create request.");
       }
-    } catch (error) {
-      console.error("Request failed", error);
-      Alert.alert("Error", "Failed to create request. Please try again.");
+    } catch (jsonError) {
+      console.error("JSON Parse Error:", jsonError);
+      Alert.alert("Error", "Unexpected response from server.");
     }
-  };
+  } catch (error) {
+    console.error("Request failed", error);
+    Alert.alert("Error", "Failed to create request. Please try again.");
+  }
+};
 
   return (
     <View style={styles.container}>
