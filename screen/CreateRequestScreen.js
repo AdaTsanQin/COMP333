@@ -1,39 +1,78 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet,  ScrollView} from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from "react-native";
 
-const CreateRequestScreen = ({ route, navigation }) => {
-  const { username = 'Unknown', role = 'user' } = route.params ?? {};
-  const [items, setItems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState("");
-  const [quantity, setQuantity] = useState("1");
+const CreateRequestScreen = ({ navigation, route }) => {
+  // Check if product data was passed from SearchScreen
+  const productData = route.params?.productData;
+  
+  const [item, setItem] = useState(productData?.item_name || "");
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
-  const [sessionID, setSessionID] = useState(null);
-  const [region, setRegion] = useState({
-    latitude: 37.78825,  // Default coordinates (San Francisco)
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const [marker, setMarker] = useState(null);
-useEffect(() => {
-  (async () => {
-    const id = await AsyncStorage.getItem("PHPSESSID");
-    if (!id) return Alert.alert("Error", "Session ID not found.");
-    setSessionID(id);
+  const [productImage, setProductImage] = useState(productData?.image_url || null);
+
+  const handleSubmit = async () => {
+    if (!item || !dropOffLocation) {
+      Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
+      return;
+    }
 
     try {
-      let resp = await fetch("http://10.0.2.2/WesDashAPI/get_wesshop_items.php", {
-        headers: { "Cookie": `PHPSESSID=${id}` },
-        credentials: "include"
+      // Prepare request data, including product_id if available
+      const requestData = {
+        item,
+        drop_off_location: dropOffLocation,
+        delivery_speed: deliverySpeed,
+      };
+      
+      // Add product_id if it was provided from the SearchScreen
+      if (productData?.product_id) {
+        requestData.product_id = productData.product_id;
+      }
+      
+      // Add image_url if available
+      if (productImage) {
+        requestData.image_url = productImage;
+      }
+
+      const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify(requestData),
       });
       let data = await resp.json();
 
-      if (!data.success) {
-        return Alert.alert("Error", "Failed to load items.");
+      const text = await response.text();
+      console.log("Raw response:", text);
+
+      try {
+        const data = JSON.parse(text);
+
+        if (response.ok && data.success) {
+          // Get the route params from the current screen that might have the username and role
+          const { username, role } = route.params || {};
+          
+          Alert.alert("Success", data.success, [
+            {
+              text: "OK",
+              onPress: () => {
+                // If we have username and role, pass them back to Dashboard
+                if (username && role) {
+                  navigation.navigate("Dashboard", { username, role });
+                } else {
+                  navigation.navigate("Dashboard");
+                }
+              }
+            }
+          ]);
+        } else {
+          Alert.alert("Error", data.error || "Failed to create request.");
+        }
+      } catch (jsonError) {
+        console.error("JSON Parse Error:", jsonError);
+        Alert.alert("Error", "Unexpected response from server.");
       }
 
       const list = Array.isArray(data.items) ? data.items : [];
@@ -126,46 +165,36 @@ const createOrder = async () => {
     setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
   };
   return (
-  <ScrollView
-    style={styles.scrollView}
-    contentContainerStyle={styles.contentContainer}
-    nestedScrollEnabled={true}
-  >
-    <View>
-    <View style={styles.infoContainer}>
-      <Text style={styles.infoText}>Logged in as: {username}</Text>
-      <Text style={styles.infoText}>
-        Role: {role === 'dasher' ? 'Dasher' : 'User'}
-      </Text>
+    <View style={styles.container}>
+      {/* Show product image if available */}
+      {productImage && (
+        <View style={styles.imageContainer}>
+          <Image 
+            source={{ uri: productImage }} 
+            style={styles.productImage} 
+            resizeMode="contain"
+          />
+          {productData?.product_id && (
+            <Text style={styles.productId}>Product ID: {productData.product_id}</Text>
+          )}
         </View>
+      )}
+
       <Text style={styles.label}>Item:</Text>
-            <Picker
-              selectedValue={selectedItem}
-              onValueChange={setSelectedItem}
-            >
-              {items.map(i => (
-                <Picker.Item
-                  key={i.id}
-                  label={`${i.name} (In stock: ${i.number})`}
-                  value={i.name}
-                />
-              ))}
-            </Picker>
+      <TextInput 
+        style={styles.input} 
+        value={item} 
+        onChangeText={setItem} 
+        placeholder="Enter item name"
+      />
 
-            <Text style={styles.label}>Quantity:</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={quantity}
-              onChangeText={setQuantity}
-            />
-
-            <Text style={styles.label}>Drop‑off Location:</Text>
-            <TextInput
-              style={styles.input}
-              value={dropOffLocation}
-              onChangeText={setDropOffLocation}
-            />
+      <Text style={styles.label}>Drop-off Location:</Text>
+      <TextInput
+        style={styles.input}
+        value={dropOffLocation}
+        onChangeText={setDropOffLocation}
+        placeholder="Enter delivery location (e.g., Fauver, Butts, Clark)"
+      />
 
       <Text style={styles.label}>Delivery Speed:</Text>
       <View style={styles.radioGroup}>
@@ -196,20 +225,48 @@ const createOrder = async () => {
         )}
       </MapView>
       <Button title="Create Request" onPress={handleSubmit} />
+
+      <View style={styles.buttonContainer}>
+        <Button 
+          title="Create Request" 
+          onPress={handleSubmit} 
+          color="#3498db"
+        />
+      </View>
     </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 8,
-    fontWeight: '500',
-    color: '#333',
+  container: { 
+    flex: 1, 
+    padding: 20, 
+    backgroundColor: "#fff" 
   },
-  label: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 15,
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+  },
+  productImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
+  },
+  productId: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  label: { 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    marginTop: 10 
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -217,10 +274,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderRadius: 5,
   },
-  radioGroup: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 10
+  radioGroup: { 
+    flexDirection: "row", 
+    justifyContent: "space-around", 
+    marginVertical: 15 
   },
   infoContainer: {
       paddingVertical: 8,
@@ -241,6 +298,9 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
+  buttonContainer: {
+    marginTop: 20,
+  }
 });
 
 export default CreateRequestScreen;
