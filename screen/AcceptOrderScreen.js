@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, StyleSheet, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const AcceptOrderScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
@@ -126,8 +127,20 @@ const AcceptOrderScreen = ({ route, navigation }) => {
       )}
 
       {item.status === "accepted" && (
-        <Button title="Drop Off" onPress={() => handleDropOffOrder(item.id)} />
-      )}
+     <>
+       <Button
+         title="Navigate"
+         onPress={() =>
+           navigation.navigate("NavigationToLocationScreen", {
+             dropOffLocation: item.drop_off_location,
+           })
+         }
+       />
+       <Button
+         title="Drop Off"
+         onPress={() => handleDropOffOrder(item.id)}
+       />
+     </>      )}
     </View>
   );
 

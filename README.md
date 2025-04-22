@@ -486,6 +486,10 @@ OK (4 tests, 4 assertions)
 
 #### Before running, need to run following command in terminal:
 npm install @react-native-picker/picker
-npm install react-native-maps
+npm install react-native-maps (not sure weather this is correct)
+expo install react-native-maps (this is working)
 npm install react-native-maps react-native-google-places-autocomplete
 
+rm -rf node_modules
+rm package-lock.json
+npm install

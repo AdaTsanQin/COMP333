@@ -8,6 +8,7 @@ import DashboardScreen from './screen/DashboardScreen';
 import CreateRequestScreen from './screen/CreateRequestScreen';
 import ViewRequestScreen from './screen/ViewRequestScreen';
 import AcceptOrderScreen from './screen/AcceptOrderScreen';
+import NavigationToLocationScreen from "./screen/NavigationToLocationScreen";
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,7 @@ const App = () => {
         <Stack.Screen name="CreateRequestScreen" component={CreateRequestScreen} />
         <Stack.Screen name="ViewRequestScreen" component={ViewRequestScreen} />
         <Stack.Screen name="AcceptOrderScreen" component={AcceptOrderScreen} />
+        <Stack.Screen name="NavigationToLocationScreen" component={NavigationToLocationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

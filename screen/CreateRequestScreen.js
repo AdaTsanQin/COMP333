@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView} from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet,  ScrollView} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MapView, { Marker } from 'react-native-maps';
-import { PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const CreateRequestScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
@@ -20,8 +19,6 @@ const CreateRequestScreen = ({ route, navigation }) => {
     longitudeDelta: 0.0421,
   });
   const [marker, setMarker] = useState(null);
-
-
 useEffect(() => {
   (async () => {
     const id = await AsyncStorage.getItem("PHPSESSID");
@@ -123,16 +120,18 @@ const createOrder = async () => {
     Alert.alert("Error", "Failed to create request. Please try again.");
   }
 };
-
   const handleMapPress = (e) => {
     const coordinate = e.nativeEvent.coordinate;
     setMarker(coordinate);
     setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
   };
-
   return (
-  <ScrollView contentContainerStyle={styles.container}>
-    <View style={styles.container}>
+  <ScrollView
+    style={styles.scrollView}
+    contentContainerStyle={styles.contentContainer}
+    nestedScrollEnabled={true}
+  >
+    <View>
     <View style={styles.infoContainer}>
       <Text style={styles.infoText}>Logged in as: {username}</Text>
       <Text style={styles.infoText}>
@@ -196,7 +195,6 @@ const createOrder = async () => {
           />
         )}
       </MapView>
-
       <Button title="Create Request" onPress={handleSubmit} />
     </View>
     </ScrollView>
@@ -234,6 +232,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     marginTop: 20,
+  },
+  scrollView: {
+     flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: "#fff",
   },
 });
 

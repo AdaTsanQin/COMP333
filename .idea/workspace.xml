@@ -6,6 +6,32 @@
   <component name="ChangeListManager">
     <list default="true" id="f7e239ab-f9e1-4fa2-8961-f89df69a9ed9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/main/java/com/reactnativecommunity/picker/ReactPickerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/main/java/com/reactnativecommunity/picker/ReactPickerManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/paper/java/com/facebook/react/viewmanagers/RNCAndroidDialogPickerManagerDelegate.java" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/paper/java/com/facebook/react/viewmanagers/RNCAndroidDialogPickerManagerDelegate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/paper/java/com/facebook/react/viewmanagers/RNCAndroidDropdownPickerManagerDelegate.java" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/android/src/paper/java/com/facebook/react/viewmanagers/RNCAndroidDropdownPickerManagerDelegate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/ios/RNCPicker.mm" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/ios/RNCPicker.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/ios/RNCPickerComponentView.mm" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/ios/RNCPickerComponentView.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/ios/RNCPickerFabricConversions.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/PickerAndroid.android.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/PickerAndroid.android.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/PickerIOS.ios.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/PickerIOS.ios.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/RNCPickerNativeComponent.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/js/RNCPickerNativeComponent.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/react-native.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/react-native.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/typings/Picker.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@react-native-picker/picker/typings/Picker.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-chromium-versions.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-chromium-versions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-chromium-versions.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-chromium-versions.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-versions.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-versions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-versions.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/electron-to-chromium/full-versions.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/electron-to-chromium/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/electron-to-chromium/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/AcceptOrderScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/AcceptOrderScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/CreateRequestScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/CreateRequestScreen.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,19 +52,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "feature/issue-4.8-map-implement",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/adaqin/Desktop/DaSanXia/COMP333/Assignment/COMP333"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/issue-4.8-map-implement&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/adaqin/Desktop/DaSanXia/COMP333/Assignment/COMP333&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
