@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet,TextInput, Alert, Switch }  from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, Alert, Switch, TouchableOpacity }  from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -53,7 +53,7 @@ const DashboardScreen = ({ route, navigation }) => {
         Alert.alert("Error", "Something went wrong. Please try again.");
       }
     };
-
+  
 return (
     <View style={styles.container}>
       <Text style={styles.title}>Dashboard</Text>
@@ -69,44 +69,60 @@ return (
         />
       </View>
 
-      <Button title="Logout" onPress={handleLogout} />
+      <View style={styles.buttonContainer}>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
 
-    {currentRole === 'user' && (
-      <>
-        <Button
-          title="Create Request"
+      {currentRole === 'user' && (
+        <>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate('CreateRequestScreen', { username, role: currentRole })
+            }
+          >
+            <Text style={styles.buttonText}>Create Request</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate('ViewRequestScreen', { username, role: currentRole })
+            }
+          >
+            <Text style={styles.buttonText}>View Request</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Search Items', { username, role: currentRole })
+            }
+          >
+            <Text style={styles.buttonText}>Items from Nearby Stores</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {currentRole === 'dasher' && (
+        <TouchableOpacity
+          style={styles.button}
           onPress={() =>
-            navigation.navigate('CreateRequestScreen', { username, role: currentRole })
+            navigation.navigate('AcceptOrderScreen', { username, role: currentRole })
           }
-        />
-        <Button
-          title="View Request"
-          onPress={() =>
-            navigation.navigate('ViewRequestScreen', { username, role: currentRole })
-          }
-        />
-        <Button
-          title="Search Products"
-          onPress={() => navigation.navigate('Search Items', { username, role: currentRole })
-          }
-        />
-      </>
-    )}
+        >
+          <Text style={styles.buttonText}>Accept Order</Text>
+        </TouchableOpacity>
+      )}
 
-    {currentRole === 'dasher' && (
-      <Button
-        title="Accept Order"
-        onPress={() =>
-          navigation.navigate('AcceptOrderScreen', { username, role: currentRole })
-        }
-      />
-    )}
-
-    <Button
-      title="Delete Account"
-      color="red"
-      onPress={() => setShowDeleteFields(!showDeleteFields)}
-    />
+      <TouchableOpacity
+        style={[styles.button, {backgroundColor: '#ff6666'}]}
+        onPress={() => setShowDeleteFields(!showDeleteFields)}
+      >
+        <Text style={styles.buttonText}>Delete Account</Text>
+      </TouchableOpacity>
 
     {showDeleteFields && (
       <>
@@ -124,13 +140,15 @@ return (
           value={confirmPasswordToDelete}
           onChangeText={setConfirmPasswordToDelete}
         />
-        <Button
-          title="Confirm Deletion"
+        <TouchableOpacity
+          style={[styles.button, {backgroundColor: '#ff6666'}]}
           onPress={handleDeleteAccount}
-          color="red"
-        />
+        >
+          <Text style={styles.buttonText}>Confirm Deletion</Text>
+        </TouchableOpacity>
       </>
     )}
+    </View>
   </View>
 );
 };
@@ -166,7 +184,26 @@ const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20}
+    marginBottom: 20
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  button: {
+    width: '80%',
+    backgroundColor: '#007bff',
+    padding: 10,
+    marginVertical: 6,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
 });
 
 export default DashboardScreen;
