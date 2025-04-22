@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MapView, { Marker } from 'react-native-maps';
+import { PROVIDER_DEFAULT } from 'react-native-maps';
 
 const CreateRequestScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
@@ -11,6 +13,14 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
   const [sessionID, setSessionID] = useState(null);
+  const [region, setRegion] = useState({
+    latitude: 37.78825,  // Default coordinates (San Francisco)
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [marker, setMarker] = useState(null);
+
 
 useEffect(() => {
   (async () => {
@@ -114,6 +124,12 @@ const createOrder = async () => {
   }
 };
 
+  const handleMapPress = (e) => {
+    const coordinate = e.nativeEvent.coordinate;
+    setMarker(coordinate);
+    setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
+  };
+
   return (
     <View style={styles.container}>
     <View style={styles.infoContainer}>
@@ -164,6 +180,21 @@ const createOrder = async () => {
           color={deliverySpeed === "common" ? "blue" : "gray"}
         />
       </View>
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_DEFAULT}  // Use OSM provider
+        region={region}
+        onRegionChangeComplete={setRegion}
+        onPress={handleMapPress}
+      >
+        {marker && (
+          <Marker
+            coordinate={marker}
+            title="Drop-off Location"
+            description="This is the location you selected."
+          />
+        )}
+      </MapView>
 
       <Button title="Create Request" onPress={handleSubmit} />
     </View>
@@ -197,6 +228,11 @@ const styles = StyleSheet.create({
       borderColor: '#eee',
       marginBottom: 12,
     },
+  map: {
+    width: '100%',
+    height: 300,
+    marginTop: 20,
+  },
 });
 
 export default CreateRequestScreen;
