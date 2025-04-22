@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+=======
+import { View, Text, TextInput, Button, Alert, StyleSheet,  ScrollView} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
 
 const CreateRequestScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
@@ -11,7 +18,17 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
   const [sessionID, setSessionID] = useState(null);
+<<<<<<< HEAD
 
+=======
+  const [region, setRegion] = useState({
+    latitude: 37.78825,  // Default coordinates (San Francisco)
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [marker, setMarker] = useState(null);
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
 useEffect(() => {
   (async () => {
     const id = await AsyncStorage.getItem("PHPSESSID");
@@ -113,9 +130,24 @@ const createOrder = async () => {
     Alert.alert("Error", "Failed to create request. Please try again.");
   }
 };
+<<<<<<< HEAD
 
   return (
     <View style={styles.container}>
+=======
+  const handleMapPress = (e) => {
+    const coordinate = e.nativeEvent.coordinate;
+    setMarker(coordinate);
+    setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
+  };
+  return (
+  <ScrollView
+    style={styles.scrollView}
+    contentContainerStyle={styles.contentContainer}
+    nestedScrollEnabled={true}
+  >
+    <View>
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
     <View style={styles.infoContainer}>
       <Text style={styles.infoText}>Logged in as: {username}</Text>
       <Text style={styles.infoText}>
@@ -164,7 +196,25 @@ const createOrder = async () => {
           color={deliverySpeed === "common" ? "blue" : "gray"}
         />
       </View>
+<<<<<<< HEAD
 
+=======
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_DEFAULT}  // Use OSM provider
+        region={region}
+        onRegionChangeComplete={setRegion}
+        onPress={handleMapPress}
+      >
+        {marker && (
+          <Marker
+            coordinate={marker}
+            title="Drop-off Location"
+            description="This is the location you selected."
+          />
+        )}
+      </MapView>
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
       <Button title="Create Request" onPress={handleSubmit} />
     </View>
   );
@@ -197,6 +247,22 @@ const styles = StyleSheet.create({
       borderColor: '#eee',
       marginBottom: 12,
     },
+<<<<<<< HEAD
+=======
+  map: {
+    width: '100%',
+    height: 200,
+    marginTop: 20,
+  },
+  scrollView: {
+     flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
 });
 
 export default CreateRequestScreen;

@@ -11,6 +11,7 @@ import AcceptOrderScreen from './screen/AcceptOrderScreen';
 import NavigationToLocationScreen from "./screen/NavigationToLocationScreen";
 import SearchScreen from './screen/SearchScreen';
 import CreateStoreRequestScreen from './screen/CreateStoreRequestScreen';
+import NavigationToLocationScreen from "./screen/NavigationToLocationScreen";
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,7 @@ const App = () => {
         <Stack.Screen name="NavigationToLocationScreen" component={NavigationToLocationScreen} />
         <Stack.Screen name="Search Items" component={SearchScreen } />
         <Stack.Screen name="CreateStoreRequestScreen" component={CreateStoreRequestScreen} />
+        <Stack.Screen name="NavigationToLocationScreen" component={NavigationToLocationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

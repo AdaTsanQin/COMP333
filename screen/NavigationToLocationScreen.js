@@ -9,7 +9,11 @@ import {
 import MapView, { Marker } from "react-native-maps";
 import { Linking } from "react-native";
 
+<<<<<<< HEAD
 const NavigationToLocation = ({ route, navigation }) => {
+=======
+const NavigationToLocation = ({ route }) => {
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
   const { dropOffLocation } = route.params;
   // “12.3456, -78.9012”
   const [lat, lng] = dropOffLocation
@@ -44,12 +48,15 @@ const NavigationToLocation = ({ route, navigation }) => {
       </MapView>
       <View style={styles.buttonWrapper}>
         <Button title="Start Navigation" onPress={startNavigation} />
+<<<<<<< HEAD
               <View style={styles.backButton}>
                 <Button
                   title="Back to Dashboard"
                   onPress={() => navigation.goBack()}
                 />
               </View>
+=======
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
       </View>
     </View>
   );
@@ -65,9 +72,12 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
   },
+<<<<<<< HEAD
   backButton: {
     marginTop: 10,
   },
+=======
+>>>>>>> a4e31e0a (Added map on both user and dasher (issue4.8))
 });
 
 export default NavigationToLocation;
