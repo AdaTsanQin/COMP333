@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker } from 'react-native-maps';
@@ -131,6 +131,7 @@ const createOrder = async () => {
   };
 
   return (
+  <ScrollView contentContainerStyle={styles.container}>
     <View style={styles.container}>
     <View style={styles.infoContainer}>
       <Text style={styles.infoText}>Logged in as: {username}</Text>
@@ -198,6 +199,7 @@ const createOrder = async () => {
 
       <Button title="Create Request" onPress={handleSubmit} />
     </View>
+    </ScrollView>
   );
 };
 
@@ -230,7 +232,7 @@ const styles = StyleSheet.create({
     },
   map: {
     width: '100%',
-    height: 300,
+    height: 200,
     marginTop: 20,
   },
 });
