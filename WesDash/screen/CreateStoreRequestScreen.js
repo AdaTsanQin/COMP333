@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from "react-native";
 
-const CreateRequestScreen = ({ navigation, route }) => {
+const CreateStoreRequestScreen = ({ navigation, route }) => {
   // Check if product data was passed from SearchScreen
   const productData = route.params?.productData;
   
@@ -42,7 +42,6 @@ const CreateRequestScreen = ({ navigation, route }) => {
         credentials: 'include',
         body: JSON.stringify(requestData),
       });
-      let data = await resp.json();
 
       const text = await response.text();
       console.log("Raw response:", text);
@@ -74,96 +73,12 @@ const CreateRequestScreen = ({ navigation, route }) => {
         console.error("JSON Parse Error:", jsonError);
         Alert.alert("Error", "Unexpected response from server.");
       }
-
-      const list = Array.isArray(data.items) ? data.items : [];
-      setItems(list);
-
-      if (list.length > 0) {
-        setSelectedItem(list[0].name);
-      }
-    } catch (e) {
-      console.error(e);
-      Alert.alert("Error", "Could not load shop items.");
+    } catch (error) {
+      console.error("Request failed", error);
+      Alert.alert("Error", "Failed to create request. Please try again.");
     }
-  })();
-}, []);
-
-
-
-const handleSubmit = async () => {
-  if (!selectedItem || !dropOffLocation) {
-    Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
-    return;
-  }
-
-  const selectedItemDetails = items.find(item => item.name === selectedItem);
-  const requestedQuantity = parseInt(quantity, 10);
-
-  // Check if the requested quantity exceeds available stock
-  if (selectedItemDetails && requestedQuantity > selectedItemDetails.number) {
-    Alert.alert(
-      "Alert",
-      "Your current request is larger than the storage, may be pending for a long time until the storage of the shop increases.",
-      [
-        {
-          text: "Proceed Anyway",
-          onPress: async () => {
-            await createOrder();
-          },
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
-  } else {
-    await createOrder();
-  }
-};
-
-const createOrder = async () => {
-  try {
-    const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": `PHPSESSID=${sessionID}`,
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        item: selectedItem,
-        quantity: parseInt(quantity, 10),
-        drop_off_location: dropOffLocation,
-        delivery_speed: deliverySpeed,
-      }),
-    });
-
-    const text = await response.text();
-    console.log("Raw response:", text);
-
-    try {
-      const data = JSON.parse(text);
-
-      if (response.ok && data.success) {
-        Alert.alert("Success", data.success);
-      } else {
-        Alert.alert("Error", data.error || "Failed to create request.");
-      }
-    } catch (jsonError) {
-      console.error("JSON Parse Error:", jsonError);
-      Alert.alert("Error", "Unexpected response from server.");
-    }
-  } catch (error) {
-    console.error("Request failed", error);
-    Alert.alert("Error", "Failed to create request. Please try again.");
-  }
-};
-  const handleMapPress = (e) => {
-    const coordinate = e.nativeEvent.coordinate;
-    setMarker(coordinate);
-    setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
   };
+
   return (
     <View style={styles.container}>
       {/* Show product image if available */}
@@ -209,22 +124,6 @@ const createOrder = async () => {
           color={deliverySpeed === "common" ? "blue" : "gray"}
         />
       </View>
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_DEFAULT}  // Use OSM provider
-        region={region}
-        onRegionChangeComplete={setRegion}
-        onPress={handleMapPress}
-      >
-        {marker && (
-          <Marker
-            coordinate={marker}
-            title="Drop-off Location"
-            description="This is the location you selected."
-          />
-        )}
-      </MapView>
-      <Button title="Create Request" onPress={handleSubmit} />
 
       <View style={styles.buttonContainer}>
         <Button 
@@ -234,7 +133,6 @@ const createOrder = async () => {
         />
       </View>
     </View>
-    </ScrollView>
   );
 };
 
@@ -279,28 +177,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-around", 
     marginVertical: 15 
   },
-  infoContainer: {
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderColor: '#eee',
-      marginBottom: 12,
-    },
-  map: {
-    width: '100%',
-    height: 200,
-    marginTop: 20,
-  },
-  scrollView: {
-     flex: 1,
-  },
-  contentContainer: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
   buttonContainer: {
     marginTop: 20,
   }
 });
 
-export default CreateRequestScreen;
+export default CreateStoreRequestScreen;
