@@ -97,6 +97,10 @@ const AcceptOrderScreen = ({ route, navigation }) => {
       <Text style={styles.label}>Item Name:</Text>
       <Text style={styles.text}>{item.item}</Text>
 
+      <Text style={styles.label}>Quantity:</Text>
+      <Text style={styles.text}>{item.quantity}</Text>
+
+
       <Text style={styles.label}>Drop Off Location:</Text>
       <Text style={styles.text}>{item.drop_off_location}</Text>
 
