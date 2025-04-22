@@ -425,16 +425,26 @@ CREATE TABLE users (
 
 
 CREATE TABLE requests (
-  id               INT AUTO_INCREMENT PRIMARY KEY,
-  username         VARCHAR(255) NOT NULL,
-  item             VARCHAR(255) NOT NULL,
-  drop_off_location VARCHAR(255) NOT NULL,
-  delivery_speed   ENUM('urgent','common') DEFAULT 'common',
-  status           ENUM('pending','accepted','completed','confirmed') DEFAULT 'pending',
-  created_at       DATETIME NOT NULL,
-  accepted_by      VARCHAR(255) DEFAULT NULL,
-  CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
+id                INT AUTO_INCREMENT PRIMARY KEY,
+username          VARCHAR(255)   NOT NULL,
+item              VARCHAR(255)   NOT NULL,
+quantity          INT            NOT NULL DEFAULT 1,
+drop_off_location VARCHAR(255)   NOT NULL,
+delivery_speed    ENUM('urgent','common') DEFAULT 'common',
+status            ENUM('pending','accepted','completed','confirmed') DEFAULT 'pending',
+created_at        DATETIME       NOT NULL,
+accepted_by       VARCHAR(255)   DEFAULT NULL,
+CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
 );
+
+
+CREATE TABLE Wesshop (
+id     INT             AUTO_INCREMENT PRIMARY KEY,
+name   VARCHAR(255)    NOT NULL,
+number INT             NOT NULL,
+price  DECIMAL(10,2)    NOT NULL
+);
+
 
 | Step | Command / Action |
 |------|------------------|
@@ -472,3 +482,9 @@ PHPUnit 12.x by Sebastian Bergmann and contributors.
 Time: 00:00.x, Memory: 8.00 MB
 
 OK (4 tests, 4 assertions)
+
+
+#### Before running, need to run following command in terminal:
+npm install @react-native-picker/picker
+
+
