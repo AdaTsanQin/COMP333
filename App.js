@@ -8,11 +8,9 @@ import DashboardScreen from './screen/DashboardScreen';
 import CreateRequestScreen from './screen/CreateRequestScreen';
 import ViewRequestScreen from './screen/ViewRequestScreen';
 import AcceptOrderScreen from './screen/AcceptOrderScreen';
-<<<<<<< HEAD
 import NavigationToLocationScreen from "./screen/NavigationToLocationScreen";
-=======
+import SearchScreen from './screen/SearchScreen';
 import CreateStoreRequestScreen from './screen/CreateStoreRequestScreen';
->>>>>>> be68378a (Separated requests created from wesdash and nearby stores)
 
 const Stack = createStackNavigator();
 
@@ -27,11 +25,9 @@ const App = () => {
         <Stack.Screen name="CreateRequestScreen" component={CreateRequestScreen} />
         <Stack.Screen name="ViewRequestScreen" component={ViewRequestScreen} />
         <Stack.Screen name="AcceptOrderScreen" component={AcceptOrderScreen} />
-<<<<<<< HEAD
         <Stack.Screen name="NavigationToLocationScreen" component={NavigationToLocationScreen} />
-=======
+        <Stack.Screen name="Search Items" component={SearchScreen } />
         <Stack.Screen name="CreateStoreRequestScreen" component={CreateStoreRequestScreen} />
->>>>>>> be68378a (Separated requests created from wesdash and nearby stores)
       </Stack.Navigator>
     </NavigationContainer>
   );
