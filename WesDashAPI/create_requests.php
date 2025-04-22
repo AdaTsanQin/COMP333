@@ -36,13 +36,18 @@ $inputData = json_decode(file_get_contents("php://input"), true);
 
 
 if ($inputData) {
-    // JSON request
     $item            = $inputData['item'] ?? '';
+    $quantity        = isset($inputData['quantity']) 
+                       ? (int)$inputData['quantity'] 
+                       : 1;              // ← default if missing
     $dropOffLocation = $inputData['drop_off_location'] ?? '';
     $deliverySpeed   = $inputData['delivery_speed'] ?? 'common';
 } else {
-    // Form-encoded request
+    // fallback to form—also grab quantity
     $item            = $_POST['item'] ?? '';
+    $quantity        = isset($_POST['quantity']) 
+                       ? (int)$_POST['quantity'] 
+                       : 1;
     $dropOffLocation = $_POST['drop_off_location'] ?? '';
     $deliverySpeed   = $_POST['delivery_speed'] ?? 'common';
 }
@@ -56,14 +61,14 @@ $status    = 'pending';
 $createdAt = date('Y-m-d H:i:s');
 $username  = $_SESSION['username'];
 
-$sql = "INSERT INTO requests (username, item, drop_off_location, delivery_speed, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO requests (username, item, quantity, drop_off_location, delivery_speed, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     die(json_encode(["error" => "Prepare failed: " . $conn->error]));
 }
 
-$stmt->bind_param("ssssss", $username, $item, $dropOffLocation, $deliverySpeed, $status, $createdAt);
+$stmt->bind_param("ssissss", $username, $item, $quantity, $dropOffLocation, $deliverySpeed, $status, $createdAt);
 
 if ($stmt->execute()) {
     echo json_encode(["success" => "Request created successfully!"]);
