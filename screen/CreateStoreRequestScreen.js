@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from "react-native";
 
-const CreateRequestScreen = ({ navigation, route }) => {
+const CreateStoreRequestScreen = ({ navigation, route }) => {
   // Check if product data was passed from SearchScreen
   const productData = route.params?.productData;
   
@@ -182,4 +182,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default CreateRequestScreen;
+export default CreateStoreRequestScreen;

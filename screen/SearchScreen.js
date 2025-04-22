@@ -97,7 +97,7 @@ const SearchScreen = ({ navigation, route }) => {
     }
     
     // Navigate to CreateRequestScreen with the product data and user info
-    navigation.navigate('CreateRequestScreen', {
+    navigation.navigate('CreateStoreRequestScreen', {
       productData: {
         item_name: formattedName,
         image_url: thumbnailUrl,
