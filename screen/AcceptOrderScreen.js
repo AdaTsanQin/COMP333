@@ -1,5 +1,4 @@
-// screen/AcceptOrderScreen.js
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,17 +11,15 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
-// ───────────────────────────────────────────────
 const AcceptOrderScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
 
   const [orders, setOrders] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
-  const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+  const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
   const BASE_URL = `http://${HOST}/WesDashAPI`;
 
-  /* ---------- 拉数据 ---------- */
   const fetchOrders = async () => {
     try {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
@@ -42,22 +39,21 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- 首次加载 ---------- */
   useEffect(() => {
     (async () => {
       const id = await AsyncStorage.getItem('PHPSESSID');
-      if (!id) { Alert.alert('Error', 'Session ID not found.'); return; }
+      if (!id) return Alert.alert('Error', 'Session ID not found. Please log in again.');
       setSessionID(id);
       fetchOrders();
     })();
   }, []);
 
-  /* ---------- 返回时刷新 ---------- */
   useFocusEffect(
-    useCallback(() => { if (sessionID) fetchOrders(); }, [sessionID])
+    React.useCallback(() => {
+      if (sessionID) fetchOrders();
+    }, [sessionID])
   );
 
-  /* ---------- 接单 ---------- */
   const handleAcceptOrder = async (id) => {
     try {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
@@ -74,6 +70,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
             o.id === id ? { ...o, status: 'accepted', room_id: data.room_id || o.room_id } : o
           )
         );
+
         if (data.room_id) {
           navigation.navigate('Chat', { roomId: data.room_id, username });
         } else {
@@ -108,7 +105,6 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- 单条卡片 ---------- */
   const OrderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.label}>Item:</Text>
@@ -137,7 +133,6 @@ const AcceptOrderScreen = ({ route, navigation }) => {
         <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
       </View>
 
-      {/* 按钮区 */}
       {item.status === 'pending' && (
         <Button title="ACCEPT" onPress={() => handleAcceptOrder(item.id)} />
       )}
@@ -145,31 +140,19 @@ const AcceptOrderScreen = ({ route, navigation }) => {
       {item.status === 'accepted' && (
         <>
           <Button title="DROP OFF" onPress={() => handleDropOffOrder(item.id)} />
-
           {item.room_id && (
             <Button
               title="CHAT"
               color="#007bff"
-              onPress={() =>
-                navigation.navigate('Chat', { roomId: item.room_id, username })
-              }
+              onPress={() => navigation.navigate('Chat', { roomId: item.room_id, username })}
             />
           )}
-
-          <Button
-            title="NAVIGATE"
-            onPress={() =>
-              navigation.navigate('NavigationToLocationScreen', {
-                dropOffLocation: item.drop_off_location,
-              })
-            }
-          />
         </>
       )}
     </View>
   );
 
-  /* ---------- 渲染 ---------- */
+  /* ---------- UI ---------- */
   return (
     <View style={styles.container}>
       <View style={styles.infoBox}>
@@ -191,17 +174,15 @@ const AcceptOrderScreen = ({ route, navigation }) => {
   );
 };
 
-/* ---------- 样式 ---------- */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   heading:   { fontSize: 24, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
   infoBox:   { paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee', marginBottom: 12 },
   infoTxt:   { fontSize: 16, marginBottom: 4, fontWeight: '500', color: '#333' },
 
-  card:      { padding: 12, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 14 },
-  label:     { fontSize: 16, fontWeight: 'bold', marginTop: 4 },
-  text:      { fontSize: 16, marginBottom: 4 },
-
+  card:   { padding: 12, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 14 },
+  label:  { fontSize: 16, fontWeight: 'bold', marginTop: 4 },
+  text:   { fontSize: 16, marginBottom: 4 },
   statusBox: { padding: 6, borderRadius: 4, alignItems: 'center', marginBottom: 8 },
   pending:   { backgroundColor: '#ffcc00' },
   accepted:  { backgroundColor: '#66cc66' },
@@ -210,4 +191,3 @@ const styles = StyleSheet.create({
 });
 
 export default AcceptOrderScreen;
-
