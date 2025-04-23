@@ -9,7 +9,7 @@ import {
 import MapView, { Marker } from "react-native-maps";
 import { Linking } from "react-native";
 
-const NavigationToLocation = ({ route }) => {
+const NavigationToLocation = ({ route, navigation }) => {
   const { dropOffLocation } = route.params;
   // “12.3456, -78.9012”
   const [lat, lng] = dropOffLocation
@@ -44,6 +44,12 @@ const NavigationToLocation = ({ route }) => {
       </MapView>
       <View style={styles.buttonWrapper}>
         <Button title="Start Navigation" onPress={startNavigation} />
+              <View style={styles.backButton}>
+                <Button
+                  title="Back to Dashboard"
+                  onPress={() => navigation.goBack()}
+                />
+              </View>
       </View>
     </View>
   );
@@ -58,6 +64,9 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
+  },
+  backButton: {
+    marginTop: 10,
   },
 });
 
