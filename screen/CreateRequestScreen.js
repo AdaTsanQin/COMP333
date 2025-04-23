@@ -13,8 +13,8 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [deliverySpeed, setDeliverySpeed] = useState("common");
   const [sessionID, setSessionID] = useState(null);
   const [region, setRegion] = useState({
-    latitude: 37.78825,  // Default coordinates (Not right now)
-    longitude: -122.4324,
+    latitude: 41.5556,     // Wesleyan University
+    longitude: -72.6558,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
