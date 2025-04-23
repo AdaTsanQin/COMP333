@@ -12,7 +12,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
-// ───────────────────────────────────────────────
 const AcceptOrderScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
 
@@ -22,16 +21,14 @@ const AcceptOrderScreen = ({ route, navigation }) => {
   const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
   const BASE_URL = `http://${HOST}/WesDashAPI`;
 
-  /* ---------- 拉数据 ---------- */
+  /* ---------- pull orders ---------- */
   const fetchOrders = async () => {
     try {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `PHPSESSID=${sessionID}`,
-        },
+        headers: { 'Content-Type': 'application/json',
+                   Cookie: `PHPSESSID=${sessionID}` },
       });
       const data = await resp.json();
       data.success
@@ -42,7 +39,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- 首次加载 ---------- */
+  /* ---------- first load ---------- */
   useEffect(() => {
     (async () => {
       const id = await AsyncStorage.getItem('PHPSESSID');
@@ -52,12 +49,12 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     })();
   }, []);
 
-  /* ---------- 返回时刷新 ---------- */
-  useFocusEffect(
-    useCallback(() => { if (sessionID) fetchOrders(); }, [sessionID])
-  );
+  /* ---------- refresh on focus ---------- */
+  useFocusEffect(useCallback(() => {
+    if (sessionID) fetchOrders();
+  }, [sessionID]));
 
-  /* ---------- 接单 ---------- */
+  /* ---------- accept ---------- */
   const handleAcceptOrder = async (id) => {
     try {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
@@ -69,16 +66,14 @@ const AcceptOrderScreen = ({ route, navigation }) => {
       const data = await resp.json();
 
       if (data.success) {
-        setOrders((prev) =>
-          prev.map((o) =>
+        setOrders(prev =>
+          prev.map(o =>
             o.id === id ? { ...o, status: 'accepted', room_id: data.room_id || o.room_id } : o
-          )
+          ),
         );
-        if (data.room_id) {
-          navigation.navigate('Chat', { roomId: data.room_id, username });
-        } else {
-          Alert.alert('Success', 'Order accepted successfully!');
-        }
+        data.room_id
+          ? navigation.navigate('Chat', { roomId: data.room_id, username })
+          : Alert.alert('Success', 'Order accepted successfully!');
       } else {
         Alert.alert('Error', data.message || 'Failed to accept order.');
       }
@@ -87,7 +82,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- Drop-off ---------- */
+  /* ---------- drop-off ---------- */
   const handleDropOffOrder = async (id) => {
     try {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
@@ -108,7 +103,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- 单条卡片 ---------- */
+  /* ---------- single card ---------- */
   const OrderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.label}>Item:</Text>
@@ -132,12 +127,11 @@ const AcceptOrderScreen = ({ route, navigation }) => {
             : item.status === 'accepted'
             ? styles.accepted
             : styles.completed,
-        ]}
-      >
+        ]}>
         <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
       </View>
 
-      {/* 按钮区 */}
+      {/* buttons */}
       {item.status === 'pending' && (
         <Button title="ACCEPT" onPress={() => handleAcceptOrder(item.id)} />
       )}
@@ -169,7 +163,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     </View>
   );
 
-  /* ---------- 渲染 ---------- */
+  /* ---------- render ---------- */
   return (
     <View style={styles.container}>
       <View style={styles.infoBox}>
@@ -191,7 +185,7 @@ const AcceptOrderScreen = ({ route, navigation }) => {
   );
 };
 
-/* ---------- 样式 ---------- */
+/* ---------- styles ---------- */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   heading:   { fontSize: 24, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
@@ -210,3 +204,4 @@ const styles = StyleSheet.create({
 });
 
 export default AcceptOrderScreen;
+
