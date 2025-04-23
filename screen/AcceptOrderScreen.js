@@ -1,214 +1,193 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, Alert, FlatList } from "react-native";
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Alert,
+  FlatList,
+  Platform,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AcceptOrderScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
+
   const [orders, setOrders] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
+  const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+  const BASE_URL = `http://${HOST}/WesDashAPI`;
+
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
-        method: "GET",
-        credentials: "include",
+      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Cookie": `PHPSESSID=${sessionID}` // Include the session ID in the request
-        }
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
       });
-      console.log("GET response status:", response.status);
-      const data = await response.json();
-      console.log("GET response data:", data);
-
-      if (data.success) {
-        setOrders(data.orders);
-      } else {
-        Alert.alert("Error", data.message || "Failed to fetch orders.");
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      Alert.alert("Error", "Failed to fetch orders. Please try again.");
+      const data = await resp.json();
+      data.success
+        ? setOrders(data.orders)
+        : Alert.alert('Error', data.message || 'Failed to fetch orders.');
+    } catch {
+      Alert.alert('Error', 'Network error while fetching orders.');
     }
   };
 
   useEffect(() => {
-    const getSessionID = async () => {
-      const id = await AsyncStorage.getItem("PHPSESSID");
-      if (id) {
-        setSessionID(id);
-        fetchOrders(); // Fetch orders after setting the session ID
-      } else {
-        Alert.alert("Error", "Session ID not found. Please log in again.");
-      }
-    };
-    getSessionID();
+    (async () => {
+      const id = await AsyncStorage.getItem('PHPSESSID');
+      if (!id) return Alert.alert('Error', 'Session ID not found. Please log in again.');
+      setSessionID(id);
+      fetchOrders();
+    })();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (sessionID) fetchOrders();
+    }, [sessionID])
+  );
 
   const handleAcceptOrder = async (id) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
+      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
       });
-      const data = await response.json();
-      console.log("PUT accept response data:", data);
+      const data = await resp.json();
+
       if (data.success) {
-        Alert.alert("Success", "Order accepted successfully!");
-        fetchOrders();
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === id ? { ...o, status: 'accepted', room_id: data.room_id || o.room_id } : o
+          )
+        );
+
+        if (data.room_id) {
+          navigation.navigate('Chat', { roomId: data.room_id, username });
+        } else {
+          Alert.alert('Success', 'Order accepted successfully!');
+        }
       } else {
-        Alert.alert("Error", data.message || "Failed to accept order.");
+        Alert.alert('Error', data.message || 'Failed to accept order.');
       }
-    } catch (error) {
-      console.error("Accept order error:", error);
-      Alert.alert("Error", "Failed to accept order. Please try again.");
+    } catch {
+      Alert.alert('Error', 'Failed to accept order. Please try again.');
     }
   };
 
-  // Drop off 
+  /* ---------- Drop-off ---------- */
   const handleDropOffOrder = async (id) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, action: "drop_off" })
+      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'drop_off' }),
       });
-      const data = await response.json();
-      console.log("PUT drop off response data:", data);
+      const data = await resp.json();
       if (data.success) {
-        Alert.alert("Success", "Order dropped off (completed) successfully!");
+        Alert.alert('Success', 'Order dropped off successfully!');
         fetchOrders();
       } else {
-        Alert.alert("Error", data.message || "Failed to drop off order.");
+        Alert.alert('Error', data.message || 'Failed to drop off order.');
       }
-    } catch (error) {
-      console.error("Drop off order error:", error);
-      Alert.alert("Error", "Failed to drop off order. Please try again.");
+    } catch {
+      Alert.alert('Error', 'Failed to drop off order. Please try again.');
     }
   };
 
   const OrderItem = ({ item }) => (
-    <View style={styles.orderItem}>
-      <Text style={styles.label}>Item Name:</Text>
+    <View style={styles.card}>
+      <Text style={styles.label}>Item:</Text>
       <Text style={styles.text}>{item.item}</Text>
 
       <Text style={styles.label}>Quantity:</Text>
       <Text style={styles.text}>{item.quantity}</Text>
 
-
-      <Text style={styles.label}>Drop Off Location:</Text>
+      <Text style={styles.label}>Drop-off:</Text>
       <Text style={styles.text}>{item.drop_off_location}</Text>
 
-      <Text style={styles.label}>Delivery Speed:</Text>
+      <Text style={styles.label}>Speed:</Text>
       <Text style={styles.text}>{item.delivery_speed}</Text>
 
       <Text style={styles.label}>Status:</Text>
       <View
         style={[
-          styles.statusContainer,
-          item.status === "pending"
+          styles.statusBox,
+          item.status === 'pending'
             ? styles.pending
-            : item.status === "accepted"
+            : item.status === 'accepted'
             ? styles.accepted
-            : styles.completed
+            : styles.completed,
         ]}
       >
-        <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+        <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
       </View>
 
-      {item.status === "pending" && (
-        <Button title="Accept" onPress={() => handleAcceptOrder(item.id)} />
+      {item.status === 'pending' && (
+        <Button title="ACCEPT" onPress={() => handleAcceptOrder(item.id)} />
       )}
 
-      {item.status === "accepted" && (
-        <Button title="Drop Off" onPress={() => handleDropOffOrder(item.id)} />
+      {item.status === 'accepted' && (
+        <>
+          <Button title="DROP OFF" onPress={() => handleDropOffOrder(item.id)} />
+          {item.room_id && (
+            <Button
+              title="CHAT"
+              color="#007bff"
+              onPress={() => navigation.navigate('Chat', { roomId: item.room_id, username })}
+            />
+          )}
+        </>
       )}
     </View>
   );
 
+  /* ---------- UI ---------- */
   return (
     <View style={styles.container}>
-    <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Logged in as: {username}</Text>
-          <Text style={styles.infoText}>
-            Role: {role === 'dasher' ? 'Dasher' : 'User'}
-          </Text>
-        </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTxt}>Logged in as: {username}</Text>
+        <Text style={styles.infoTxt}>Role: {role === 'dasher' ? 'Dasher' : 'User'}</Text>
+      </View>
+
       <Text style={styles.heading}>Orders for Acceptance</Text>
+
       <FlatList
         data={orders}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <OrderItem item={item} />}
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center', marginTop: 40 }}>No orders available.</Text>
+        }
       />
     </View>
   );
 };
 
-export default AcceptOrderScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff"
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center"
-  },
-  orderItem: {
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    backgroundColor: "#f8f8f8"
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 5
-  },
-  text: {
-    fontSize: 16,
-    marginBottom: 5
-  },
-  statusContainer: {
-    padding: 8,
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 5
-  },
-  pending: {
-    backgroundColor: "#ffcc00"
-  },
-  accepted: {
-    backgroundColor: "#66cc66"
-  },
-  completed: {
-    backgroundColor: "#007bff"
-  },
-  statusText: {
-    fontWeight: "bold",
-    color: "#fff"
-  },
-  infoContainer: {
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderColor: '#eee',
-      marginBottom: 12,
-    },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 8,
-    fontWeight: '500',
-    color: '#333',
-  },
+  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
+  heading:   { fontSize: 24, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
+  infoBox:   { paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee', marginBottom: 12 },
+  infoTxt:   { fontSize: 16, marginBottom: 4, fontWeight: '500', color: '#333' },
+
+  card:   { padding: 12, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 14 },
+  label:  { fontSize: 16, fontWeight: 'bold', marginTop: 4 },
+  text:   { fontSize: 16, marginBottom: 4 },
+  statusBox: { padding: 6, borderRadius: 4, alignItems: 'center', marginBottom: 8 },
+  pending:   { backgroundColor: '#ffcc00' },
+  accepted:  { backgroundColor: '#66cc66' },
+  completed: { backgroundColor: '#007bff' },
+  statusTxt: { color: '#fff', fontWeight: 'bold' },
 });
+
+export default AcceptOrderScreen;
