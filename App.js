@@ -1,4 +1,4 @@
-// App.js – merged (Chat + Map Navigate) version
+// App.js  – final merge (Chat + Map Navigation)
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -19,7 +19,7 @@ import SearchScreen               from './screen/SearchScreen';
 import ChatListScreen             from './screen/ChatListScreen';
 import ChatScreen                 from './screen/ChatScreen';
 
-import NavigationToLocationScreen from './screen/NavigationToLocationScreen';   // ★ map-navigate
+import NavigationToLocationScreen from './screen/NavigationToLocationScreen';   // map + navigate
 
 /* ---------- navigator ---------- */
 const Stack = createStackNavigator();
@@ -27,7 +27,7 @@ const Stack = createStackNavigator();
 const App = () => (
   <NavigationContainer>
     <Stack.Navigator initialRouteName="Home">
-      {/* auth / entry */}
+      {/* auth */}
       <Stack.Screen name="Home"     component={HomeScreen} />
       <Stack.Screen name="Login"    component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
@@ -61,3 +61,4 @@ const App = () => (
 );
 
 export default App;
+
