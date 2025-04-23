@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const CreateRequestScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
@@ -11,6 +12,13 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
   const [sessionID, setSessionID] = useState(null);
+  const [region, setRegion] = useState({
+    latitude: 37.78825,  // Default coordinates (Not right now)
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [marker, setMarker] = useState(null);
 
 useEffect(() => {
   (async () => {
@@ -113,9 +121,18 @@ const createOrder = async () => {
     Alert.alert("Error", "Failed to create request. Please try again.");
   }
 };
-
+  const handleMapPress = (e) => {
+    const coordinate = e.nativeEvent.coordinate;
+    setMarker(coordinate);
+    setDropOffLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
+  };
   return (
-    <View style={styles.container}>
+  <ScrollView
+    style={styles.scrollView}
+    contentContainerStyle={styles.contentContainer}
+    nestedScrollEnabled={true}
+  >
+    <View>
     <View style={styles.infoContainer}>
       <Text style={styles.infoText}>Logged in as: {username}</Text>
       <Text style={styles.infoText}>
@@ -164,9 +181,24 @@ const createOrder = async () => {
           color={deliverySpeed === "common" ? "blue" : "gray"}
         />
       </View>
-
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_DEFAULT}  // Use OSM provider
+        region={region}
+        onRegionChangeComplete={setRegion}
+        onPress={handleMapPress}
+      >
+        {marker && (
+          <Marker
+            coordinate={marker}
+            title="Drop-off Location"
+            description="This is the location you selected."
+          />
+        )}
+      </MapView>
       <Button title="Create Request" onPress={handleSubmit} />
     </View>
+    </ScrollView>
   );
 };
 
@@ -197,6 +229,19 @@ const styles = StyleSheet.create({
       borderColor: '#eee',
       marginBottom: 12,
     },
+  map: {
+    width: '100%',
+    height: 200,
+    marginTop: 20,
+  },
+  scrollView: {
+     flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
 });
 
 export default CreateRequestScreen;
