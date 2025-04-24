@@ -1,207 +1,254 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity } from "react-native";
+// screen/ViewRequestsScreen.js
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ViewRequestsScreen = ({ route, navigation }) => {
+  /* ───────── 基本状态 ───────── */
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
   const [requests, setRequests] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
+  /* ───────── 统一提示 ───────── */
+  const showAlert = (title, msg, ok = false) =>
+    Alert.alert(title, msg, [{ text: 'OK', onPress: () => ok && fetchRequests() }]);
+
+  /* ───────── 拉取请求列表 ───────── */
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
-        method: "GET",
-        credentials: "include",
+      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Cookie": `PHPSESSID=${sessionID}`, // Include the session ID in the request
-        }
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
       });
-
-      const data = await response.json();
-      if (data.success) {
-        setRequests(data.requests);
-      } else {
-        Alert.alert("Error", data.message || "Failed to fetch requests.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch requests. Please try again.");
+      const d = await r.json();
+      d.success
+        ? setRequests(d.requests)
+        : showAlert('Error', d.message || 'Failed to fetch requests');
+    } catch {
+      showAlert('Error', 'Network error while fetching requests');
     }
   };
 
+  /* ───────── 组件加载 ───────── */
   useEffect(() => {
-    const getSessionID = async () => {
-      const id = await AsyncStorage.getItem("PHPSESSID");
-      if (id) {
-        setSessionID(id);
-        fetchRequests(); // Fetch requests after setting session ID
-      } else {
-        Alert.alert("Error", "Session ID not found. Please log in again.");
-      }
-    };
-    fetchRequests();
-    getSessionID();
+    (async () => {
+      const id = await AsyncStorage.getItem('PHPSESSID');
+      if (!id) return showAlert('Error', 'Session not found');
+      setSessionID(id);
+      fetchRequests();
+    })();
   }, []);
 
-  const handleDeleteRequest = async (id) => {
+  /* ───────── 删除请求 ───────── */
+  const handleDelete = async (id) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
-        method: "DELETE",
+      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+        method: 'DELETE',
+        credentials: 'include',
         headers: {
-        "Content-Type": "application/json",
-        "Cookie": `PHPSESSID=${sessionID}`,},
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
         body: JSON.stringify({ delete_id: id }),
-        credentials: "include",
       });
-
-      const data = await response.json();
-      if (data.success) {
-        Alert.alert("Success", data.message);
-        fetchRequests();
-      } else {
-        Alert.alert("Error", data.message || "Failed to delete request.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to delete request. Please try again.");
+      const d = await r.json();
+      showAlert(d.success ? 'Deleted' : 'Error', d.message, d.success);
+    } catch {
+      showAlert('Error', 'Delete failed – network error');
     }
   };
 
-  const handleEditRequest = async (id, item, dropOffLocation, deliverySpeed, status) => {
+  /* ───────── 编辑请求 ───────── */
+  const handleEdit = async (obj) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/edit.php", {
-        method: "PUT",
+      const r = await fetch('http://10.0.2.2/WesDashAPI/edit.php', {
+        method: 'PUT',
+        credentials: 'include',
         headers: {
-        "Content-Type": "application/json",
-        "Cookie": `PHPSESSID=${sessionID}`,},
-        body: JSON.stringify({ id, item, drop_off_location: dropOffLocation, delivery_speed: deliverySpeed, status }),
-        credentials: "include",
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
+        body: JSON.stringify(obj),
       });
-
-      const data = await response.json();
-      if (data.success) {
-        Alert.alert("Success", data.message);
-        fetchRequests();
-      } else {
-        Alert.alert("Error", data.message || "Failed to edit request.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to edit request. Please try again.");
+      const d = await r.json();
+      showAlert(d.success ? 'Saved' : 'Error', d.message, d.success);
+    } catch {
+      showAlert('Error', 'Edit failed – network error');
     }
   };
-  const handleConfirmRequest = async (id) => {
-  try {
-    const response = await fetch("http://10.0.2.2/WesDashAPI/accept_requests.php", {
-      method: "PUT",
-      headers: {
-      "Content-Type": "application/json",
-      "Cookie": `PHPSESSID=${sessionID}`,},
-      body: JSON.stringify({ request_id: id }), 
-      credentials: "include",
-    });
 
-    const data = await response.json();
-    if (data.success) {
-      Alert.alert("Success", data.message || "Request accepted!");
-      fetchRequests(); // refresh the list
-    } else {
-      Alert.alert("Error", data.message || "Failed to accept request.");
+  /* ───────── 确认完成 ───────── */
+  const handleConfirm = async (id) => {
+    try {
+      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
+        body: JSON.stringify({ request_id: id }),
+      });
+      const d = await r.json();
+      showAlert(
+        d.success ? 'Confirmed' : 'Error',
+        d.message || 'Confirm failed',
+        d.success
+      );
+    } catch {
+      showAlert('Error', 'Confirm failed – network error');
     }
-  } catch (error) {
-    Alert.alert("Error", "Network error while accepting request.");
-   }
   };
 
+  /* ───────── 单条请求卡片 ───────── */
+  const RequestItem = ({ item }) => {
+    const [itemName, setItemName] = useState(item.item);
+    const [loc, setLoc] = useState(item.drop_off_location);
+    const [speed, setSpeed] = useState(item.delivery_speed);
+
+    return (
+      <View style={styles.card}>
+        <Text style={styles.label}>Item Name</Text>
+        <TextInput style={styles.input} value={itemName} onChangeText={setItemName} />
+
+        <Text style={styles.label}>Drop-off Location</Text>
+        <TextInput style={styles.input} value={loc} onChangeText={setLoc} />
+
+        <Text style={styles.label}>Delivery Speed</Text>
+        <View style={styles.radioRow}>
+          {['urgent', 'common'].map((s) => (
+            <TouchableOpacity
+              key={s}
+              style={[
+                styles.radioBtn,
+                speed === s && styles.radioSelected,
+              ]}
+              onPress={() => setSpeed(s)}
+            >
+              <Text style={speed === s ? styles.radioTxtSel : styles.radioTxt}>
+                {s.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.buttonRow}>
+          <Button
+            title="Save"
+            onPress={() =>
+              handleEdit({
+                id: item.id,
+                item: itemName,
+                drop_off_location: loc,
+                delivery_speed: speed,
+                status: item.status,
+              })
+            }
+          />
+          <Button title="Delete" color="#ff6666" onPress={() => handleDelete(item.id)} />
+        </View>
+
+        {item.status === 'completed' && (
+          <Button title="Confirm Received" onPress={() => handleConfirm(item.id)} />
+        )}
+
+        {/* 有 room_id 才显示 Chat 按钮 */}
+        {item.room_id && (
+          <Button
+            title="Chat"
+            onPress={() =>
+              navigation.navigate('Chat', { roomId: item.room_id, username })
+            }
+          />
+        )}
+      </View>
+    );
+  };
+
+  /* ───────── 组件 UI ───────── */
   return (
     <View style={styles.container}>
-    <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Logged in as: {username}</Text>
-          <Text style={styles.infoText}>
-            Role: {role === 'dasher' ? 'Dasher' : 'User'}
-          </Text>
-        </View>
-      <Text style={styles.heading}>All Requests</Text>
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTxt}>Logged in as: {username}</Text>
+        <Text style={styles.infoTxt}>Role: {role === 'dasher' ? 'Dasher' : 'User'}</Text>
+      </View>
+
+      <Text style={styles.heading}>My Requests</Text>
+
       <FlatList
         data={requests}
-        keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <RequestItem
-              item={item}
-              onEdit={handleEditRequest}
-              onDelete={handleDeleteRequest}
-              onConfirm={handleConfirmRequest}
-            />
-          )}
+        keyExtractor={(i) => i.id.toString()}
+        renderItem={({ item }) => <RequestItem item={item} />}
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center', marginTop: 40 }}>No requests yet</Text>
+        }
       />
     </View>
   );
 };
 
-const RequestItem = ({ item, onEdit, onDelete, onConfirm }) => {
-  const [itemText, setItemText] = useState(item.item);
-  const [dropOffText, setDropOffText] = useState(item.drop_off_location);
-  const [deliverySpeed, setDeliverySpeed] = useState(item.delivery_speed);
-
-  return (
-    <View style={styles.requestItem}>
-      <Text style={styles.label}>Item Name:</Text>
-      <TextInput style={styles.input} value={itemText} onChangeText={setItemText} />
-
-      <Text style={styles.label}>Drop Off Location:</Text>
-      <TextInput style={styles.input} value={dropOffText} onChangeText={setDropOffText} />
-
-      <Text style={styles.label}>Delivery Speed:</Text>
-      <View style={styles.radioGroup}>
-        <TouchableOpacity
-          style={[styles.radioButton, deliverySpeed === "urgent" && styles.selectedButton]}
-          onPress={() => setDeliverySpeed("urgent")}
-        >
-          <Text style={styles.radioText}>Urgent</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.radioButton, deliverySpeed === "common" && styles.selectedButton]}
-          onPress={() => setDeliverySpeed("common")}
-        >
-          <Text style={styles.radioText}>Common</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.label}>Status:</Text>
-      <View style={[styles.statusContainer, item.status === "urgent" ? styles.urgent : styles.common]}>
-        <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
-      </View>
-
-      <Button title="Confirm Edit" onPress={() => onEdit(item.id, itemText, dropOffText, deliverySpeed, item.status)} />
-        {item.status === "completed" && (
-           <Button title="Confirm Order" onPress={() => onConfirm(item.id)} />
-        )}
-       <Button title="Delete" onPress={() => onDelete(item.id)} />
-    </View>
-  );
-};
-
+/* ────────── 样式 ────────── */
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  heading: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  requestItem: { padding: 10, marginBottom: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 5, backgroundColor: "#f8f8f8" },
-  input: { borderWidth: 1, padding: 5, marginBottom: 5, borderRadius: 5, backgroundColor: "#fff" },
-  label: { fontSize: 16, fontWeight: "bold", marginTop: 5 },
+  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
+  heading: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  infoBox: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    marginBottom: 12,
+  },
+  infoTxt: { fontSize: 16, marginBottom: 4, fontWeight: '500', color: '#333' },
 
-  // Radio button group styling
-  radioGroup: { flexDirection: "row", justifyContent: "space-around", marginBottom: 10 },
-  radioButton: { padding: 10, borderWidth: 1, borderColor: "#333", borderRadius: 5, minWidth: 100, alignItems: "center" },
-  selectedButton: { backgroundColor: "#007bff" },
-  radioText: { fontWeight: "bold", color: "#333" },
-  selectedText: { color: "#fff" },
+  card: {
+    padding: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    backgroundColor: '#f8f8f8',
+  },
+  label: { fontSize: 14, fontWeight: 'bold', marginTop: 6 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 6,
+    marginTop: 4,
+    backgroundColor: '#fff',
+  },
+  radioRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 8,
+  },
+  radioBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderRadius: 4,
+  },
+  radioSelected: { backgroundColor: '#007bff', borderColor: '#007bff' },
+  radioTxt: { color: '#333' },
+  radioTxtSel: { color: '#fff', fontWeight: 'bold' },
 
-  // Status display (non-editable)
-  statusContainer: { padding: 8, borderRadius: 5, alignItems: "center", marginBottom: 5 },
-  urgent: { backgroundColor: "#ff6666" },
-  common: { backgroundColor: "#66cc66" },
-  statusText: { fontWeight: "bold", color: "#fff" },
-
-  infoContainer: { paddingVertical: 8, borderBottomWidth: 1,  borderColor: '#eee',  marginBottom: 12,},
-  infoText: { fontSize: 16, marginBottom: 8, fontWeight: '500', color: '#333',},
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 6,
+  },
 });
 
 export default ViewRequestsScreen;
