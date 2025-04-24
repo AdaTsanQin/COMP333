@@ -9,23 +9,31 @@ import {
   Alert,
   FlatList,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ViewRequestsScreen = ({ route, navigation }) => {
-  /* ───────── 基本状态 ───────── */
+const HOST          = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const BASE_URL      = `http://${HOST}/WesDashAPI`;
+const PRIMARY_COLOR = '#007bff';   
+const STATUS_COLOR  = '#66cc66';   
+const PENDING_COLOR = '#ffcc00';  
+
+export default function ViewRequestsScreen({ route, navigation }) {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
   const [requests, setRequests] = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
-  /* ───────── 统一提示 ───────── */
-  const showAlert = (title, msg, ok = false) =>
-    Alert.alert(title, msg, [{ text: 'OK', onPress: () => ok && fetchRequests() }]);
+  /* ───── 通用提示 ───── */
+  const toast = (msg, ok = false) =>
+    Alert.alert(ok ? 'Success' : 'Error', msg, [
+      { text: 'OK', onPress: ok ? fetchRequests : undefined },
+    ]);
 
-  /* ───────── 拉取请求列表 ───────── */
+  /* ───── 拉取订单 ───── */
   const fetchRequests = async () => {
     try {
-      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -34,28 +42,26 @@ const ViewRequestsScreen = ({ route, navigation }) => {
         },
       });
       const d = await r.json();
-      d.success
-        ? setRequests(d.requests)
-        : showAlert('Error', d.message || 'Failed to fetch requests');
+      d.success ? setRequests(d.requests) : toast(d.message || 'Failed to load');
     } catch {
-      showAlert('Error', 'Network error while fetching requests');
+      toast('Network error');
     }
   };
 
-  /* ───────── 组件加载 ───────── */
+  /* ───── 初始加载 ───── */
   useEffect(() => {
     (async () => {
-      const id = await AsyncStorage.getItem('PHPSESSID');
-      if (!id) return showAlert('Error', 'Session not found');
-      setSessionID(id);
+      const sid = await AsyncStorage.getItem('PHPSESSID');
+      if (!sid) return toast('Session not found');
+      setSessionID(sid);
       fetchRequests();
     })();
   }, []);
 
-  /* ───────── 删除请求 ───────── */
-  const handleDelete = async (id) => {
+  /* ───── 删除 ───── */
+  const doDelete = async (id) => {
     try {
-      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -65,35 +71,35 @@ const ViewRequestsScreen = ({ route, navigation }) => {
         body: JSON.stringify({ delete_id: id }),
       });
       const d = await r.json();
-      showAlert(d.success ? 'Deleted' : 'Error', d.message, d.success);
+      toast(d.message, d.success);
     } catch {
-      showAlert('Error', 'Delete failed – network error');
+      toast('Delete failed');
     }
   };
 
-  /* ───────── 编辑请求 ───────── */
-  const handleEdit = async (obj) => {
+  /* ───── 保存编辑 ───── */
+  const doEdit = async (payload) => {
     try {
-      const r = await fetch('http://10.0.2.2/WesDashAPI/edit.php', {
+      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Cookie: `PHPSESSID=${sessionID}`,
         },
-        body: JSON.stringify(obj),
+        body: JSON.stringify(payload),
       });
       const d = await r.json();
-      showAlert(d.success ? 'Saved' : 'Error', d.message, d.success);
+      toast(d.message, d.success);
     } catch {
-      showAlert('Error', 'Edit failed – network error');
+      toast('Update failed');
     }
   };
 
-  /* ───────── 确认完成 ───────── */
-  const handleConfirm = async (id) => {
+  /* ───── 确认收货 ───── */
+  const doConfirm = async (id) => {
     try {
-      const r = await fetch('http://10.0.2.2/WesDashAPI/accept_requests.php', {
+      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -103,26 +109,27 @@ const ViewRequestsScreen = ({ route, navigation }) => {
         body: JSON.stringify({ request_id: id }),
       });
       const d = await r.json();
-      showAlert(
-        d.success ? 'Confirmed' : 'Error',
-        d.message || 'Confirm failed',
-        d.success
-      );
+      toast(d.message, d.success);
     } catch {
-      showAlert('Error', 'Confirm failed – network error');
+      toast('Confirm failed');
     }
   };
 
-  /* ───────── 单条请求卡片 ───────── */
+  /* ───── 单条卡片 ───── */
   const RequestItem = ({ item }) => {
-    const [itemName, setItemName] = useState(item.item);
-    const [loc, setLoc] = useState(item.drop_off_location);
+    const [name, setName]   = useState(item.item);
+    const [loc , setLoc ]   = useState(item.drop_off_location);
     const [speed, setSpeed] = useState(item.delivery_speed);
 
     return (
       <View style={styles.card}>
         <Text style={styles.label}>Item Name</Text>
-        <TextInput style={styles.input} value={itemName} onChangeText={setItemName} />
+        <TextInput
+          style={[styles.input, { height: 60 }]}
+          multiline
+          value={name}
+          onChangeText={setName}
+        />
 
         <Text style={styles.label}>Drop-off Location</Text>
         <TextInput style={styles.input} value={loc} onChangeText={setLoc} />
@@ -134,7 +141,7 @@ const ViewRequestsScreen = ({ route, navigation }) => {
               key={s}
               style={[
                 styles.radioBtn,
-                speed === s && styles.radioSelected,
+                speed === s && styles.radioSel,
               ]}
               onPress={() => setSpeed(s)}
             >
@@ -145,30 +152,46 @@ const ViewRequestsScreen = ({ route, navigation }) => {
           ))}
         </View>
 
-        <View style={styles.buttonRow}>
+        <View style={styles.btnRow}>
           <Button
-            title="Save"
+            title="SAVE"
             onPress={() =>
-              handleEdit({
+              doEdit({
                 id: item.id,
-                item: itemName,
+                item: name,
                 drop_off_location: loc,
                 delivery_speed: speed,
                 status: item.status,
               })
             }
           />
-          <Button title="Delete" color="#ff6666" onPress={() => handleDelete(item.id)} />
+          <Button
+            title="DELETE"
+            color="#ff6666"
+            onPress={() => doDelete(item.id)}
+          />
+        </View>
+
+        {/* 根据状态切换颜色 */}
+        <View style={[
+          styles.statusBox,
+          item.status === 'pending' && styles.pending
+        ]}>
+          <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
         </View>
 
         {item.status === 'completed' && (
-          <Button title="Confirm Received" onPress={() => handleConfirm(item.id)} />
+          <Button
+            title="CONFIRM RECEIVED"
+            color={PRIMARY_COLOR}
+            onPress={() => doConfirm(item.id)}
+          />
         )}
 
-        {/* 有 room_id 才显示 Chat 按钮 */}
         {item.room_id && (
           <Button
-            title="Chat"
+            title="CHAT"
+            color={PRIMARY_COLOR}
             onPress={() =>
               navigation.navigate('Chat', { roomId: item.room_id, username })
             }
@@ -178,7 +201,7 @@ const ViewRequestsScreen = ({ route, navigation }) => {
     );
   };
 
-  /* ───────── 组件 UI ───────── */
+  /* ───── 主视图 ───── */
   return (
     <View style={styles.container}>
       <View style={styles.infoBox}>
@@ -193,62 +216,41 @@ const ViewRequestsScreen = ({ route, navigation }) => {
         keyExtractor={(i) => i.id.toString()}
         renderItem={({ item }) => <RequestItem item={item} />}
         ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 40 }}>No requests yet</Text>
+          <Text style={{ textAlign: 'center', marginTop: 40 }}>
+            No requests yet
+          </Text>
         }
+      />
+
+      <Button
+        title="BACK TO DASHBOARD"
+        color={PRIMARY_COLOR}
+        onPress={() => navigation.navigate('Dashboard', { username, role })}
       />
     </View>
   );
-};
+}
 
-/* ────────── 样式 ────────── */
+/* ───── 样式 ───── */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  heading: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  infoBox: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 12,
-  },
-  infoTxt: { fontSize: 16, marginBottom: 4, fontWeight: '500', color: '#333' },
+  heading:   { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  infoBox:   { paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee', marginBottom: 12 },
+  infoTxt:   { fontSize: 16, marginBottom: 4, fontWeight: '500', color: '#333' },
 
-  card: {
-    padding: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    backgroundColor: '#f8f8f8',
-  },
-  label: { fontSize: 14, fontWeight: 'bold', marginTop: 6 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    padding: 6,
-    marginTop: 4,
-    backgroundColor: '#fff',
-  },
-  radioRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginVertical: 8,
-  },
-  radioBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderRadius: 4,
-  },
-  radioSelected: { backgroundColor: '#007bff', borderColor: '#007bff' },
-  radioTxt: { color: '#333' },
-  radioTxtSel: { color: '#fff', fontWeight: 'bold' },
+  card:      { padding: 12, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, marginBottom: 14, backgroundColor: '#f8f8f8' },
+  label:     { fontSize: 14, fontWeight: 'bold', marginTop: 6 },
+  input:     { borderWidth: 1, borderColor: '#ddd', borderRadius: 4, padding: 6, marginTop: 4, backgroundColor: '#fff' },
 
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 6,
-  },
+  radioRow:  { flexDirection: 'row', justifyContent: 'space-evenly', marginVertical: 8 },
+  radioBtn:  { flex: 1, paddingVertical: 8, borderWidth: 1, borderColor: PRIMARY_COLOR, borderRadius: 4, marginHorizontal: 4, alignItems: 'center' },
+  radioSel:  { backgroundColor: PRIMARY_COLOR },
+  radioTxt:  { color: PRIMARY_COLOR, fontWeight: '500' },
+  radioTxtSel:{ color: '#fff', fontWeight: '700' },
+
+  btnRow:    { flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginVertical: 6 },
+
+  statusBox: { padding: 6, borderRadius: 4, alignItems: 'center', marginBottom: 8, backgroundColor: STATUS_COLOR },
+  pending:   { backgroundColor: PENDING_COLOR },
+  statusTxt: { color: '#fff', fontWeight: 'bold' },
 });
-
-export default ViewRequestsScreen;
