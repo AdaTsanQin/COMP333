@@ -94,7 +94,7 @@ export default function DashboardScreen({ route, navigation }) {
         <>
           <BigButton
             title="Create Request"
-            onPress={() => navigation.navigate('CreateRequestScreen', { username, role })}
+            onPress={() => navigation.navigate('SearchScreen', { username, role })}
           />
           <BigButton
             title="View Request"

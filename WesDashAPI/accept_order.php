@@ -23,13 +23,14 @@ if (!isset($_SESSION['username'])) {
 }
 $loggedInUser = $_SESSION['username'];
 
-/* ═══════════════ GET: ═══════════════ */
+/* ─────────────── GET ─────────────── */
 if ($method === 'GET') {
   $sql = "
     SELECT *
       FROM requests
      WHERE (status='pending'  AND username   != ?)
-        OR (status='accepted' AND accepted_by = ?)";
+        OR (status='accepted' AND accepted_by = ?)
+     ORDER BY id DESC";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param('ss', $loggedInUser, $loggedInUser);
   $stmt->execute();
@@ -37,13 +38,13 @@ if ($method === 'GET') {
   exit;
 }
 
-/* ═══════════════ PUT: Drop-off ═══════════════ */
+/* ─────────────── PUT ─────────────── */
 if ($method === 'PUT') {
   $in = json_decode(file_get_contents('php://input'), true);
   if (empty($in['id'])) { echo json_encode(['success'=>false,'message'=>'Missing id']); exit; }
   $id = (int)$in['id'];
 
-  /* —— 1. Drop-off —— */
+  /* 1. Rider 标记已送达 → completed */
   if (($in['action'] ?? '') === 'drop_off') {
     $stmt = $conn->prepare(
       "UPDATE requests SET status='completed'
@@ -63,11 +64,12 @@ if ($method === 'PUT') {
     exit;
   }
 
+  /* 2. Rider 接单：pending → accepted */
   $conn->begin_transaction();
 
   /* 2-a 锁定订单 */
   $sel = $conn->prepare(
-    "SELECT username,item,quantity
+    "SELECT username
        FROM requests
       WHERE id=? AND status='pending' AND username!=?
       FOR UPDATE");
@@ -79,23 +81,13 @@ if ($method === 'PUT') {
     echo json_encode(['success'=>false,'message'=>'Order not available']); exit;
   }
 
-  /* 2-b 扣库存 */
-  $updShop = $conn->prepare(
-    "UPDATE Wesshop SET number = number-? WHERE name=? AND number>=?");
-  $updShop->bind_param('iss', $order['quantity'], $order['item'], $order['quantity']);
-  $updShop->execute();
-  if ($updShop->affected_rows===0) {
-    $conn->rollback();
-    echo json_encode(['success'=>false,'message'=>'Insufficient stock']); exit;
-  }
-
-  /* 2-c 更新订单状态 */
-  $updReq = $conn->prepare(
+  /* 2-b 更新订单状态 */
+  $upd = $conn->prepare(
     "UPDATE requests SET status='accepted', accepted_by=? WHERE id=?");
-  $updReq->bind_param('si', $loggedInUser, $id);
-  $updReq->execute();
+  $upd->bind_param('si', $loggedInUser, $id);
+  $upd->execute();
 
-  /* 2-d 创建聊天室 */
+  /* 2-c 创建聊天室 */
   $chat = $conn->prepare(
     "INSERT INTO chat_rooms (order_id,user_name,dasher_name) VALUES (?,?,?)");
   $chat->bind_param('iss', $id, $order['username'], $loggedInUser);
@@ -106,11 +98,12 @@ if ($method === 'PUT') {
   echo json_encode([
     'success'=>true,
     'message'=>'Order accepted successfully.',
-    'room_id'=>$roomId   // ★ 前端跳转 Chat 用这个
+    'room_id'=>$roomId
   ]);
   exit;
 }
 
-/* ---------- 其余方法 ---------- */
-echo json_encode(['success'=>false,'message'=>"Invalid request method: $method"]);
+/* ─────────────── 其它 ─────────────── */
+echo json_encode(['success'=>false,'message'=>'Invalid request method']);
 $conn->close();
+?>
