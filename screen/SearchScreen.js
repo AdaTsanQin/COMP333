@@ -1,174 +1,86 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList, ActivityIndicator, Image, Alert, TouchableOpacity } from 'react-native';
+import {
+  View, Text, TextInput, Button, StyleSheet, FlatList,
+  ActivityIndicator, Image, Alert, TouchableOpacity
+} from 'react-native';
 
-const SearchScreen = ({ navigation, route }) => {
-  // Get username and role if passed from Dashboard
+export default function SearchScreen({ navigation, route }) {
   const { username, role } = route.params || {};
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [query, setQuery]    = useState('');
+  const [results, setResults]= useState([]);
+  const [loading, setLoading]= useState(false);
+  const [cart, setCart]      = useState([]);
+  const [tapLock, setTapLock]= useState(false);      // 防止连点
 
+  /* ---------- search ---------- */
   const handleSearch = async () => {
     if (!query.trim()) return;
     setLoading(true);
-
-    // Buildd & log the exact URL
-    const params = [
-      `term=${encodeURIComponent(query)}`,
-      //'limit=5',
-      'fulfillment=aisle'
-    ].join('&');
-    const url = `http://10.0.2.2/WesDashAPI/products.php?${params}`;
-    console.log('Calling URL:', url);
-
     try {
-      // make request request
-      const response = await fetch(url);
-      // Log the HTTP status
-      console.log('Response status:', response.status);
-
-      // get the raw text (for debugging)
-      const text = await response.text();
-      console.log('Raw products.php response:', JSON.stringify(text));
-
-      // parse JSON
-      if (!text) {
-        Alert.alert('Error', 'Empty response from server');
-        return;
-      }
-      
-      // trimming to remove any HTML
-      let cleanText = text.trim();
-      // Remove any HTML-like content that might be at the beginning - for annoying "unexpected character: <" errors
-      if (cleanText.indexOf('{') > 0) {
-        cleanText = cleanText.substring(cleanText.indexOf('{'));
-      }
-      
-      try {
-        const data = JSON.parse(cleanText);
-        // Check if data has the expected structure
-        if (data && data.data) {
-          // standard Kroger API response format with a "data" array
-          setResults(data.data);
-        } else if (Array.isArray(data)) {
-          // If it's already an array, use it directly
-          setResults(data);
-        } else {
-          // For any other structure, just wrap it in an array
-          setResults([data]);
-        }
-      } catch (parseError) {
-        console.error('JSON Parse error:', parseError);
-        Alert.alert('Error', 'Invalid response format from server');
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-      Alert.alert('Error', err.message);
-    } finally {
-      setLoading(false);
-    }
+      const url = `http://10.0.2.2/WesDashAPI/products.php?term=${encodeURIComponent(
+        query
+      )}&fulfillment=aisle`;
+      const raw  = await (await fetch(url)).text();
+      const json = JSON.parse(raw.slice(raw.indexOf('{')));
+      setResults(json.data || []);
+    } catch (e) {
+      Alert.alert('Error', e.message);
+    } finally { setLoading(false); }
   };
 
-  const handleItemPress = (item) => {
-    // Get product details to pass to CreateRequestScreen
-    const productName = item.description || 'Product';
-    const brand = item.brand || '';
-    const size = item.items && item.items[0]?.size ? item.items[0].size : '';
-    
-    // Find a thumbnail image URL if available
-    let thumbnailUrl = null;
-    if (item.images && Array.isArray(item.images)) {
-      const frontImage = item.images.find(img => img.featured === true || img.perspective === 'front');
-      if (frontImage && frontImage.sizes) {
-        const thumbnailSize = frontImage.sizes.find(size => size.size === 'thumbnail' || size.size === 'small');
-        if (thumbnailSize) {
-          thumbnailUrl = thumbnailSize.url;
-        }
-      }
-    }
-    
-    // Create a formatted product name with brand and size if available
-    let formattedName = productName;
-    if (brand) {
-      formattedName = `${brand} - ${formattedName}`;
-    }
-    if (size) {
-      formattedName = `${formattedName} (${size})`;
-    }
-    
-    // Navigate to CreateRequestScreen with the product data and user info
-    navigation.navigate('CreateStoreRequestScreen', {
-      productData: {
-        item_name: formattedName,
-        image_url: thumbnailUrl,
-        product_id: item.productId || item.upc,
-      },
-      username, // Pass username from Dashboard if available
-      role      // Pass role from Dashboard if available
-    });
+  /* ---------- add to cart ---------- */
+  const addToCart = (item) => {
+    if (tapLock) return;
+    setTapLock(true);
+    setCart(prev => [...prev, item]);
+    Alert.alert('Added', `${item.description} added to cart`);
+    setTimeout(()=>setTapLock(false),150);
   };
 
-  const renderItem = ({ item }) => {
-    // Find a thumbnail image from the Kroger API response format
-    let thumbnail = null;
-    
-    // Based on the Kroger API response format
-    if (item.images && Array.isArray(item.images)) {
-      // First try to find the featured image or front perspective
-      const frontImage = item.images.find(img => 
-        img.featured === true || img.perspective === 'front'
-      );
-      
-      if (frontImage && frontImage.sizes) {
-        // Get the thumbnail size
-        const thumbnailSize = frontImage.sizes.find(size => size.size === 'thumbnail');
-        if (thumbnailSize) {
-          thumbnail = thumbnailSize.url;
-        }
-      }
-      
-      // If no featured/front image found, use the first image with a thumbnail
-      if (!thumbnail && item.images.length > 0) {
-        for (const img of item.images) {
-          if (img.sizes) {
-            const thumbnailSize = img.sizes.find(size => size.size === 'thumbnail');
-            if (thumbnailSize) {
-              thumbnail = thumbnailSize.url;
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // Get product details
-    const productName = item.description || 'Product';
-    const brand = item.brand || '';
-    const size = item.items && item.items[0]?.size ? item.items[0].size : '';
-    
-    return (
-      <TouchableOpacity 
-        style={styles.card}
-        onPress={() => handleItemPress(item)}
-        activeOpacity={0.7}
-      >
-        {thumbnail ? (
-          <Image source={{ uri: thumbnail }} style={styles.thumb} />
-        ) : (
-          <View style={[styles.thumb, { backgroundColor: '#eee' }]} />
-        )}
-        <View style={styles.info}>
-          <Text style={styles.title}>{productName}</Text>
-          <Text style={styles.subtitle}>{brand}</Text>
-          {size ? <Text style={styles.size}>{size}</Text> : null}
-          <Text style={styles.addText}>Tap to add to order →</Text>
-        </View>
-      </TouchableOpacity>
-    );
+  const imgUrl = (itm)=>{
+    if(!itm.images?.length) return null;
+    const pick = itm.images.find(i=>i.featured||i.perspective==='front')||itm.images[0];
+    return pick.sizes?.[0]?.url ?? null;
   };
 
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card} activeOpacity={0.7}
+      onPress={()=>addToCart(item)}
+    >
+      {imgUrl(item)
+        ? <Image source={{ uri: imgUrl(item) }} style={styles.thumb}/>
+        : <View style={[styles.thumb,{backgroundColor:'#ddd'}]}/>}
+      <View style={styles.info}>
+        <Text style={styles.title}>{item.description}</Text>
+        <Text style={styles.subtitle}>{item.brand}</Text>
+        {item.items?.[0]?.size && <Text style={styles.size}>{item.items[0].size}</Text>}
+        <Text style={styles.addText}>Tap to add to cart →</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  /* ---------- nav helpers ---------- */
+  const goCheckout   = () => navigation.navigate('Checkout',   { cart, username, role });
+  const goCustom     = () => navigation.navigate('CustomOrder',{ username, role });
+
+  /* ---------- UI ---------- */
   return (
     <View style={styles.container}>
+
+      {/* 说明文字 */}
+      <Text style={styles.h1}>Enter the product you want to buy.</Text>
+      <Text style={styles.h2}>
+        If it isn’t listed <Text style={{fontWeight:'400'}}>or you want to specify the store</Text>,{'\n'}
+        you can create a custom order.
+      </Text>
+
+      {/* 创建自定义订单 */}
+      <TouchableOpacity style={styles.customBtn} onPress={goCustom} activeOpacity={0.85}>
+        <Text style={styles.customTxt}>CREATE CUSTOM ORDER</Text>
+      </TouchableOpacity>
+
+      {/* 搜索区域 */}
       <View style={styles.searchBar}>
         <TextInput
           style={styles.input}
@@ -176,56 +88,69 @@ const SearchScreen = ({ navigation, route }) => {
           value={query}
           onChangeText={setQuery}
         />
-        <Button title="Search" onPress={handleSearch} />
+        <Button title="Search" onPress={handleSearch}/>
       </View>
 
+      {/* 结果 / 加载 */}
       {loading ? (
-        <ActivityIndicator size="large" style={styles.loader} />
+        <ActivityIndicator size="large" style={{ marginTop:20 }}/>
       ) : (
         <FlatList
           data={results}
-          keyExtractor={(item, index) => item.productId || item.upc || `${item.description || 'unknown'}-${item.brand || 'unknown'}-${index}`}
+          keyExtractor={(it,idx)=>it.productId||it.upc||`${idx}`}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>No products found. Try a different search term.</Text>
-          }
+          ListEmptyComponent={<Text style={styles.emptyTxt}>No products found.</Text>}
         />
+      )}
+
+      {/* 购物车 */}
+      {cart.length>0 && (
+        <TouchableOpacity style={styles.checkoutBtn} onPress={goCheckout} activeOpacity={0.85}>
+          <Text style={styles.checkoutTxt}>Checkout ({cart.length})</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
-};
+}
 
+/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  searchBar: { flexDirection: 'row', padding: 10 },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 4, marginRight: 10, paddingHorizontal: 8 },
-  loader: { marginTop: 20 },
-  list: { padding: 10 },
-  card: { 
-    flexDirection: 'row', 
-    marginBottom: 15, 
-    backgroundColor: '#f8f8f8', 
-    borderRadius: 8, 
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
-  },
-  thumb: { width: 100, height: 100, backgroundColor: '#eee' },
-  info: { flex: 1, padding: 12 },
-  title: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#555', marginBottom: 4 },
-  size: { fontSize: 13, color: '#777', fontStyle: 'italic' },
-  emptyText: { textAlign: 'center', padding: 20, color: '#666' },
-  addText: { 
-    fontSize: 13, 
-    color: '#3498db', 
-    marginTop: 8,
-    fontWeight: '500',
-  },
-});
+  container:{ flex:1, backgroundColor:'#fff' },
 
-export default SearchScreen;
+  h1:{ fontSize:18, fontWeight:'700', textAlign:'center', marginTop:12 },
+  h2:{ fontSize:16, fontWeight:'700', textAlign:'center', marginTop:4, marginBottom:10 },
+
+  /* 自定义订单按钮 */
+  customBtn:{
+    alignSelf:'center',
+    backgroundColor:'#673ab7',
+    borderRadius:24,
+    paddingHorizontal:24,
+    paddingVertical:10,
+    marginBottom:12,
+    elevation:3
+  },
+  customTxt:{ color:'#fff', fontSize:15, fontWeight:'700' },
+
+  searchBar:{ flexDirection:'row', paddingHorizontal:10, paddingBottom:8 },
+  input:{ flex:1, borderWidth:1, borderColor:'#ccc', borderRadius:4,
+          marginRight:10, paddingHorizontal:8 },
+
+  list:{ padding:10 },
+  card:{ flexDirection:'row', backgroundColor:'#f8f8f8', borderRadius:8,
+         marginBottom:15, overflow:'hidden', elevation:2 },
+  thumb:{ width:100, height:100 },
+  info:{ flex:1, padding:12 },
+  title:{ fontSize:16, fontWeight:'bold' },
+  subtitle:{ fontSize:14, color:'#555', marginTop:2 },
+  size:{ fontSize:13, color:'#777', fontStyle:'italic', marginTop:2 },
+  addText:{ fontSize:13, color:'#3498db', marginTop:8, fontWeight:'500' },
+
+  emptyTxt:{ textAlign:'center', marginTop:40, color:'#666' },
+
+  checkoutBtn:{ position:'absolute', right:25, bottom:25,
+                backgroundColor:'#e91e63', borderRadius:28,
+                paddingHorizontal:20, paddingVertical:12, elevation:4 },
+  checkoutTxt:{ color:'#fff', fontSize:16, fontWeight:'700' },
+});

@@ -1,82 +1,94 @@
 <?php
-if (isset($_GET['PHPSESSID'])) {
-    session_id($_GET['PHPSESSID']);
-}
+if (isset($_GET['PHPSESSID'])) session_id($_GET['PHPSESSID']);
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
 
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "app-db";
-
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
+try {
+    $pdo = new PDO(
+        'mysql:host=localhost;dbname=app-db;charset=utf8mb4',
+        'root',
+        '',
+        [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+} catch (PDOException $e) {
+    echo json_encode(['error' => 'DB connect error']); 
+    exit;
 }
 
-// Must login first
-if (!isset($_SESSION['username'])) {
-    die(json_encode(["error" => "Please log in before creating a request."]));
+if (empty($_SESSION['username'])) {
+    echo json_encode(['error' => 'Please log in before creating a request.']); 
+    exit;
+}
+$username = $_SESSION['username'];
+
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) {
+    echo json_encode(['error' => 'Invalid JSON']); 
+    exit;
 }
 
-// Check if request is JSON or form data
-$inputData = json_decode(file_get_contents("php://input"), true);
+$dropOff = trim($input['drop_off_location'] ?? '');
+if ($dropOff === '') {
+    echo json_encode(['error' => 'drop_off_location required']); 
+    exit;
+}
 
-// Debugging
-//file_put_contents("debug_log.txt", print_r($inputData, true), FILE_APPEND);
-//file_put_contents("debug_log.txt", print_r($_POST, true), FILE_APPEND);
+$deliverySpeed = $input['delivery_speed'] ?? 'common';
+$now           = date('Y-m-d H:i:s');
+$status        = 'pending';
 
-
-if ($inputData) {
-    $item            = $inputData['item'] ?? '';
-    $quantity        = isset($inputData['quantity']) 
-                       ? (int)$inputData['quantity'] 
-                       : 1;              // ← default if missing
-    $dropOffLocation = $inputData['drop_off_location'] ?? '';
-    $deliverySpeed   = $inputData['delivery_speed'] ?? 'common';
+if (!empty($input['items'])) {
+    $lines = [];
+    $total = 0;
+    foreach ($input['items'] as $row) {
+        $name = trim($row['item'] ?? '');
+        if ($name === '') continue;
+        $qty  = max(1, (int)($row['quantity'] ?? 1));
+        $lines[] = "{$qty}× {$name}";
+        $total  += $qty;
+    }
+    if (!$lines) {
+        echo json_encode(['error' => 'No valid items']); 
+        exit;
+    }
+    $itemField = implode('; ', $lines);
+    $qtyField  = $total;
+} elseif (!empty($input['item'])) {
+    $itemField = trim($input['item']);
+    $qtyField  = max(1, (int)($input['quantity'] ?? 1));
 } else {
-    // fallback to form—also grab quantity
-    $item            = $_POST['item'] ?? '';
-    $quantity        = isset($_POST['quantity']) 
-                       ? (int)$_POST['quantity'] 
-                       : 1;
-    $dropOffLocation = $_POST['drop_off_location'] ?? '';
-    $deliverySpeed   = $_POST['delivery_speed'] ?? 'common';
+    echo json_encode(['error' => 'items[] or item required']); 
+    exit;
 }
 
-// Validate data
-if (empty($item) || empty($dropOffLocation)) {
-    die(json_encode(["error" => "Item and Drop-off location cannot be empty!"]));
+$sql = "INSERT INTO requests
+        (username, item, quantity, drop_off_location,
+         delivery_speed, status, created_at)
+        VALUES (:u, :it, :q, :loc, :spd, :st, :dt)";
+$st  = $pdo->prepare($sql);
+
+try {
+    $st->execute([
+        ':u'   => $username,
+        ':it'  => $itemField,
+        ':q'   => $qtyField,
+        ':loc' => $dropOff,
+        ':spd' => $deliverySpeed,
+        ':st'  => $status,
+        ':dt'  => $now
+    ]);
+    echo json_encode([
+        'success'    => true,
+        'request_id' => $pdo->lastInsertId()
+    ]);
+} catch (PDOException $e) {
+    echo json_encode(['error' => 'Insert failed']);
 }
-
-$status    = 'pending';
-$createdAt = date('Y-m-d H:i:s');
-$username  = $_SESSION['username'];
-
-$sql = "INSERT INTO requests (username, item, quantity, drop_off_location, delivery_speed, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die(json_encode(["error" => "Prepare failed: " . $conn->error]));
-}
-
-$stmt->bind_param("ssissss", $username, $item, $quantity, $dropOffLocation, $deliverySpeed, $status, $createdAt);
-
-if ($stmt->execute()) {
-    echo json_encode(["success" => "Request created successfully!"]);
-} else {
-    echo json_encode(["error" => "Insert failed: " . $stmt->error]);
-}
-
-$stmt->close();
-$conn->close();
-exit();
 ?>
