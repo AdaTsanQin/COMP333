@@ -27,8 +27,10 @@ const AcceptOrderScreen = ({ route, navigation }) => {
       const resp = await fetch(`${BASE_URL}/accept_order.php`, {
         method: 'GET',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json',
-                   Cookie: `PHPSESSID=${sessionID}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sessionID}`,
+        },
       });
       const data = await resp.json();
       data.success
@@ -103,7 +105,13 @@ const AcceptOrderScreen = ({ route, navigation }) => {
     }
   };
 
-  /* ---------- single card ---------- */
+  /* ---------- 坐标合法性工具 ---------- */
+  const hasValidCoords = (loc = '') => {
+    const parts = loc.split(',').map(s => parseFloat(s.trim()));
+    return parts.length === 2 && parts.every(n => Number.isFinite(n));
+  };
+
+  /* ---------- 单条卡片 ---------- */
   const OrderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.label}>Item:</Text>
@@ -131,7 +139,6 @@ const AcceptOrderScreen = ({ route, navigation }) => {
         <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
       </View>
 
-      {/* buttons */}
       {item.status === 'pending' && (
         <Button title="ACCEPT" onPress={() => handleAcceptOrder(item.id)} />
       )}
@@ -150,14 +157,27 @@ const AcceptOrderScreen = ({ route, navigation }) => {
             />
           )}
 
-          <Button
-            title="NAVIGATE"
-            onPress={() =>
-              navigation.navigate('NavigationToLocationScreen', {
-                dropOffLocation: item.drop_off_location,
-              })
-            }
-          />
+          {hasValidCoords(item.drop_off_location) ? (
+            <Button
+              title="NAVIGATE"
+              onPress={() =>
+                navigation.navigate('NavigationToLocationScreen', {
+                  dropOffLocation: item.drop_off_location,
+                })
+              }
+            />
+          ) : (
+            <Button
+              title="NO MAP"
+              color="#999"
+              onPress={() =>
+                Alert.alert(
+                  'No coordinates',
+                  'This order has no valid map location.'
+                )
+              }
+            />
+          )}
         </>
       )}
     </View>
@@ -204,4 +224,3 @@ const styles = StyleSheet.create({
 });
 
 export default AcceptOrderScreen;
-
