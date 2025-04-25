@@ -137,6 +137,7 @@ if ($httpCode !== 200) {
 
 // Relay Kroger's successful response
 http_response_code(200);
+
 echo $response;
 
 ?>

@@ -11,6 +11,12 @@ export default function OrderDetailsScreen({ navigation, route }) {
   const [speed, setSpeed]   = useState('common');
   const [dropOff, setDrop]  = useState('');
   const [marker, setMarker] = useState(null);
+  
+  // Calculate total price
+  const totalPrice = cart.reduce((sum, item) => {
+    const itemPrice = item.items?.[0]?.price?.regular ? parseFloat(item.items[0].price.regular) : 0;
+    return sum + itemPrice;
+  }, 0).toFixed(2);
 
   const [region, setRegion] = useState({
     latitude: 41.5556,
@@ -34,12 +40,14 @@ export default function OrderDetailsScreen({ navigation, route }) {
       items: cart.map(c=>({
         item: c.description,
         quantity: 1,
-        product_id: c.productId || c.upc || ''
+        product_id: c.productId || c.upc || '',
+        price: c.items?.[0]?.price?.regular || '0.00'
       })),
       drop_off_location: dropOff,
       delivery_speed: speed,
       lat: marker.latitude,
       lng: marker.longitude,
+      est_price: totalPrice
     };
     try {
       const r = await fetch('http://10.0.2.2/WesDashAPI/create_requests.php',{
@@ -63,8 +71,10 @@ export default function OrderDetailsScreen({ navigation, route }) {
       {/* Items */}
       <Text style={styles.header}>Your Items</Text>
       {cart.map((it,i)=>(
-        <Text key={i} style={styles.itemTxt}>• {it.description}</Text>
+        <Text key={i} style={styles.itemTxt}>• {it.description} {it.items?.[0]?.price?.regular ? `- $${it.items[0].price.regular}` : ''}</Text>
       ))}
+      
+      <Text style={styles.totalPrice}>Total Price: ${totalPrice}</Text>
 
       {/* Speed */}
       <Text style={styles.label}>Delivery speed</Text>
@@ -109,6 +119,7 @@ const styles = StyleSheet.create({
   container:{ padding:16, backgroundColor:'#fff' },
   header:{ fontSize:20, fontWeight:'700', marginBottom:6 },
   itemTxt:{ fontSize:15, marginVertical:2 },
+  totalPrice:{ fontSize:18, fontWeight:'700', color:'#2e8b57', marginTop:16, marginBottom:8 },
 
   label:{ fontSize:16, fontWeight:'600', marginTop:16, marginBottom:4 },
   input:{ borderWidth:1, borderColor:'#aaa', borderRadius:5, padding:8 },
