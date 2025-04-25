@@ -417,56 +417,72 @@ WesDashAPI/
 | 3.  | Run the schema: |
 
 CREATE TABLE users (
-  username   VARCHAR(255) PRIMARY KEY,
-  password   VARCHAR(255) NOT NULL,
-  is_deleted TINYINT(1) DEFAULT 0,
-  role       ENUM('User','Dasher') DEFAULT 'User'
-);
-
+    username   VARCHAR(255) PRIMARY KEY,
+    password   VARCHAR(255) NOT NULL,
+    is_deleted TINYINT(1)   NOT NULL DEFAULT 0,
+    role       ENUM('User','Dasher') NOT NULL DEFAULT 'User',
+    balance    INT          NOT NULL DEFAULT 0     
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE requests (
-id                INT AUTO_INCREMENT PRIMARY KEY,
-username          VARCHAR(255)   NOT NULL,
-item              VARCHAR(255)   NOT NULL,
-quantity          INT            NOT NULL DEFAULT 1,
-drop_off_location VARCHAR(255)   NOT NULL,
-delivery_speed    ENUM('urgent','common') DEFAULT 'common',
-status            ENUM('pending','accepted','completed','confirmed') DEFAULT 'pending',
-created_at        DATETIME       NOT NULL,
-accepted_by       VARCHAR(255)   DEFAULT NULL,
-CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username),
-is_custom      TINYINT(1)      NOT NULL DEFAULT 0,
-est_price      DECIMAL(10,2)   NULL       DEFAULT NULL,
-purchase_mode  VARCHAR(16)     NULL       DEFAULT NULL,
-total_price DECIMAL(10,2) NOT NULL DEFAULT 0
-);
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    username          VARCHAR(255)  NOT NULL,
+    item              VARCHAR(255)  NOT NULL,
+    quantity          INT           NOT NULL DEFAULT 1,
+    drop_off_location VARCHAR(255)  NOT NULL,
+    delivery_speed    ENUM('urgent','common') NOT NULL DEFAULT 'common',
+    status            ENUM('pending','accepted','completed','confirmed')
+                     NOT NULL DEFAULT 'pending',
+    is_custom         TINYINT(1)    NOT NULL DEFAULT 0,
+    est_price         DECIMAL(10,2) NULL,
+    purchase_mode     VARCHAR(16)   NULL,
+    total_price       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_by       VARCHAR(255)  NULL,
 
-New-database update for testing:
--- 1) users
-ALTER TABLE users
-ADD COLUMN stripe_customer_id     VARCHAR(255) NULL,
-ADD COLUMN stripe_account_id      VARCHAR(255) NULL;
+    CONSTRAINT fk_requests_user
+      FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
 
--- 2) request
-ALTER TABLE requests
-ADD COLUMN payment_intent_id      VARCHAR(255) NULL,
-ADD COLUMN payment_status         ENUM('pending','authorized','captured','failed')
-DEFAULT 'pending';
+    INDEX idx_status(status),
+    INDEX idx_dasher(accepted_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3) tips
+CREATE TABLE chat_rooms (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    order_id    INT          NOT NULL,
+    user_name   VARCHAR(255) NOT NULL,
+    dasher_name VARCHAR(255) NOT NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    closed_at   DATETIME     NULL,
+    INDEX(order_id),
+    CONSTRAINT fk_room_req
+      FOREIGN KEY (order_id) REFERENCES requests(id)
+      ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE chat_messages (
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    room_id  INT          NOT NULL,
+    sender   VARCHAR(255) NOT NULL,
+    message  TEXT         NOT NULL,
+    sent_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_room_time (room_id, sent_at),
+    CONSTRAINT fk_msg_room
+      FOREIGN KEY (room_id) REFERENCES chat_rooms(id)
+      ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE tips (
-id                  INT AUTO_INCREMENT PRIMARY KEY,
-request_id          INT     NOT NULL,
-tip_intent_id       VARCHAR(255) NOT NULL,
-amount              INT     NOT NULL,      -- stored in cents
-currency            CHAR(3) NOT NULL       DEFAULT 'usd',
-status              ENUM('pending','succeeded','failed')
-NOT NULL DEFAULT 'pending',
-created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-CONSTRAINT fk_tips_request FOREIGN KEY (request_id)
-REFERENCES requests(id)
-ON DELETE CASCADE
-);
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    request_id INT  NOT NULL,
+    amount     INT  NOT NULL,        
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_tip_req
+      FOREIGN KEY (request_id) REFERENCES requests(id)
+      ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 | Step | Command / Action |
 |------|------------------|
@@ -506,19 +522,29 @@ Time: 00:00.x, Memory: 8.00 MB
 OK (4 tests, 4 assertions)
 
 
-#### Before running, need to run following command in terminal:
-npm install @react-native-picker/picker
-npm install react-native-maps (not sure weather this is correct)
-expo install react-native-maps (this is working)
-npm install react-native-maps react-native-google-places-autocomplete
-npm install @stripe/stripe-react-native
+## Problem2：AI
 
-In backend, run:
-cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI
-composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction
-composer require stripe/stripe-php
-Create a secrets.php under htdocs with following content: 
-<?php
-$stripeSecretKey = 'Your_Stripe_Secret_Key'; (Not sure weather need to change key)
 
+
+
+
+
+
+
+## problem3:PROJECT
+
+#### 1. Switch to the main branch
+git checkout main
+
+#### 2. copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
+cp -r WesDashAPI /Applications/XAMPP/xamppfiles/htdocs/
+
+#### 3. Open the project in Android Studio
+choose open→ COMP333(main branch folder)
+
+#### 4. Install JavaScript dependencies
+npm install
+
+#### 5. Launch the app with Expo
+npm run android  
 
