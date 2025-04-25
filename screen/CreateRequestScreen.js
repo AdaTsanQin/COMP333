@@ -13,28 +13,24 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
-/* ─────────────────────────────────────────────────────── */
 const CreateRequestScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
 
-  /* ---------- state ---------- */
-  const [items,        setItems]        = useState([]);
+  const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState('');
-  const [quantity,     setQuantity]     = useState('1');
-  const [dropOff,      setDropOff]      = useState('');
-  const [speed,        setSpeed]        = useState('common');
-  const [sessionID,    setSessionID]    = useState(null);
+  const [quantity, setQuantity] = useState('1');
+  const [dropOff, setDropOff] = useState('');
+  const [speed, setSpeed] = useState('common');
+  const [sessionID, setSessionID] = useState(null);
 
-  /* map */
   const [region, setRegion] = useState({
-    latitude:       41.5556,     // Wesleyan U.
-    longitude:     -72.6558,
-    latitudeDelta:  0.02,
+    latitude: 41.5556,
+    longitude: -72.6558,
+    latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   });
   const [marker, setMarker] = useState(null);
 
-  /* ---------- fetch items ---------- */
   useEffect(() => {
     (async () => {
       const sid = await AsyncStorage.getItem('PHPSESSID');
@@ -58,22 +54,39 @@ const CreateRequestScreen = ({ route, navigation }) => {
     })();
   }, []);
 
-  /* ---------- map tap ---------- */
   const handleMapPress = (e) => {
     const coord = e.nativeEvent.coordinate;
     setMarker(coord);
     setDropOff(`${coord.latitude}, ${coord.longitude}`);
   };
 
-  /* ---------- submit ---------- */
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!selectedItem || !dropOff) {
       Alert.alert('Error', 'Item and drop-off location are required.');
       return;
     }
 
-    const row  = items.find((i) => i.name === selectedItem);
-    const qty  = parseInt(quantity, 10) || 1;
+    const feeRate = speed === 'common' ? 0.05 : 0.20;
+    Alert.alert(
+      'Delivery Fee',
+      `You selected ${speed} delivery. A ${feeRate * 100}% fee will be applied.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Proceed', onPress: () => submitOrder() },
+      ]
+    );
+  };
+
+  async function submitOrder() {
+    // find the item row (so we can get its per‐unit price)
+    const row = items.find((i) => i.name === selectedItem);
+    const qty = parseInt(quantity, 10) || 1;
+
+    // per‐unit price; adjust field name if yours differs
+    const estPrice = row?.price ?? 0;
+
+    // total price = unit price × quantity
+    const totalPrice = parseFloat((estPrice * qty).toFixed(2));
 
     const proceed = async () => {
       try {
@@ -89,12 +102,16 @@ const CreateRequestScreen = ({ route, navigation }) => {
             quantity: qty,
             drop_off_location: dropOff,
             delivery_speed: speed,
+            est_price: estPrice,
+            total_price: totalPrice,
           }),
         });
         const data = await resp.json();
 
         if (resp.ok && data.success) {
-          Alert.alert('Success', data.success, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+          Alert.alert('Success', `Request created (total: $${data.total_price})`, [
+            { text: 'OK', onPress: () => navigation.goBack() }
+          ]);
         } else {
           throw new Error(data.error || 'Failed to create request.');
         }
@@ -103,6 +120,7 @@ const CreateRequestScreen = ({ route, navigation }) => {
       }
     };
 
+    // if you still want the “quantity exceeds stock” warning:
     if (row && qty > row.number) {
       Alert.alert(
         'Warning',
@@ -115,12 +133,10 @@ const CreateRequestScreen = ({ route, navigation }) => {
     } else {
       proceed();
     }
-  };
+  }
 
-  /* ---------- UI ---------- */
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-
       <View style={styles.infoBox}>
         <Text style={styles.infoTxt}>Logged in as: {username}</Text>
         <Text style={styles.infoTxt}>
@@ -128,7 +144,6 @@ const CreateRequestScreen = ({ route, navigation }) => {
         </Text>
       </View>
 
-      {/* item */}
       <Text style={styles.label}>Item:</Text>
       <Picker selectedValue={selectedItem} onValueChange={setSelectedItem}>
         {items.map((i) => (
@@ -140,7 +155,6 @@ const CreateRequestScreen = ({ route, navigation }) => {
         ))}
       </Picker>
 
-      {/* qty */}
       <Text style={styles.label}>Quantity:</Text>
       <TextInput
         style={styles.input}
@@ -149,7 +163,6 @@ const CreateRequestScreen = ({ route, navigation }) => {
         onChangeText={setQuantity}
       />
 
-      {/* location */}
       <Text style={styles.label}>Drop-off (lat, lng):</Text>
       <TextInput
         style={styles.input}
@@ -168,7 +181,6 @@ const CreateRequestScreen = ({ route, navigation }) => {
         {marker && <Marker coordinate={marker} />}
       </MapView>
 
-      {/* speed */}
       <Text style={styles.label}>Delivery Speed:</Text>
       <View style={styles.radioRow}>
         {['urgent', 'common'].map((s) => (
@@ -182,21 +194,19 @@ const CreateRequestScreen = ({ route, navigation }) => {
       </View>
 
       <Button title="Create Request" onPress={handleSubmit} />
-
     </ScrollView>
   );
 };
 
-/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  scroll:  { flex: 1 },
+  scroll: { flex: 1 },
   content: { padding: 20, backgroundColor: '#fff', flexGrow: 1 },
 
   infoBox: { marginBottom: 16, borderBottomWidth: 1, borderColor: '#eee', paddingBottom: 8 },
   infoTxt: { fontSize: 16, fontWeight: '500', color: '#333', marginBottom: 4 },
 
-  label:   { fontSize: 18, fontWeight: 'bold', marginTop: 12 },
-  input:   { borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 5, marginTop: 4 },
+  label: { fontSize: 18, fontWeight: 'bold', marginTop: 12 },
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 5, marginTop: 4 },
 
   radioRow: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 12 },
 

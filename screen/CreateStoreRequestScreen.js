@@ -1,77 +1,82 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from "react-native";
+// screen/CreateStoreRequestScreen.js
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  Image,
+} from "react-native";
 
 const CreateStoreRequestScreen = ({ navigation, route }) => {
-  // Check if product data was passed from SearchScreen
-  const productData = route.params?.productData;
-  
-  const [item, setItem] = useState(productData?.item_name || "");
+  // If you came via SearchScreen you might have productData
+  const productData = route.params?.productData ?? {};
+
+  const [item, setItem]                     = useState(productData.item_name || "");
   const [dropOffLocation, setDropOffLocation] = useState("");
-  const [deliverySpeed, setDeliverySpeed] = useState("common");
-  const [productImage, setProductImage] = useState(productData?.image_url || null);
+  const [deliverySpeed, setDeliverySpeed]   = useState("common");
+  const [productImage]                      = useState(productData.image_url || null);
 
-  const handleSubmit = async () => {
-    if (!item || !dropOffLocation) {
-      Alert.alert("Error", "Item and Drop-off Location cannot be empty!");
-      return;
-    }
-
+  // ── 1) This helper actually does the POST ────────────────────────
+  const proceedStoreRequest = async () => {
     try {
-      // Prepare request data, including product_id if available
+      // --- compute prices ---
+      // per-unit price from productData (default to 0 if missing)
+      const estPrice = parseFloat(productData.price) || 0.00;
+      // for a single-item store request, total = estPrice * 1
+      const totalPrice = parseFloat((estPrice * 1).toFixed(2));
+
       const requestData = {
         item,
         drop_off_location: dropOffLocation,
         delivery_speed: deliverySpeed,
+        est_price: estPrice,       // new
+        total_price: totalPrice    // new
       };
-      
-      // Add product_id if it was provided from the SearchScreen
-      if (productData?.product_id) {
+
+      if (productData.product_id) {
         requestData.product_id = productData.product_id;
       }
-      
-      // Add image_url if available
       if (productImage) {
         requestData.image_url = productImage;
       }
 
-      const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-        body: JSON.stringify(requestData),
-      });
+      const response = await fetch(
+        "http://10.0.2.2/WesDashAPI/create_requests.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(requestData),
+        }
+      );
 
       const text = await response.text();
       console.log("Raw response:", text);
 
+      let data;
       try {
-        const data = JSON.parse(text);
+        data = JSON.parse(text);
+      } catch {
+        return Alert.alert("Error", "Unexpected response from server.");
+      }
 
-        if (response.ok && data.success) {
-          // Get the route params from the current screen that might have the username and role
-          const { username, role } = route.params || {};
-          
-          Alert.alert("Success", data.success, [
-            {
-              text: "OK",
-              onPress: () => {
-                // If we have username and role, pass them back to Dashboard
-                if (username && role) {
-                  navigation.navigate("Dashboard", { username, role });
-                } else {
-                  navigation.navigate("Dashboard");
-                }
-              }
-            }
-          ]);
-        } else {
-          Alert.alert("Error", data.error || "Failed to create request.");
-        }
-      } catch (jsonError) {
-        console.error("JSON Parse Error:", jsonError);
-        Alert.alert("Error", "Unexpected response from server.");
+      if (response.ok && data.success) {
+        const { username, role } = route.params || {};
+        Alert.alert("Success", data.success, [
+          {
+            text: "OK",
+            onPress: () =>
+              navigation.navigate(
+                "Dashboard",
+                username && role ? { username, role } : {}
+              ),
+          },
+        ]);
+      } else {
+        Alert.alert("Error", data.error || "Failed to create request.");
       }
     } catch (error) {
       console.error("Request failed", error);
@@ -79,27 +84,51 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
     }
   };
 
+  // ── 2) Main submit handler shows fee alert ───────────────────────
+  const handleSubmit = () => {
+    if (!item.trim() || !dropOffLocation.trim()) {
+      return Alert.alert(
+        "Error",
+        "Item and Drop-off Location cannot be empty!"
+      );
+    }
+
+    const feeRate = deliverySpeed === "common" ? 0.05 : 0.20;
+    Alert.alert(
+      "Delivery Fee",
+      `You selected ${deliverySpeed.toUpperCase()} delivery. A ${
+        feeRate * 100
+      }% fee will be applied.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Proceed", onPress: proceedStoreRequest },
+      ]
+    );
+  };
+
+  // ── 3) UI ───────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
-      {/* Show product image if available */}
       {productImage && (
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: productImage }} 
-            style={styles.productImage} 
+          <Image
+            source={{ uri: productImage }}
+            style={styles.productImage}
             resizeMode="contain"
           />
-          {productData?.product_id && (
-            <Text style={styles.productId}>Product ID: {productData.product_id}</Text>
+          {productData.product_id && (
+            <Text style={styles.productId}>
+              Product ID: {productData.product_id}
+            </Text>
           )}
         </View>
       )}
 
       <Text style={styles.label}>Item:</Text>
-      <TextInput 
-        style={styles.input} 
-        value={item} 
-        onChangeText={setItem} 
+      <TextInput
+        style={styles.input}
+        value={item}
+        onChangeText={setItem}
         placeholder="Enter item name"
       />
 
@@ -108,7 +137,7 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
         style={styles.input}
         value={dropOffLocation}
         onChangeText={setDropOffLocation}
-        placeholder="Enter delivery location (e.g., Fauver, Butts, Clark)"
+        placeholder="e.g. Fauver, Butts, Clark"
       />
 
       <Text style={styles.label}>Delivery Speed:</Text>
@@ -126,9 +155,9 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button 
-          title="Create Request" 
-          onPress={handleSubmit} 
+        <Button
+          title="Create Request"
+          onPress={handleSubmit}
           color="#3498db"
         />
       </View>
@@ -137,17 +166,17 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 20, 
-    backgroundColor: "#fff" 
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
   },
   imageContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 15,
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     borderRadius: 8,
   },
   productImage: {
@@ -157,13 +186,13 @@ const styles = StyleSheet.create({
   },
   productId: {
     fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
+    color: "#666",
+    fontStyle: "italic",
   },
-  label: { 
-    fontSize: 18, 
-    fontWeight: "bold", 
-    marginTop: 10 
+  label: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
   },
   input: {
     borderWidth: 1,
@@ -172,14 +201,15 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderRadius: 5,
   },
-  radioGroup: { 
-    flexDirection: "row", 
-    justifyContent: "space-around", 
-    marginVertical: 15 
+  radioGroup: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 15,
   },
   buttonContainer: {
     marginTop: 20,
-  }
+  },
 });
 
 export default CreateStoreRequestScreen;
+

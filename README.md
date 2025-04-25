@@ -434,16 +434,13 @@ delivery_speed    ENUM('urgent','common') DEFAULT 'common',
 status            ENUM('pending','accepted','completed','confirmed') DEFAULT 'pending',
 created_at        DATETIME       NOT NULL,
 accepted_by       VARCHAR(255)   DEFAULT NULL,
-CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
+CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username),
+is_custom      TINYINT(1)      NOT NULL DEFAULT 0,
+est_price      DECIMAL(10,2)   NULL       DEFAULT NULL,
+purchase_mode  VARCHAR(16)     NULL       DEFAULT NULL,
+total_price DECIMAL(10,2) NOT NULL DEFAULT 0
 );
 
-
-CREATE TABLE Wesshop (
-id     INT             AUTO_INCREMENT PRIMARY KEY,
-name   VARCHAR(255)    NOT NULL,
-number INT             NOT NULL,
-price  DECIMAL(10,2)    NOT NULL
-);
 
 
 | Step | Command / Action |
@@ -489,5 +486,13 @@ npm install @react-native-picker/picker
 npm install react-native-maps (not sure weather this is correct)
 expo install react-native-maps (this is working)
 npm install react-native-maps react-native-google-places-autocomplete
+npm install @stripe/stripe-react-native
+In backend, run:
+cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI
+composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction
+composer require stripe/stripe-php
+Create a secrets.php under htdocs with following content: 
+<?php
+$stripeSecretKey = 'Your_Stripe_Secret_Key'; (Not sure weather need to change key)
 
 

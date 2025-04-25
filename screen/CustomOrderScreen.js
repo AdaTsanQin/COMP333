@@ -20,18 +20,17 @@ export default function CustomOrderScreen({ navigation, route }) {
 
   /* ----- state ----- */
   const [desc, setDesc]         = useState('');
-  const [price, setPrice]       = useState('');
+  const [price, setPrice]       = useState('');        // user‐entered total price
   const [speed, setSpeed]       = useState('common');
-  const [where, setWhere]       = useState('dasher');   // 'dasher' | 'specify'
-  const [coord, setCoord]       = useState(null);       // { lat, lng }
+  const [where, setWhere]       = useState('dasher');  // 'dasher' | 'specify'
+  const [coord, setCoord]       = useState(null);
   const [coordTxt, setCoordTxt] = useState('');
 
-  /* map default to Wesleyan */
   const defaultRegion = {
     latitude:       41.5556,
     longitude:     -72.6558,
     latitudeDelta:  0.02,
-    longitudeDelta: 0.02,
+    longitudeDelta:  0.02,
   };
 
   const handleMapPress = (e) => {
@@ -40,20 +39,14 @@ export default function CustomOrderScreen({ navigation, route }) {
     setCoordTxt(`${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}`);
   };
 
-  /* ------------------------------------------------------------------ */
-  /* CREATE ORDER → write to backend then jump to ViewRequestScreen      */
-  /* ------------------------------------------------------------------ */
-  const handleSubmit = async () => {
-    if (!desc.trim()) {
-      Alert.alert('Error', 'Please describe the item(s).');
-      return;
-    }
-    if (where === 'specify' && !coordTxt.trim()) {
-      Alert.alert('Error', 'Please choose / enter store coordinates.');
-      return;
-    }
-
+  // ── 1) Helper that actually sends the request ─────────────────────────
+  async function proceedCustomOrder() {
     try {
+      // parse price into a float
+      const priceVal    = parseFloat(price) || 0;
+      // for custom orders quantity is always 1
+      const totalPrice  = parseFloat((priceVal * 1).toFixed(2));
+
       const sid = await AsyncStorage.getItem('PHPSESSID');
       const res = await fetch('http://10.0.2.2/WesDashAPI/create_requests.php', {
         method: 'POST',
@@ -63,14 +56,15 @@ export default function CustomOrderScreen({ navigation, route }) {
           Cookie: `PHPSESSID=${sid}`,
         },
         body: JSON.stringify({
-          item:              desc,                         // 描述直接写到 item 字段
-          quantity:          1,                            // 自定义单固定 1
+          item:              desc,
+          quantity:          1,
           drop_off_location: where === 'specify'
-                              ? coordTxt.trim()
-                              : 'DASHER_CHOOSING',
+                                ? coordTxt.trim()
+                                : 'DASHER_CHOOSING',
           delivery_speed:    speed,
-          est_price:         price || null,                // 若后端没有该列会被忽略
-          is_custom:         1,                            // 标记自定义
+          est_price:         priceVal > 0 ? priceVal : null,
+          total_price:       totalPrice,
+          is_custom:         1,
         }),
       });
       const data = await res.json();
@@ -81,27 +75,45 @@ export default function CustomOrderScreen({ navigation, route }) {
       Alert.alert('Success', 'Order created!', [
         {
           text: 'OK',
-          /* 跳到请求列表并携带用户名 / 角色 */
-          onPress: () =>
-            navigation.navigate('ViewRequestScreen', { username, role }),
+          onPress: () => navigation.navigate('ViewRequestScreen', { username, role }),
         },
       ]);
     } catch (e) {
       Alert.alert('Error', e.message || 'Network error');
     }
+  }
+
+  // ── 2) Main submit handler that shows the fee alert ──────────────────
+  const handleSubmit = () => {
+    if (!desc.trim()) {
+      Alert.alert('Error', 'Please describe the item(s).');
+      return;
+    }
+    if (where === 'specify' && !coordTxt.trim()) {
+      Alert.alert('Error', 'Please choose / enter store coordinates.');
+      return;
+    }
+
+    const feeRate = speed === 'common' ? 0.05 : 0.20;
+    Alert.alert(
+      'Delivery Fee',
+      `You selected ${speed.toUpperCase()} delivery. A ${feeRate * 100}% fee will be applied.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Proceed', onPress: proceedCustomOrder },
+      ]
+    );
   };
 
-  /* -------------------------- UI -------------------------- */
+  // ── 3) UI ───────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#fff' }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-
         <Text style={styles.heading}>Create Custom Order</Text>
 
-        {/* description */}
         <Text style={styles.label}>Describe item(s)</Text>
         <TextInput
           style={[styles.input, { height: 90 }]}
@@ -111,7 +123,6 @@ export default function CustomOrderScreen({ navigation, route }) {
           onChangeText={setDesc}
         />
 
-        {/* estimated price */}
         <Text style={styles.label}>Estimated total price (optional)</Text>
         <TextInput
           style={styles.input}
@@ -121,16 +132,12 @@ export default function CustomOrderScreen({ navigation, route }) {
           onChangeText={setPrice}
         />
 
-        {/* delivery speed */}
         <Text style={styles.label}>Delivery speed</Text>
         <View style={styles.row}>
           {['urgent', 'common'].map((s) => (
             <TouchableOpacity
               key={s}
-              style={[
-                styles.radioBtn,
-                speed === s && styles.selected,
-              ]}
+              style={[styles.radioBtn, speed === s && styles.selected]}
               onPress={() => setSpeed(s)}
             >
               <Text style={speed === s ? styles.selTxt : styles.txt}>
@@ -140,14 +147,10 @@ export default function CustomOrderScreen({ navigation, route }) {
           ))}
         </View>
 
-        {/* where to purchase */}
         <Text style={styles.label}>Where to purchase</Text>
         <View style={styles.row}>
           <TouchableOpacity
-            style={[
-              styles.radioBtn,
-              where === 'dasher' && styles.selected,
-            ]}
+            style={[styles.radioBtn, where === 'dasher' && styles.selected]}
             onPress={() => setWhere('dasher')}
           >
             <Text style={where === 'dasher' ? styles.selTxt : styles.txt}>
@@ -155,10 +158,7 @@ export default function CustomOrderScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.radioBtn,
-              where === 'specify' && styles.selected,
-            ]}
+            style={[styles.radioBtn, where === 'specify' && styles.selected]}
             onPress={() => setWhere('specify')}
           >
             <Text style={where === 'specify' ? styles.selTxt : styles.txt}>
@@ -167,7 +167,6 @@ export default function CustomOrderScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* specify store UI */}
         {where === 'specify' && (
           <>
             <TextInput
@@ -191,13 +190,11 @@ export default function CustomOrderScreen({ navigation, route }) {
         <View style={{ height: 18 }} />
         <Button title="Submit Order" onPress={handleSubmit} />
         <View style={{ height: 40 }} />
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-/* -------------------------- styles -------------------------- */
 const styles = StyleSheet.create({
   container:{ padding:20 },
   heading:{ fontSize:20, fontWeight:'700', textAlign:'center', marginBottom:18 },
@@ -211,3 +208,4 @@ const styles = StyleSheet.create({
   selTxt:{ color:'#fff', fontWeight:'700' },
   map:{ width:'100%', height:220, marginTop:10, borderRadius:6 },
 });
+
