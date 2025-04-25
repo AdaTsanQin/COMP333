@@ -44,22 +44,23 @@ $deliverySpeed = $input['delivery_speed'] ?? 'common';
 $now           = date('Y-m-d H:i:s');
 $status        = 'pending';
 
+// --- build itemField & qtyField as before ---
 if (!empty($input['items'])) {
     $lines = [];
-    $total = 0;
+    $totalQty = 0;
     foreach ($input['items'] as $row) {
         $name = trim($row['item'] ?? '');
         if ($name === '') continue;
-        $qty  = max(1, (int)($row['quantity'] ?? 1));
-        $lines[] = "{$qty}× {$name}";
-        $total  += $qty;
+        $qty = max(1, (int)($row['quantity'] ?? 1));
+        $lines[]  = "{$qty}× {$name}";
+        $totalQty += $qty;
     }
     if (!$lines) {
         echo json_encode(['error' => 'No valid items']); 
         exit;
     }
     $itemField = implode('; ', $lines);
-    $qtyField  = $total;
+    $qtyField  = $totalQty;
 } elseif (!empty($input['item'])) {
     $itemField = trim($input['item']);
     $qtyField  = max(1, (int)($input['quantity'] ?? 1));
@@ -68,11 +69,24 @@ if (!empty($input['items'])) {
     exit;
 }
 
+// --- handle price fields ---
+// client may send est_price (per‐unit or total? here we treat it as per‐unit)
+$estPrice = isset($input['est_price'])
+    ? floatval($input['est_price'])
+    : null;
+
+// client may send total_price explicitly
+$totalPrice = isset($input['total_price'])
+    ? floatval($input['total_price'])
+    // fallback: if we have est_price, multiply by quantity
+    : ($estPrice !== null ? round($estPrice * $qtyField, 2) : 0.00);
+
 $sql = "INSERT INTO requests
         (username, item, quantity, drop_off_location,
-         delivery_speed, status, created_at)
-        VALUES (:u, :it, :q, :loc, :spd, :st, :dt)";
-$st  = $pdo->prepare($sql);
+         delivery_speed, status, created_at, est_price, total_price)
+        VALUES
+        (:u, :it, :q, :loc, :spd, :st, :dt, :est, :tot)";
+$st = $pdo->prepare($sql);
 
 try {
     $st->execute([
@@ -82,13 +96,15 @@ try {
         ':loc' => $dropOff,
         ':spd' => $deliverySpeed,
         ':st'  => $status,
-        ':dt'  => $now
+        ':dt'  => $now,
+        ':est' => $estPrice,     // will be NULL if not provided
+        ':tot' => $totalPrice
     ]);
     echo json_encode([
         'success'    => true,
-        'request_id' => $pdo->lastInsertId()
+        'request_id' => $pdo->lastInsertId(),
+        'total_price'=> number_format($totalPrice, 2)
     ]);
 } catch (PDOException $e) {
-    echo json_encode(['error' => 'Insert failed']);
+    echo json_encode(['error' => 'Insert failed: '.$e->getMessage()]);
 }
-?>

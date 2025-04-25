@@ -441,7 +441,32 @@ purchase_mode  VARCHAR(16)     NULL       DEFAULT NULL,
 total_price DECIMAL(10,2) NOT NULL DEFAULT 0
 );
 
+New-database update for testing:
+-- 1) users
+ALTER TABLE users
+ADD COLUMN stripe_customer_id     VARCHAR(255) NULL,
+ADD COLUMN stripe_account_id      VARCHAR(255) NULL;
 
+-- 2) request
+ALTER TABLE requests
+ADD COLUMN payment_intent_id      VARCHAR(255) NULL,
+ADD COLUMN payment_status         ENUM('pending','authorized','captured','failed')
+DEFAULT 'pending';
+
+-- 3) tips
+CREATE TABLE tips (
+id                  INT AUTO_INCREMENT PRIMARY KEY,
+request_id          INT     NOT NULL,
+tip_intent_id       VARCHAR(255) NOT NULL,
+amount              INT     NOT NULL,      -- stored in cents
+currency            CHAR(3) NOT NULL       DEFAULT 'usd',
+status              ENUM('pending','succeeded','failed')
+NOT NULL DEFAULT 'pending',
+created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CONSTRAINT fk_tips_request FOREIGN KEY (request_id)
+REFERENCES requests(id)
+ON DELETE CASCADE
+);
 
 | Step | Command / Action |
 |------|------------------|
@@ -487,6 +512,7 @@ npm install react-native-maps (not sure weather this is correct)
 expo install react-native-maps (this is working)
 npm install react-native-maps react-native-google-places-autocomplete
 npm install @stripe/stripe-react-native
+
 In backend, run:
 cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI
 composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction
