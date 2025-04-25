@@ -435,7 +435,7 @@ CREATE TABLE requests (
                      NOT NULL DEFAULT 'pending',
     is_custom         TINYINT(1)    NOT NULL DEFAULT 0,
     est_price         DECIMAL(10,2) NULL,
-    purchase_mode     VARCHAR(16)   NULL,
+    purchase_mode     VARCHAR(255)   NULL,
     total_price       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     accepted_by       VARCHAR(255)  NULL,
