@@ -7,6 +7,12 @@ import {
 export default function CheckoutScreen({ navigation, route }) {
   const [cart, setCart]       = useState(route.params?.cart || []);
   const { username, role }    = route.params || {};
+  
+  // Calculate total price
+  const totalPrice = cart.reduce((sum, item) => {
+    const itemPrice = item.items?.[0]?.price?.regular ? parseFloat(item.items[0].price.regular) : 0;
+    return sum + itemPrice;
+  }, 0).toFixed(2);
 
   /* 删除一条 */
   const removeItem = (idx) => setCart(prev => prev.filter((_, i) => i !== idx));
@@ -26,16 +32,21 @@ export default function CheckoutScreen({ navigation, route }) {
 
   /* 渲染购物车条目 */
   const renderItem = ({ item, index }) => (
+    
     <View style={styles.card}>
       {imgUrl(item)
         ? <Image source={{ uri: imgUrl(item) }} style={styles.thumb}/>
-        : <View style={[styles.thumb,{backgroundColor:'#ddd'}]}/>}
+        : <View style={[styles.thumb, { backgroundColor: '#ddd' }]}/>}
       <View style={styles.info}>
         <Text style={styles.title}>{item.description}</Text>
         <Text style={styles.brand}>{item.brand}</Text>
+        {/* Display the price */}
+        <Text style={styles.price}>
+  {item.items?.[0]?.price?.regular ? `$${item.items[0].price.regular}` : 'Price not available'}
+</Text>
       </View>
       <TouchableOpacity style={styles.del} onPress={() => removeItem(index)}>
-        <Text style={{ color:'#fff' }}>✕</Text>
+        <Text style={{ color: '#fff' }}>✕</Text>
       </TouchableOpacity>
     </View>
   );
@@ -51,7 +62,10 @@ export default function CheckoutScreen({ navigation, route }) {
       />
 
       <View style={styles.bar}>
-        <Text style={styles.totalTxt}>Items: {cart.length}</Text>
+        <View>
+          <Text style={styles.totalTxt}>Items: {cart.length}</Text>
+          <Text style={styles.totalPrice}>Total: ${totalPrice}</Text>
+        </View>
         <Button title="Place Order" onPress={placeOrder}/>
       </View>
     </View>
@@ -71,4 +85,10 @@ const styles = StyleSheet.create({
   bar:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',
         padding:16, borderTopWidth:1, borderColor:'#eee' },
   totalTxt:{ fontSize:18, fontWeight:'700' },
+  totalPrice:{ fontSize:16, fontWeight:'700', color:'#2e8b57', marginTop:4 },
+  price: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 4,
+  },
 });

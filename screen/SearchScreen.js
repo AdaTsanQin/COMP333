@@ -19,7 +19,9 @@ export default function SearchScreen({ navigation, route }) {
     try {
       const url = `http://10.0.2.2/WesDashAPI/products.php?term=${encodeURIComponent(
         query
-      )}&fulfillment=aisle`;
+      )}&fulfillment=aisle&locationId=01100002&show=items.price`;
+      // print url
+      console.log('URL:', url);
       const raw  = await (await fetch(url)).text();
       const json = JSON.parse(raw.slice(raw.indexOf('{')));
       setResults(json.data || []);
@@ -45,16 +47,26 @@ export default function SearchScreen({ navigation, route }) {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.card} activeOpacity={0.7}
-      onPress={()=>addToCart(item)}
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => addToCart(item)}
     >
-      {imgUrl(item)
-        ? <Image source={{ uri: imgUrl(item) }} style={styles.thumb}/>
-        : <View style={[styles.thumb,{backgroundColor:'#ddd'}]}/>}
+      {imgUrl(item) ? (
+        <Image source={{ uri: imgUrl(item) }} style={styles.thumb} />
+      ) : (
+        <View style={[styles.thumb, { backgroundColor: '#ddd' }]} />
+      )}
       <View style={styles.info}>
-        <Text style={styles.title}>{item.description}</Text>
+        {/* Ensure price is wrapped in a <Text> */}
+        <Text style={styles.title}>
+          {item.items?.[0]?.price?.regular
+            ? `$${item.items[0].price.regular}`
+            : 'Price not available'}
+        </Text>
         <Text style={styles.subtitle}>{item.brand}</Text>
-        {item.items?.[0]?.size && <Text style={styles.size}>{item.items[0].size}</Text>}
+        {item.items?.[0]?.size && (
+          <Text style={styles.size}>{item.items[0].size}</Text>
+        )}
         <Text style={styles.addText}>Tap to add to cart →</Text>
       </View>
     </TouchableOpacity>

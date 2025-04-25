@@ -24,6 +24,7 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [dropOff,      setDropOff]      = useState('');
   const [speed,        setSpeed]        = useState('common');
   const [sessionID,    setSessionID]    = useState(null);
+  
 
   /* map */
   const [region, setRegion] = useState({
