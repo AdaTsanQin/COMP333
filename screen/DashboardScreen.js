@@ -113,7 +113,13 @@ export default function DashboardScreen({ route, navigation }) {
         color={BLUE}
         onPress={() => navigation.navigate('Chats', { username, role })}
       />
-
+      <BigButton
+        title="Buy Coins"
+        color="#FF9900"
+        onPress={() =>
+          navigation.navigate('PurchaseCoins', { username, role })
+        }
+      />
       {/* Danger Zone toggle */}
       <TouchableOpacity
         onPress={() => {

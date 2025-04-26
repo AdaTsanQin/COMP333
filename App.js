@@ -25,6 +25,9 @@ import ChatScreen                 from './screen/ChatScreen';
 
 import NavigationToLocationScreen from './screen/NavigationToLocationScreen';   // map + navigate
 
+
+import PurchaseCoinsScreen from './screen/PurchaseCoinsScreen';
+
 /* ---------- navigator ---------- */
 const Stack = createStackNavigator();
 
@@ -56,7 +59,8 @@ export default function App() {
         {/* chat */}
         <Stack.Screen name="Chats" component={ChatListScreen} />
         <Stack.Screen name="Chat"  component={ChatScreen} />
-
+        {/* purchase */}
+        <Stack.Screen name="PurchaseCoins" component={PurchaseCoinsScreen} options={{ title: 'Top Up Coins' }}/>
         {/* map navigation */}
         <Stack.Screen
           name="NavigationToLocationScreen"
