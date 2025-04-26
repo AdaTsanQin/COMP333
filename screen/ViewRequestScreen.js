@@ -182,9 +182,14 @@ export default function ViewRequestsScreen({ route, navigation }) {
 
         {item.status === 'completed' && (
           <Button
-            title="CONFIRM RECEIVED"
+            title="TIP & CONFIRM"
             color={PRIMARY_COLOR}
-            onPress={() => doConfirm(item.id)}
+            onPress={() =>
+              navigation.navigate('TipScreen', {
+                requestId: item.id,
+                onConfirmed: () => doConfirm(item.id),
+              })
+            }
           />
         )}
 

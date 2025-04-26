@@ -24,11 +24,10 @@ const CreateRequestScreen = ({ route, navigation }) => {
   const [dropOff,      setDropOff]      = useState('');
   const [speed,        setSpeed]        = useState('common');
   const [sessionID,    setSessionID]    = useState(null);
-  
 
   /* map */
   const [region, setRegion] = useState({
-    latitude:       41.5556,     // Wesleyan U.
+    latitude:       41.5556,
     longitude:     -72.6558,
     latitudeDelta:  0.02,
     longitudeDelta: 0.02,
@@ -73,9 +72,24 @@ const CreateRequestScreen = ({ route, navigation }) => {
       return;
     }
 
-    const row  = items.find((i) => i.name === selectedItem);
-    const qty  = parseInt(quantity, 10) || 1;
+    const row = items.find((i) => i.name === selectedItem);
+    const qty = parseInt(quantity, 10) || 1;
 
+    const estPrice = row?.price ?? 0;
+    const totalPrice = parseFloat((estPrice * qty).toFixed(2));
+    const feeRate = speed === 'common' ? 0.05 : 0.20;
+
+    Alert.alert(
+      'Delivery Fee',
+      `You selected ${speed} delivery. A ${feeRate * 100}% fee will be applied.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Proceed', onPress: () => submitOrder(row, qty, estPrice, totalPrice) },
+      ]
+    );
+  };
+
+  async function submitOrder(row, qty, estPrice, totalPrice) {
     const proceed = async () => {
       try {
         const resp = await fetch('http://10.0.2.2/WesDashAPI/create_requests.php', {
@@ -90,12 +104,16 @@ const CreateRequestScreen = ({ route, navigation }) => {
             quantity: qty,
             drop_off_location: dropOff,
             delivery_speed: speed,
+            est_price: estPrice,
+            total_price: totalPrice,
           }),
         });
         const data = await resp.json();
 
         if (resp.ok && data.success) {
-          Alert.alert('Success', data.success, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+          Alert.alert('Success', `Request created (total: $${data.total_price})`, [
+            { text: 'OK', onPress: () => navigation.goBack() }
+          ]);
         } else {
           throw new Error(data.error || 'Failed to create request.');
         }
@@ -111,12 +129,12 @@ const CreateRequestScreen = ({ route, navigation }) => {
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Proceed', onPress: proceed },
-        ],
+        ]
       );
     } else {
       proceed();
     }
-  };
+  }
 
   /* ---------- UI ---------- */
   return (
@@ -205,4 +223,5 @@ const styles = StyleSheet.create({
 });
 
 export default CreateRequestScreen;
+
 

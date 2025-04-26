@@ -23,12 +23,12 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
         drop_off_location: dropOffLocation,
         delivery_speed: deliverySpeed,
       };
-      
+
       // Add product_id if it was provided from the SearchScreen
       if (productData?.product_id) {
         requestData.product_id = productData.product_id;
       }
-      
+
       // Add image_url if available
       if (productImage) {
         requestData.image_url = productImage;
@@ -52,7 +52,7 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
         if (response.ok && data.success) {
           // Get the route params from the current screen that might have the username and role
           const { username, role } = route.params || {};
-          
+
           Alert.alert("Success", data.success, [
             {
               text: "OK",
