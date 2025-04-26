@@ -415,12 +415,14 @@ WesDashAPI/
 | 1.  | **Start XAMPP** → launch **Apache** and **MySQL**.<br>Leave Apache on port **80** (or update `base_uri` in the tests). |
 | 2.  | Create database **`app-db`** in phpMyAdmin. |
 | 3.  | Run the schema: |
-
+(*draft changing*)
 CREATE TABLE users (
     username   VARCHAR(255) PRIMARY KEY,
     password   VARCHAR(255) NOT NULL,
     is_deleted TINYINT(1)   NOT NULL DEFAULT 0,
     role       ENUM('User','Dasher') NOT NULL DEFAULT 'User',
+    stripe_customer_id	varchar(255)
+    stripe_account_id varchar(255)
     balance    INT          NOT NULL DEFAULT 0     
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
