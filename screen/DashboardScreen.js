@@ -1,31 +1,49 @@
 // screen/DashboardScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  Switch,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  TextInput,
+  View, Text, StyleSheet, Alert, Switch, TouchableOpacity,
+  Image, Dimensions, TextInput, Platform     // ← 加 Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';          // ← 加
 
-const RED      = '#C41E3A';
-const RED_DARK = '#991427';
-const BLUE     = '#5978FF';
-const GREY_TXT = '#666';
-const BG_COLOR = '#F3F4F8';
+const RED       = '#C41E3A';
+const RED_DARK  = '#991427';
+const BLUE      = '#5978FF';
+const GREEN     = '#2e8b57';      
+const GREY_TXT  = '#666';
+const BG_COLOR  = '#F3F4F8';
+const CARD_BG   = '#ffffff';
+const CARD_SHADOW = '#00000020';
+
+const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const BASE_URL = `http://${HOST}/WesDashAPI`;
 
 export default function DashboardScreen({ route, navigation }) {
   const { username = 'User', role: initRole = 'user' } = route.params || {};
 
-  const [role, setRole] = useState(initRole);
+  const [role, setRole]   = useState(initRole);
+  const [balance, setBal] = useState(null);         // 美元字符串
   const [showDanger, setShowDanger] = useState(false);
   const [passwordToDelete, setPasswordToDelete] = useState('');
   const [confirmPasswordToDelete, setConfirmPasswordToDelete] = useState('');
+
+  /* ── 拉取余额 ── */
+  const fetchBalance = async () => {
+    try {
+      const sid = await AsyncStorage.getItem('PHPSESSID');
+      if (!sid) return;
+      const r = await fetch(`${BASE_URL}/get_balance.php`, {
+        credentials: 'include',
+        headers: { Cookie: `PHPSESSID=${sid}` },
+      });
+      const d = await r.json();
+      if (d.success) setBal((d.balance / 100).toFixed(2));
+    } catch {/* ignore 网络错误 */ }
+  };
+
+  /* 首次进入 + 每次重新聚焦时刷新余额 */
+  useFocusEffect(useCallback(() => { fetchBalance(); }, []));
 
   useEffect(() => {
     (async () => {
@@ -34,17 +52,15 @@ export default function DashboardScreen({ route, navigation }) {
     })();
   }, []);
 
-  /* ---- logout ---- */
   const handleLogout = () => navigation.navigate('Home');
 
-  /* ---- delete ---- */
   const handleDeleteAccount = async () => {
     if (passwordToDelete !== confirmPasswordToDelete) {
       Alert.alert('Error', 'Passwords do not match.');
       return;
     }
     try {
-      const resp = await fetch('http://10.0.2.2/WesDashAPI/delete_user.php', {
+      const resp = await fetch(`${BASE_URL}/delete_user.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: passwordToDelete }),
@@ -62,6 +78,7 @@ export default function DashboardScreen({ route, navigation }) {
     }
   };
 
+  /** 统一的大按钮组件 */
   const BigButton = ({ title, onPress, color = RED }) => (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -74,12 +91,13 @@ export default function DashboardScreen({ route, navigation }) {
 
   return (
     <View style={styles.root}>
+      {/* Logo + Greeting */}
       <Image source={require('../assets/cardinal.png')} style={styles.logo} />
-
       <Text style={styles.hi}>
         Hi, {username} <Text style={{ fontSize: 28 }}>👋</Text>
       </Text>
 
+      {/* Role Switch */}
       <View style={styles.roleRow}>
         <Text style={styles.roleTxt}>Role: {role}</Text>
         <Switch
@@ -90,6 +108,23 @@ export default function DashboardScreen({ route, navigation }) {
         />
       </View>
 
+      {/* Balance Card */}
+      <View style={styles.balanceRow}>
+        <View style={styles.balanceCard}>
+          <Text style={styles.balanceTxt}>
+            Balance{balance!==null && `  $${balance}`}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.topUpBtn}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('RechargeScreen', { username, role })}
+        >
+          <Text style={styles.topUpTxt}>＋</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Main Buttons */}
       {role === 'user' ? (
         <>
           <BigButton
@@ -110,11 +145,11 @@ export default function DashboardScreen({ route, navigation }) {
 
       <BigButton
         title="Chat Rooms"
-        color={BLUE}
+        color={GREEN}
         onPress={() => navigation.navigate('Chats', { username, role })}
       />
 
-      {/* Danger Zone toggle */}
+      {/* Danger Zone */}
       <TouchableOpacity
         onPress={() => {
           setShowDanger(!showDanger);
@@ -152,6 +187,7 @@ export default function DashboardScreen({ route, navigation }) {
         </View>
       )}
 
+      {/* Logout */}
       <TouchableOpacity onPress={handleLogout} style={styles.logout}>
         <Text style={{ fontSize: 16, color: GREY_TXT }}>↩ Logout</Text>
       </TouchableOpacity>
@@ -159,20 +195,44 @@ export default function DashboardScreen({ route, navigation }) {
   );
 }
 
-/* ---- 样式 ---- */
 const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG_COLOR,
     alignItems: 'center',
-    paddingTop: height * 0.08,       
+    paddingTop: height * 0.08,
   },
   logo: { width: 90, height: 90, resizeMode: 'contain', marginBottom: 4 },
   hi: { fontSize: 34, fontWeight: '700', marginVertical: 10 },
-  roleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 26 },
+
+  roleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 22 },
   roleTxt: { fontSize: 17, color: GREY_TXT, marginRight: 8 },
 
+  /* Balance */
+  balanceRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  balanceCard: {
+    backgroundColor: CARD_BG,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 12,
+    elevation: 4,
+    shadowColor: CARD_SHADOW,
+  },
+  balanceTxt: { fontSize: 18, fontWeight: '700', color: GREY_TXT },
+  topUpBtn: {
+    marginLeft: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#444',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+  },
+  topUpTxt: { fontSize: 26, color: '#fff', marginTop: -2 },
+
+  /* Big buttons */
   bigBtn: {
     width: '78%',
     paddingVertical: 16,
@@ -182,13 +242,13 @@ const styles = StyleSheet.create({
   },
   bigBtnTxt: { fontSize: 20, color: '#fff', fontWeight: '600' },
 
+  /* Danger zone */
   dangerToggle: { marginTop: 20 },
-
   deleteContainer: {
     width: '80%',
     marginTop: 12,
     alignItems: 'center',
-    paddingBottom: 180,  
+    paddingBottom: 180,
   },
   input: {
     width: '100%',
@@ -201,9 +261,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   deleteBtn: {
-    width: '40%',          
+    width: '40%',
     backgroundColor: '#444',
-    paddingVertical: 9,    
+    paddingVertical: 9,
     borderRadius: 10,
     alignItems: 'center',
   },

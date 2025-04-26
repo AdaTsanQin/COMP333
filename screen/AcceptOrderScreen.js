@@ -9,114 +9,113 @@ import {
   FlatList,
   Platform,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage            from '@react-native-async-storage/async-storage';
+import { useFocusEffect }      from '@react-navigation/native';
 
 const AcceptOrderScreen = ({ route, navigation }) => {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
 
-  const [orders,     setOrders]  = useState([]);
-  const [sessionID,  setSID]     = useState(null);
+  const [orders,   setOrders] = useState([]);
+  const [sessionID,setSID]    = useState(null);
 
   const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
   const BASE_URL = `http://${HOST}/WesDashAPI`;
 
-  /* ---------- pull orders ---------- */
-  const fetchOrders = async () => {
+  /* ───── 拉取订单列表 ───── */
+  const fetchOrders = async (sid = sessionID) => {
+    if (!sid) return;
     try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type':'application/json', Cookie:`PHPSESSID=${sessionID}` },
+      const r  = await fetch(`${BASE_URL}/accept_order.php`, {
+        method:'GET',
+        credentials:'include',
+        headers:{ Cookie:`PHPSESSID=${sid}` },
       });
-      const data = await resp.json();
-      data.success
-        ? setOrders(data.orders)
-        : Alert.alert('Error', data.message || 'Failed to fetch orders.');
+      const d = await r.json();
+      d.success
+        ? setOrders(d.orders)
+        : Alert.alert('Error', d.message || 'Failed to fetch orders.');
     } catch {
-      Alert.alert('Error', 'Network error while fetching orders.');
+      Alert.alert('Error','Network issue while fetching orders.');
     }
   };
 
-  /* ---------- first load ---------- */
+  /* 首次进入 */
   useEffect(() => {
     (async () => {
-      const id = await AsyncStorage.getItem('PHPSESSID');
-      if (!id) { Alert.alert('Error','Session ID not found.'); return; }
-      setSID(id);
-      fetchOrders();
+      const sid = await AsyncStorage.getItem('PHPSESSID');
+      if (!sid) { Alert.alert('Error','Session ID not found.'); return; }
+      setSID(sid);
+      fetchOrders(sid);
     })();
   }, []);
 
-  /* ---------- refresh on focus ---------- */
+  /* 页面聚焦时刷新 */
   useFocusEffect(useCallback(() => {
-    if (sessionID) fetchOrders();
+    if (sessionID) fetchOrders(sessionID);
   }, [sessionID]));
 
-  /* ---------- accept ---------- */
+  /* ───── 接单 ───── */
   const handleAcceptOrder = async (id) => {
     try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
+      const r = await fetch(`${BASE_URL}/accept_order.php`, {
         method:'PUT',
         credentials:'include',
-        headers:{ 'Content-Type':'application/json' },
+        headers:{
+          'Content-Type':'application/json',
+          Cookie:`PHPSESSID=${sessionID}`,
+        },
         body: JSON.stringify({ id }),
       });
-      const data = await resp.json();
-      if (data.success) {
-        setOrders(prev => prev.map(o =>
-          o.id===id ? { ...o, status:'accepted', room_id:data.room_id||o.room_id } : o));
-        data.room_id
-          ? navigation.navigate('Chat',{ roomId:data.room_id, username })
-          : Alert.alert('Success','Order accepted successfully!');
-      } else Alert.alert('Error', data.message || 'Failed to accept order.');
-    } catch { Alert.alert('Error','Failed to accept order. Please try again.'); }
+      const d = await r.json();
+      if (!d.success) return Alert.alert('Error', d.message || 'Accept failed.');
+      setOrders(prev => prev.map(o =>
+        o.id===id ? { ...o, status:'accepted', room_id:d.room_id||o.room_id } : o
+      ));
+      d.room_id
+        ? navigation.navigate('Chat',{ roomId:d.room_id, username })
+        : Alert.alert('Success','Order accepted!');
+    } catch { Alert.alert('Error','Network error while accepting.'); }
   };
 
-  /* ---------- drop-off ---------- */
-  const handleDropOffOrder = async (id) => {
-    try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
-        method:'PUT',
-        credentials:'include',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ id, action:'drop_off' }),
-      });
-      const data = await resp.json();
-      if (data.success) {
-        Alert.alert('Success','Order dropped off successfully!');
-        fetchOrders();
-      } else Alert.alert('Error', data.message || 'Failed to drop off order.');
-    } catch { Alert.alert('Error','Failed to drop off order. Please try again.'); }
+  /* ───── DROP-OFF → 跳到输入页面 ───── */
+  const handleDropOffOrder = (id) => {
+    navigation.navigate('DropOffScreen', {
+      requestId:     id,
+      sessionID,          // 传给下一页做 multipart 请求
+      BASE_URL,
+      refreshOrders: () => fetchOrders(sessionID),
+    });
   };
 
-  /* ---------- 坐标合法性工具 ---------- */
-  const hasValidCoords = (loc) => {
-    if (!loc) return false;                 
-    const p = String(loc).split(',').map(s => parseFloat(s.trim()));
-    return p.length === 2 && p.every(n => Number.isFinite(n));
+  /* 坐标合法性检查 */
+  const hasCoords = (loc) => {
+    if (!loc) return false;
+    const p = `${loc}`.split(',').map(s=>parseFloat(s.trim()));
+    return p.length===2 && p.every(Number.isFinite);
   };
 
-  /* ---------- 单条卡片 ---------- */
-  const OrderItem = ({ item }) => (
+  /* 单条卡片 */
+  const OrderCard = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.label}>Item:</Text>
-      <Text style={styles.text}>{item.item}</Text>
-
-      <Text style={styles.label}>Quantity:</Text>
-      <Text style={styles.text}>{item.quantity}</Text>
-
-      <Text style={styles.label}>Drop-off:</Text>
-      <Text style={styles.text}>{item.drop_off_location}</Text>
-
-      <Text style={styles.label}>Speed:</Text>
-      <Text style={styles.text}>{item.delivery_speed}</Text>
+      {item.item && (
+        <>
+          <Text style={styles.label}>Item:</Text>
+          <Text style={styles.text}>{item.item}</Text>
+          <Text style={styles.label}>Quantity:</Text>
+          <Text style={styles.text}>{item.quantity}</Text>
+          <Text style={styles.label}>Drop-off:</Text>
+          <Text style={styles.text}>{item.drop_off_location}</Text>
+          <Text style={styles.label}>Speed:</Text>
+          <Text style={styles.text}>{item.delivery_speed}</Text>
+        </>
+      )}
 
       <Text style={styles.label}>Status:</Text>
       <View style={[
         styles.statusBox,
         item.status==='pending'  ? styles.pending  :
-        item.status==='accepted' ? styles.accepted : styles.completed]}>
+        item.status==='accepted' ? styles.accepted : styles.completed,
+      ]}>
         <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
       </View>
 
@@ -126,39 +125,26 @@ const AcceptOrderScreen = ({ route, navigation }) => {
 
       {item.status==='accepted' && (
         <>
-          {/* 导航到店铺（如果有） */}
-          {hasValidCoords(item.purchase_mode) && (
-            <Button
-              title="NAVIGATE TO STORE"
-              onPress={()=>navigation.navigate('NavigationToLocationScreen',
-                       { dropOffLocation:item.purchase_mode })}/>
-          )}
+          {hasCoords(item.drop_off_location)
+            ? <Button title="NAVIGATE TO DROP-OFF"
+                onPress={()=>navigation.navigate('NavigationToLocationScreen',{
+                  dropOffLocation:item.drop_off_location,
+                })}/>
+            : <Button title="NO DROP-OFF MAP" color="#999"
+                onPress={()=>Alert.alert('No coordinates')}/>}
 
-          {/* 导航到收货点 */}
-          {hasValidCoords(item.drop_off_location) ? (
-            <Button
-              title="NAVIGATE TO DROP-OFF"
-              onPress={()=>navigation.navigate('NavigationToLocationScreen',
-                       { dropOffLocation:item.drop_off_location })}/>
-          ) : (
-            <Button title="NO DROP-OFF MAP" color="#999"
-              onPress={()=>Alert.alert('No coordinates','This order has no drop-off location.')}/>
-          )}
+          <Button title="DROP OFF" onPress={()=>handleDropOffOrder(item.id)}/>
 
-          {/* 聊天 */}
           {item.room_id && (
-            <Button title="CHAT" color="#007bff"
+            <Button title="CHAT"
               onPress={()=>navigation.navigate('Chat',{ roomId:item.room_id, username })}/>
           )}
-
-          {/* 完成配送 */}
-          <Button title="DROP OFF" onPress={()=>handleDropOffOrder(item.id)}/>
         </>
       )}
     </View>
   );
 
-  /* ---------- render ---------- */
+  /* 渲染 */
   return (
     <View style={styles.container}>
       <View style={styles.infoBox}>
@@ -170,23 +156,23 @@ const AcceptOrderScreen = ({ route, navigation }) => {
 
       <FlatList
         data={orders}
-        keyExtractor={i=>i.id.toString()}
-        renderItem={({item})=><OrderItem item={item}/>}
-        ListEmptyComponent={<Text style={{textAlign:'center', marginTop:40}}>No orders available.</Text>}
+        keyExtractor={o=>o.id.toString()}
+        renderItem={({item})=> <OrderCard item={item}/> }
+        ListEmptyComponent={<Text style={{textAlign:'center',marginTop:40}}>No orders.</Text>}
       />
     </View>
   );
 };
 
-/* ---------- styles ---------- */
+/* 样式 */
 const styles = StyleSheet.create({
   container:{ flex:1, padding:16, backgroundColor:'#fff' },
-  heading:  { fontSize:24, fontWeight:'bold', marginBottom:10, textAlign:'center' },
-  infoBox:  { paddingVertical:8, borderBottomWidth:1, borderColor:'#eee', marginBottom:12 },
-  infoTxt:  { fontSize:16, marginBottom:4, fontWeight:'500', color:'#333' },
+  heading:{ fontSize:24, fontWeight:'bold', marginBottom:10, textAlign:'center' },
+  infoBox:{ paddingVertical:8, borderBottomWidth:1, borderColor:'#eee', marginBottom:12 },
+  infoTxt:{ fontSize:16, marginBottom:4, fontWeight:'500', color:'#333' },
 
   card:{ padding:12, borderWidth:1, borderColor:'#ccc', borderRadius:6, marginBottom:14 },
-  label:{ fontSize:16, fontWeight:'bold', marginTop:4 },
+  label:{ fontSize:16, fontWeight:'700', marginTop:4 },
   text:{ fontSize:16, marginBottom:4 },
 
   statusBox:{ padding:6, borderRadius:4, alignItems:'center', marginBottom:8 },

@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, PUT, OPTIONS');
+header('Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Cookie, Accept');
 header('Access-Control-Allow-Credentials: true');
 
@@ -26,15 +26,71 @@ $loggedInUser = $_SESSION['username'];
 /* ─────────────── GET ─────────────── */
 if ($method === 'GET') {
   $sql = "
-    SELECT *
-      FROM requests
-     WHERE (status='pending'  AND username   != ?)
-        OR (status='accepted' AND accepted_by = ?)
-     ORDER BY id DESC";
+    SELECT r.*, cr.id AS room_id
+      FROM requests r
+      LEFT JOIN chat_rooms cr ON cr.order_id = r.id
+     WHERE (r.status='pending'  AND r.username   != ?)
+        OR (r.status='accepted' AND r.accepted_by = ?)
+     ORDER BY r.id DESC";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param('ss', $loggedInUser, $loggedInUser);
   $stmt->execute();
-  echo json_encode(['success'=>true,'orders'=>$stmt->get_result()->fetch_all(MYSQLI_ASSOC)]);
+  echo json_encode([
+      'success'=>true,
+      'orders' =>$stmt->get_result()->fetch_all(MYSQLI_ASSOC)
+  ]);
+  exit;
+}
+
+/* ════════════════  POST  (dasher drop-off with receipt) ════════════════ */
+if ($method === 'POST') {
+
+  /* 0. 基础校验 */
+  if (
+      empty($_POST['id']) ||
+      empty($_POST['action']) || $_POST['action']!=='drop_off' ||
+      empty($_POST['price']) || (float)$_POST['price']<=0 ||
+      empty($_FILES['receipt']) || $_FILES['receipt']['error']!==UPLOAD_ERR_OK
+  ){
+      echo json_encode(['success'=>false,'message'=>'Missing fields']); exit;
+  }
+  $id    = (int)$_POST['id'];
+  $price = (float)$_POST['price'];          // 实际商品总价（美元）
+
+  /* 1. 只有当前骑手已接受且状态=accepted 的订单才能 drop_off */
+  $chk = $conn->prepare(
+      "SELECT status FROM requests
+        WHERE id=? AND accepted_by=? FOR UPDATE");
+  $chk->bind_param('is', $id, $loggedInUser);
+  $chk->execute();
+  $row = $chk->get_result()->fetch_assoc();
+  if (!$row || $row['status']!=='accepted') {
+      echo json_encode(['success'=>false,'message'=>'Order not in accepted state']); exit;
+  }
+
+  /* 2. 保存小票图片到 WesDashAPI/receipts/ 目录 */
+  $dir = __DIR__.'/receipts';
+  if (!is_dir($dir)) mkdir($dir,0755,true);
+  $ext = pathinfo($_FILES['receipt']['name'], PATHINFO_EXTENSION) ?: 'jpg';
+  $file = 'rec_'.$id.'_'.time().'.'.$ext;
+  if (!move_uploaded_file($_FILES['receipt']['tmp_name'], $dir.'/'.$file)){
+      echo json_encode(['success'=>false,'message'=>'Receipt upload failed']); exit;
+  }
+
+  /* 3. 把实价写回 est_price，并将状态改为 completed */
+  $upd = $conn->prepare(
+      "UPDATE requests
+          SET est_price=?, status='completed'
+        WHERE id=? AND accepted_by=?");
+  $upd->bind_param('dis', $price, $id, $loggedInUser);
+  $upd->execute();
+
+  /* 4. 关闭聊天室 */
+  $close = $conn->prepare("UPDATE chat_rooms SET closed_at=NOW() WHERE order_id=?");
+  $close->bind_param('i', $id);
+  $close->execute();
+
+  echo json_encode(['success'=>true,'message'=>'Drop-off recorded']);
   exit;
 }
 

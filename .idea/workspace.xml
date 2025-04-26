@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c8fb3c16-ce61-4cf1-92f4-b7a5a89132d8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/AcceptOrderScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/AcceptOrderScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/CheckoutScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/CheckoutScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/CreateRequestScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/CreateRequestScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/CreateStoreRequestScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/CreateStoreRequestScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/CustomOrderScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/CustomOrderScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/DashboardScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/DashboardScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/OrderDetailsScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/OrderDetailsScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/SearchScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/SearchScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/TipScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/TipScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screen/ViewRequestScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screen/ViewRequestScreen.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
+  <component name="ProjectId" id="2wF2Hszd4UrC1j2TquCcH0E4fyQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "feature/issue4.10-payment",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/haihanwang/Desktop/COMP333"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c8fb3c16-ce61-4cf1-92f4-b7a5a89132d8" name="Changes" comment="" />
+      <created>1745622916230</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745622916230</updated>
+    </task>
+    <servers />
+  </component>
+</project>
