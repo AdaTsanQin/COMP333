@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Cookie, Accept');
 header('Access-Control-Allow-Credentials: true');
 
@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
     exit;
 }
@@ -28,23 +28,24 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$orderId = $input['order_id'] ?? null;
+$username = $_SESSION['username'];
 
-if (!$orderId) {
-    echo json_encode(['success' => false, 'message' => 'Missing order ID.']);
-    exit;
-}
-
+// Get the pending review for the current user
 $stmt = $conn->prepare(
-    "UPDATE requests SET review_prompt_status = 'rejected' WHERE id = ?"
+    "SELECT id, item, accepted_by 
+     FROM requests 
+     WHERE username = ? AND review_prompt_status = 'pending' AND status = 'completed'
+     LIMIT 1"
 );
-$stmt->bind_param('i', $orderId);
+$stmt->bind_param('s', $username);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Review prompt canceled successfully.']);
+if ($result->num_rows > 0) {
+    $order = $result->fetch_assoc();
+    echo json_encode(['success' => true, 'order' => $order]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Failed to cancel review prompt.']);
+    echo json_encode(['success' => true, 'order' => null]);
 }
 
 $stmt->close();
