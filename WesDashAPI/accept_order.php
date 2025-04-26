@@ -46,23 +46,25 @@ if ($method === 'PUT') {
 
   /* 1. Rider 标记已送达 → completed */
   if (($in['action'] ?? '') === 'drop_off') {
-    $stmt = $conn->prepare(
-      "UPDATE requests SET status='completed'
-        WHERE id=? AND status='accepted' AND accepted_by=?");
-    $stmt->bind_param('is', $id, $loggedInUser);
-    $stmt->execute();
+        $stmt = $conn->prepare(
+            "UPDATE requests SET status='completed', review_prompt_status='pending' 
+             WHERE id=? AND status='accepted' AND accepted_by=?"
+        );
+        $stmt->bind_param('is', $id, $loggedInUser);
+        $stmt->execute();
 
-    $close = $conn->prepare("UPDATE chat_rooms SET closed_at=NOW() WHERE order_id=?");
-    $close->bind_param('i', $id);
-    $close->execute();
+        $close = $conn->prepare("UPDATE chat_rooms SET closed_at=NOW() WHERE order_id=?");
+        $close->bind_param('i', $id);
+        $close->execute();
 
-    echo json_encode([
-      'success'=>$stmt->affected_rows>0,
-      'message'=>$stmt->affected_rows>0
-                ? 'Order dropped off successfully'
-                : 'No matching accepted order found']);
-    exit;
-  }
+        echo json_encode([
+            'success'=>$stmt->affected_rows>0,
+            'message'=>$stmt->affected_rows>0
+                      ? 'Order dropped off successfully'
+                      : 'No matching accepted order found'
+        ]);
+        exit;
+    }
 
   /* 2. Rider 接单：pending → accepted */
   $conn->begin_transaction();

@@ -30,7 +30,25 @@ export default function DashboardScreen({ route, navigation }) {
   useEffect(() => {
     (async () => {
       const sid = await AsyncStorage.getItem('PHPSESSID');
-      if (!sid) Alert.alert('Error', 'Session ID not found. Please log in again.');
+      if (!sid) {
+        Alert.alert('Error', 'Session ID not found. Please log in again.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://10.0.2.2/WesDashAPI/get_pending_review.php', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        const data = await response.json();
+
+        if (data.success && data.order) {
+          navigation.navigate('CreateReviewScreen', { orderId: data.order.id });
+        }
+      } catch (error) {
+        console.error('Error fetching pending review:', error);
+      }
     })();
   }, []);
 
