@@ -70,9 +70,12 @@ if (!empty($input['items'])) {
 
 $sql = "INSERT INTO requests
         (username, item, quantity, drop_off_location,
-         delivery_speed, status, created_at)
-        VALUES (:u, :it, :q, :loc, :spd, :st, :dt)";
+         delivery_speed, status, created_at, est_price)
+        VALUES (:u, :it, :q, :loc, :spd, :st, :dt, :price)";
 $st  = $pdo->prepare($sql);
+
+// Get the estimated price if provided
+$estPrice = $input['est_price'] ?? '0.00';
 
 try {
     $st->execute([
@@ -82,7 +85,8 @@ try {
         ':loc' => $dropOff,
         ':spd' => $deliverySpeed,
         ':st'  => $status,
-        ':dt'  => $now
+        ':dt'  => $now,
+        ':price' => $estPrice
     ]);
     echo json_encode([
         'success'    => true,
