@@ -1,92 +1,72 @@
-// screen/DropOffScreen.js
-import React, { useState, useEffect } from 'react';
-import {
-  View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function DropOffScreen({ route, navigation }) {
-  const { orderId, onDone } = route.params;          // ← 接单页传进来的
+  const { requestId, sessionID, BASE_URL, refresh } = route.params;
+  const [price, setPrice] = useState('');
+  const [photo, setPhoto] = useState(null);
 
-  const [price, setPrice]         = useState('');
-  const [receiptUri, setReceipt]  = useState(null);
-  const [hasLibPerm, setPerm]     = useState(false);
-
-  /* ─── 请求图库权限 ─── */
-  useEffect(() => {
-    (async () => {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      setPerm(status === 'granted');
-      if (status !== 'granted') {
-        Alert.alert('Permission required',
-          'To attach a receipt you need to allow photo library access.');
-      }
-    })();
-  }, []);
-
-  /* ─── 选图片 ─── */
-  const pickReceipt = async () => {
-    if (!hasLibPerm) return;
-    try {
+  const choosePic = async () => {
+    try{
       const res = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.85,
+        quality:0.8
       });
-      if (!res.canceled) {
-        setReceipt(res.assets[0].uri);
-      }
-    } catch (e) {
-      Alert.alert('Error', 'Could not open gallery.');
-    }
+      if (!res.canceled) setPhoto(res.assets?.[0] || null);
+    }catch{ Alert.alert('Error','Could not open gallery.'); }
   };
 
-  /* ─── 提交 ─── */
-  const handleSubmit = () => {
+  /* 提交 */
+  const submit = async () => {
     const p = parseFloat(price);
-    if (!(p > 0)) {
-      Alert.alert('Invalid', 'Please enter a positive price.'); return;
+    if(!(p>0)){ Alert.alert('Invalid','Enter a positive price'); return;}
+
+    const form = new FormData();
+    form.append('id', requestId);
+    form.append('action','drop_off');
+    form.append('real_price', p);
+    if(photo){
+      form.append('receipt',{
+        uri:photo.uri,
+        name:'receipt.jpg',
+        type:'image/jpeg'
+      });
     }
-    // 把数据回传给上一页 (或直接上传后台，看你的 AcceptOrderScreen 实现)
-    onDone({ orderId, price: p, receiptUri });
-    navigation.goBack();
+
+    try{
+      const r = await fetch(`${BASE_URL}/accept_order.php`,{
+        method:'POST',
+        credentials:'include',
+        headers:{ Cookie:`PHPSESSID=${sessionID}` },
+        body:form
+      });
+      const d = await r.json();
+      if(!d.success) return Alert.alert('Error',d.message||'Fail');
+      Alert.alert('Success','Order dropped off!',[{text:'OK',onPress:()=>navigation.goBack()}]);
+      refresh();            // 更新上一页列表
+    }catch{ Alert.alert('Error','Network'); }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Finish Delivery</Text>
+  return(
+    <View style={styles.c}>
+      <Text style={styles.h}>Finish Delivery</Text>
 
       <Text style={styles.label}>Total price on receipt ($)</Text>
-      <TextInput
-        style={styles.input}
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="decimal-pad"
-        placeholder="e.g. 23.45"
-      />
+      <TextInput style={styles.inp}
+        keyboardType={Platform.OS==='ios'?'decimal-pad':'numeric'}
+        placeholder="e.g. 23.45" value={price} onChangeText={setPrice}/>
 
-      <Button
-        title="CHOOSE RECEIPT PHOTO (OPTIONAL)"
-        onPress={pickReceipt}
-        disabled={!hasLibPerm}
-      />
-
-      {receiptUri && (
-        <Image source={{ uri: receiptUri }} style={styles.preview} />
-      )}
-
-      <View style={{ height: 10 }} />
-
-      <Button title="SUBMIT" onPress={handleSubmit} />
+      <Button title="CHOOSE RECEIPT PHOTO (OPTIONAL)" onPress={choosePic}/>
+      <View style={{height:10}}/>
+      <Button title="SUBMIT" onPress={submit}/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:20 },
-  heading:{ fontSize:24, fontWeight:'700', textAlign:'center', marginBottom:24 },
-  label:{ fontSize:16, marginBottom:6 },
-  input:{ borderWidth:1, borderColor:'#ccc', borderRadius:6,
-          padding:10, marginBottom:16 },
-  preview:{ width:'100%', height:200, marginTop:12, borderRadius:6 },
+  c:{flex:1,padding:20},
+  h:{fontSize:22,fontWeight:'700',textAlign:'center',marginBottom:20},
+  label:{fontSize:16,fontWeight:'600',marginTop:14},
+  inp:{borderWidth:1,borderColor:'#ccc',borderRadius:6,padding:10,marginTop:6},
 });
