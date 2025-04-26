@@ -426,26 +426,29 @@ CREATE TABLE users (
 
 CREATE TABLE requests (
     id                INT AUTO_INCREMENT PRIMARY KEY,
-    username          VARCHAR(255)  NOT NULL,
-    item              VARCHAR(255)  NOT NULL,
-    quantity          INT           NOT NULL DEFAULT 1,
-    drop_off_location VARCHAR(255)  NOT NULL,
+    username          VARCHAR(255)            NOT NULL,
+    item              VARCHAR(255)            NOT NULL,
+    quantity          INT                     NOT NULL DEFAULT 1,
+    is_custom         TINYINT(1)              NOT NULL DEFAULT 0,       
+    est_price         DECIMAL(10,2)                    DEFAULT NULL,    
+    purchase_mode     VARCHAR(255)                     DEFAULT NULL,   
+    drop_off_location VARCHAR(255)            NOT NULL,
     delivery_speed    ENUM('urgent','common') NOT NULL DEFAULT 'common',
     status            ENUM('pending','accepted','completed','confirmed')
-                     NOT NULL DEFAULT 'pending',
-    is_custom         TINYINT(1)    NOT NULL DEFAULT 0,
-    est_price         DECIMAL(10,2) NULL,
-    purchase_mode     VARCHAR(255)   NULL,
-    total_price       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    accepted_by       VARCHAR(255)  NULL,
-
+                                         NOT NULL DEFAULT 'pending',
+    accepted_by       VARCHAR(255)                     DEFAULT NULL,   
+    total_price       DECIMAL(10,2)           NOT NULL DEFAULT 0.00,    
+    real_price        DECIMAL(10,2)                    DEFAULT NULL,     
+    receipt_photo     VARCHAR(255)                     DEFAULT NULL,   
+    created_at        DATETIME               NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_requests_user
-      FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
+        FOREIGN KEY (username)
+        REFERENCES users(username) ON DELETE CASCADE,
 
-    INDEX idx_status(status),
-    INDEX idx_dasher(accepted_by)
+    INDEX idx_status   (status),
+    INDEX idx_dasher   (accepted_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE chat_rooms (
     id          INT AUTO_INCREMENT PRIMARY KEY,
