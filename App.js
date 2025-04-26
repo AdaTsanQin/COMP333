@@ -2,6 +2,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 /* ---------- screens ---------- */
 import HomeScreen                 from './screen/HomeScreen';
@@ -25,11 +26,14 @@ import ChatScreen                 from './screen/ChatScreen';
 
 import NavigationToLocationScreen from './screen/NavigationToLocationScreen';   // map + navigate
 
+import TipScreen                    from './screen/TipScreen';
+
 /* ---------- navigator ---------- */
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
+  <StripeProvider publishableKey="pk_test_51RHZhFBXyC0V6OjK9IPnUHSWT9Fxl58yXaOA9J8GGfiazELqPZnBZQLOTT8czaCqljp8qkeoQr2jvs3LD9sDKZIe009hImSm6t">
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         {/* auth */}
@@ -56,7 +60,8 @@ export default function App() {
         {/* chat */}
         <Stack.Screen name="Chats" component={ChatListScreen} />
         <Stack.Screen name="Chat"  component={ChatScreen} />
-
+        {/* tip */}
+        <Stack.Screen name="TipScreen" component={TipScreen} />
         {/* map navigation */}
         <Stack.Screen
           name="NavigationToLocationScreen"
@@ -65,5 +70,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+  </StripeProvider>
   );
 }
