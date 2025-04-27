@@ -486,6 +486,17 @@ CREATE TABLE tips (
       ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE recharges (
+id          INT AUTO_INCREMENT PRIMARY KEY,
+username    VARCHAR(255)   NOT NULL,
+amount      INT            NOT NULL,        
+stripe_pi   VARCHAR(255)   NULL,            
+status      ENUM('pending','succeeded','failed')
+NOT NULL DEFAULT 'pending',
+created_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CONSTRAINT fk_recharge_user FOREIGN KEY (username)
+REFERENCES users(username) ON DELETE CASCADE
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 | Step | Command / Action |
 |------|------------------|
