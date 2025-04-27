@@ -498,16 +498,6 @@ CONSTRAINT fk_recharge_user FOREIGN KEY (username)
 REFERENCES users(username) ON DELETE CASCADE
 ) ENGINE=InnoDB CHARSET=utf8mb4;
 
-1.Create a account in https://stripe.com
-2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys
-3.Copy the publishable key in to this line of App.js 
-,,,
-<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY">
-,,,
-4.Copy the Secret key into the create-payment-intent.php line 27
-,,,
-\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');  
-,,,
 | Step | Command / Action |
 |------|------------------|
 4. | Insert a test user (needed for valid‑login):INSERT INTO users VALUES ('testuser', PASSWORD('password123'), 0);|
@@ -572,3 +562,14 @@ npm install
 #### 5. Launch the app with Expo
 npm run android  
 
+
+1.Create a account in https://stripe.com
+2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys
+3.Copy the publishable key in to this line of App.js 
+,,,
+<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY">
+,,,
+4.Copy the Secret key into the create-payment-intent.php line 27
+,,,
+\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');  
+,,,
