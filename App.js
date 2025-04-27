@@ -28,7 +28,7 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <StripeProvider publishableKey="pk_test_51RHZhFBXyC0V6OjK9IPnUHSWT9Fxl58yXaOA9J8GGfiazELqPZnBZQLOTT8czaCqljp8qkeoQr2jvs3LD9sDKZIe009hImSm6t">
+    <StripeProvider publishableKey="pk_test_51RHZhMPc03iVa9PcKNScJuTXqDGzFvCdgfHfYp292RAIPDc8vk0Lw81L3CerFMVWcYNlDid6PhLRALhuSwtG5EVQ00SmY5dCpi">
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
           {/* authentication */}
