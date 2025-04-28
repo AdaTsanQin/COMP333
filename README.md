@@ -546,8 +546,34 @@ OK (4 tests, 4 assertions)
 
 
 ## problem3:PROJECT
+#### Before running:
+1.Create a account in https://stripe.com<br>
+2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys<br>
+(Notice the key might be different every day, recheck even you already set up key last time)<br>
+3.Copy the publishable key in to this line of App.js<br>
+,,,<br>
+<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY"><br>
+,,,<br>
+4.Copy the Secret key into the create-payment-intent.php line 27<br>
+,,,<br>
+\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
+,,,<br>
 
-#### 1. Switch to the main branch
+5.In terminal, run:<br>
+,,,<br>
+cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI<br>
+composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
+composer require stripe/stripe-php<br>
+,,,<br>
+
+6.Create a secrets.php under htdocs with following content:<br>
+<?php<br>
+// File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
+
+// Your Stripe Secret Key (never commit this to public repo!)<br>
+$stripeSecretKey = 'YOUR_SECRET_KEY';<br>
+
+#### 1. Switch to the main branch<br>
 git checkout main
 
 #### 2. copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
@@ -560,16 +586,4 @@ choose open→ COMP333(main branch folder)
 npm install
 
 #### 5. Launch the app with Expo
-npm run android  
-
-
-1.Create a account in https://stripe.com
-2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys
-3.Copy the publishable key in to this line of App.js 
-,,,
-<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY">
-,,,
-4.Copy the Secret key into the create-payment-intent.php line 27
-,,,
-\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');  
-,,,
+npm run android
