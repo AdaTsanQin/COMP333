@@ -1,199 +1,140 @@
-// screen/AcceptOrderScreen.js
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Alert,
-  FlatList,
-  Platform,
+  View, Text, Button, StyleSheet, Alert, FlatList, Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
-const AcceptOrderScreen = ({ route, navigation }) => {
+const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const BASE_URL = `http://${HOST}/WesDashAPI`;
+
+export default function AcceptOrderScreen({ route, navigation }) {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
+  const [orders,   setOrders] = useState([]);
+  const [sessionID,setSID]    = useState(null);
 
-  const [orders,     setOrders]  = useState([]);
-  const [sessionID,  setSID]     = useState(null);
-
-  const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-  const BASE_URL = `http://${HOST}/WesDashAPI`;
-
-  /* ---------- pull orders ---------- */
-  const fetchOrders = async () => {
+  /* ───────── fetch list ───────── */
+  const fetchOrders = async (sid=sessionID) => {
+    if (!sid) return;
     try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type':'application/json', Cookie:`PHPSESSID=${sessionID}` },
+      const r = await fetch(`${BASE_URL}/accept_order.php`, {
+        credentials:'include',
+        headers:{ Cookie:`PHPSESSID=${sid}` },
       });
-      const data = await resp.json();
-      data.success
-        ? setOrders(data.orders)
-        : Alert.alert('Error', data.message || 'Failed to fetch orders.');
-    } catch {
-      Alert.alert('Error', 'Network error while fetching orders.');
+      const d = await r.json();
+      d.success ? setOrders(d.orders)
+                : Alert.alert('Error',d.message||'Load failed');
+    } catch { Alert.alert('Error','Network'); }
+  };
+
+  /* first load */
+  useEffect(()=>{ (async()=>{
+    const id = await AsyncStorage.getItem('PHPSESSID');
+    if (!id){Alert.alert('Error','No session');return;}
+    setSID(id); fetchOrders(id);
+  })(); },[]);
+
+  useFocusEffect(useCallback(()=>{ if(sessionID) fetchOrders(); },[sessionID]));
+
+  /* ───────── accept ───────── */
+  const accept = async (id) => {
+    try{
+      const r = await fetch(`${BASE_URL}/accept_order.php`,{
+        method:'PUT', credentials:'include',
+        headers:{'Content-Type':'application/json',Cookie:`PHPSESSID=${sessionID}`},
+        body:JSON.stringify({id})
+      });
+      const d = await r.json();
+      if(!d.success) return Alert.alert('Error',d.message||'Failed');
+      setOrders(p=>p.map(o=>o.id===id?{...o,status:'accepted',room_id:d.room_id||o.room_id}:o));
+      if(d.room_id) navigation.navigate('Chat',{roomId:d.room_id,username});
+    }catch{Alert.alert('Error','Accept net err');}
+  };
+
+  /* ───────── drop-off helper ───────── */
+  const backendDrop = async (id) => {
+    try{
+      const r = await fetch(`${BASE_URL}/accept_order.php`,{
+        method:'PUT', credentials:'include',
+        headers:{'Content-Type':'application/json',Cookie:`PHPSESSID=${sessionID}`},
+        body:JSON.stringify({id,action:'drop_off'})
+      });
+      const d = await r.json();
+      d.success ? (Alert.alert('Success','Dropped off'), fetchOrders())
+                : Alert.alert('Error',d.message||'Drop failed');
+    }catch{Alert.alert('Error','Drop net err');}
+  };
+
+  /* ───────── triggered from button ───────── */
+  const handleDropOff = (o) => {
+    // 若为自定义 & 尚无价格，需要输入
+    if (o.is_custom == 1 || !o.est_price || Number(o.est_price) === 0) {
+      navigation.navigate('DropOffScreen',{
+        requestId : o.id,
+        sessionID,
+        BASE_URL,
+        refresh: () => fetchOrders(),   // 回调刷新
+      });
+    } else {
+      backendDrop(o.id);
     }
   };
 
-  /* ---------- first load ---------- */
-  useEffect(() => {
-    (async () => {
-      const id = await AsyncStorage.getItem('PHPSESSID');
-      if (!id) { Alert.alert('Error','Session ID not found.'); return; }
-      setSID(id);
-      fetchOrders();
-    })();
-  }, []);
-
-  /* ---------- refresh on focus ---------- */
-  useFocusEffect(useCallback(() => {
-    if (sessionID) fetchOrders();
-  }, [sessionID]));
-
-  /* ---------- accept ---------- */
-  const handleAcceptOrder = async (id) => {
-    try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
-        method:'PUT',
-        credentials:'include',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const data = await resp.json();
-      if (data.success) {
-        setOrders(prev => prev.map(o =>
-          o.id===id ? { ...o, status:'accepted', room_id:data.room_id||o.room_id } : o));
-        data.room_id
-          ? navigation.navigate('Chat',{ roomId:data.room_id, username })
-          : Alert.alert('Success','Order accepted successfully!');
-      } else Alert.alert('Error', data.message || 'Failed to accept order.');
-    } catch { Alert.alert('Error','Failed to accept order. Please try again.'); }
+  const hasCoords = loc=>{
+    if(!loc) return false;
+    const p=`${loc}`.split(',').map(s=>parseFloat(s.trim()));
+    return p.length===2 && p.every(Number.isFinite);
   };
 
-  /* ---------- drop-off ---------- */
-  const handleDropOffOrder = async (id) => {
-    try {
-      const resp = await fetch(`${BASE_URL}/accept_order.php`, {
-        method:'PUT',
-        credentials:'include',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ id, action:'drop_off' }),
-      });
-      const data = await resp.json();
-      if (data.success) {
-        Alert.alert('Success','Order dropped off successfully!');
-        fetchOrders();
-      } else Alert.alert('Error', data.message || 'Failed to drop off order.');
-    } catch { Alert.alert('Error','Failed to drop off order. Please try again.'); }
-  };
-
-  /* ---------- 坐标合法性工具 ---------- */
-  const hasValidCoords = (loc) => {
-    if (!loc) return false;                 
-    const p = String(loc).split(',').map(s => parseFloat(s.trim()));
-    return p.length === 2 && p.every(n => Number.isFinite(n));
-  };
-
-  /* ---------- 单条卡片 ---------- */
-  const OrderItem = ({ item }) => (
+  /* card */
+  const Card = ({item:o})=>(
     <View style={styles.card}>
-      <Text style={styles.label}>Item:</Text>
-      <Text style={styles.text}>{item.item}</Text>
-
-      <Text style={styles.label}>Quantity:</Text>
-      <Text style={styles.text}>{item.quantity}</Text>
-
-      <Text style={styles.label}>Drop-off:</Text>
-      <Text style={styles.text}>{item.drop_off_location}</Text>
-
-      <Text style={styles.label}>Speed:</Text>
-      <Text style={styles.text}>{item.delivery_speed}</Text>
-
+      <Text style={styles.label}>Item:</Text><Text>{o.item}</Text>
+      {o.quantity && <><Text style={styles.label}>Qty:</Text><Text>{o.quantity}</Text></>}
       <Text style={styles.label}>Status:</Text>
       <View style={[
-        styles.statusBox,
-        item.status==='pending'  ? styles.pending  :
-        item.status==='accepted' ? styles.accepted : styles.completed]}>
-        <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
+        styles.stBox,
+        o.status==='pending'?styles.pending :
+        o.status==='accepted'?styles.accepted : styles.completed]}>
+        <Text style={styles.stTxt}>{o.status.toUpperCase()}</Text>
       </View>
 
-      {item.status==='pending' && (
-        <Button title="ACCEPT" onPress={()=>handleAcceptOrder(item.id)}/>
-      )}
+      {o.status==='pending' && <Button title="ACCEPT" onPress={()=>accept(o.id)}/>}
 
-      {item.status==='accepted' && (
+      {o.status==='accepted' && (
         <>
-          {/* 导航到店铺（如果有） */}
-          {hasValidCoords(item.purchase_mode) && (
-            <Button
-              title="NAVIGATE TO STORE"
-              onPress={()=>navigation.navigate('NavigationToLocationScreen',
-                       { dropOffLocation:item.purchase_mode })}/>
-          )}
+          {hasCoords(o.drop_off_location)
+            ? <Button title="NAVIGATE TO DROP-OFF"
+                onPress={()=>navigation.navigate('NavigationToLocationScreen',
+                  {dropOffLocation:o.drop_off_location})}/>
+            : <Button title="NO DROP-OFF MAP" color="#999"/>}
 
-          {/* 导航到收货点 */}
-          {hasValidCoords(item.drop_off_location) ? (
-            <Button
-              title="NAVIGATE TO DROP-OFF"
-              onPress={()=>navigation.navigate('NavigationToLocationScreen',
-                       { dropOffLocation:item.drop_off_location })}/>
-          ) : (
-            <Button title="NO DROP-OFF MAP" color="#999"
-              onPress={()=>Alert.alert('No coordinates','This order has no drop-off location.')}/>
-          )}
+          <Button title="DROP OFF" onPress={()=>handleDropOff(o)}/>
 
-          {/* 聊天 */}
-          {item.room_id && (
-            <Button title="CHAT" color="#007bff"
-              onPress={()=>navigation.navigate('Chat',{ roomId:item.room_id, username })}/>
-          )}
-
-          {/* 完成配送 */}
-          <Button title="DROP OFF" onPress={()=>handleDropOffOrder(item.id)}/>
+          {o.room_id && <Button title="CHAT"
+              onPress={()=>navigation.navigate('Chat',{roomId:o.room_id,username})}/>}
         </>
       )}
     </View>
   );
 
-  /* ---------- render ---------- */
-  return (
+  return(
     <View style={styles.container}>
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTxt}>Logged in as: {username}</Text>
-        <Text style={styles.infoTxt}>Role: {role==='dasher' ? 'Dasher' : 'User'}</Text>
-      </View>
-
-      <Text style={styles.heading}>Orders for Acceptance</Text>
-
-      <FlatList
-        data={orders}
-        keyExtractor={i=>i.id.toString()}
-        renderItem={({item})=><OrderItem item={item}/>}
-        ListEmptyComponent={<Text style={{textAlign:'center', marginTop:40}}>No orders available.</Text>}
-      />
+      <Text style={styles.h}>Orders for Acceptance</Text>
+      <FlatList data={orders} keyExtractor={i=>i.id.toString()}
+        renderItem={({item})=> <Card item={item}/> }
+        ListEmptyComponent={<Text style={{textAlign:'center',marginTop:40}}>No orders.</Text>}/>
     </View>
   );
-};
+}
 
-/* ---------- styles ---------- */
+/* styles */
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:16, backgroundColor:'#fff' },
-  heading:  { fontSize:24, fontWeight:'bold', marginBottom:10, textAlign:'center' },
-  infoBox:  { paddingVertical:8, borderBottomWidth:1, borderColor:'#eee', marginBottom:12 },
-  infoTxt:  { fontSize:16, marginBottom:4, fontWeight:'500', color:'#333' },
-
-  card:{ padding:12, borderWidth:1, borderColor:'#ccc', borderRadius:6, marginBottom:14 },
-  label:{ fontSize:16, fontWeight:'bold', marginTop:4 },
-  text:{ fontSize:16, marginBottom:4 },
-
-  statusBox:{ padding:6, borderRadius:4, alignItems:'center', marginBottom:8 },
-  pending:{ backgroundColor:'#ffcc00' },
-  accepted:{ backgroundColor:'#66cc66' },
-  completed:{ backgroundColor:'#007bff' },
-  statusTxt:{ color:'#fff', fontWeight:'bold' },
+  container:{flex:1,padding:16,backgroundColor:'#fff'},
+  h:{fontSize:24,fontWeight:'700',textAlign:'center',marginBottom:10},
+  card:{borderWidth:1,borderColor:'#ccc',borderRadius:6,padding:12,marginBottom:14},
+  label:{fontWeight:'700',marginTop:4},
+  stBox:{padding:6,borderRadius:4,alignItems:'center',marginVertical:6},
+  pending:{backgroundColor:'#ffcc00'},accepted:{backgroundColor:'#66cc66'},
+  completed:{backgroundColor:'#007bff'},stTxt:{color:'#fff',fontWeight:'700'},
 });
-
-export default AcceptOrderScreen;
