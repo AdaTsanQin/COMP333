@@ -15,13 +15,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HOST          = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 const BASE_URL      = `http://${HOST}/WesDashAPI`;
-const PRIMARY_COLOR = '#007bff';   
-const STATUS_COLOR  = '#66cc66';   
-const PENDING_COLOR = '#ffcc00';  
+const PRIMARY_COLOR = '#007bff';
+const STATUS_COLOR  = '#66cc66';
+const PENDING_COLOR = '#ffcc00';
 
 export default function ViewRequestsScreen({ route, navigation }) {
   const { username = 'Unknown', role = 'user' } = route.params ?? {};
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests]   = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
   /* ───── 通用提示 ───── */
@@ -117,8 +117,8 @@ export default function ViewRequestsScreen({ route, navigation }) {
 
   /* ───── 单条卡片 ───── */
   const RequestItem = ({ item }) => {
-    const [name, setName]   = useState(item.item);
-    const [loc , setLoc ]   = useState(item.drop_off_location);
+    const [name,  setName]  = useState(item.item);
+    const [loc ,  setLoc ]  = useState(item.drop_off_location);
     const [speed, setSpeed] = useState(item.delivery_speed);
 
     return (
@@ -180,11 +180,17 @@ export default function ViewRequestsScreen({ route, navigation }) {
           <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
         </View>
 
+        {/* -------- Bill → Tip → Confirm 流程 -------- */}
         {item.status === 'completed' && (
           <Button
-            title="CONFIRM RECEIVED"
+            title="VIEW BILL"
             color={PRIMARY_COLOR}
-            onPress={() => doConfirm(item.id)}
+            onPress={() =>
+              navigation.navigate('BillScreen', {
+                request: item,          // 账单页需要完整订单信息
+                onDone : fetchRequests, // 账单 / Tip 完成后刷新列表
+              })
+            }
           />
         )}
 
@@ -206,7 +212,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
     <View style={styles.container}>
       <View style={styles.infoBox}>
         <Text style={styles.infoTxt}>Logged in as: {username}</Text>
-        <Text style={styles.infoTxt}>Role: {role === 'dasher' ? 'Dasher' : 'User'}</Text>
+        <Text style={styles.infoTxt}>
+          Role: {role === 'dasher' ? 'Dasher' : 'User'}
+        </Text>
       </View>
 
       <Text style={styles.heading}>My Requests</Text>

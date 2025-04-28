@@ -426,26 +426,29 @@ CREATE TABLE users (
 
 CREATE TABLE requests (
     id                INT AUTO_INCREMENT PRIMARY KEY,
-    username          VARCHAR(255)  NOT NULL,
-    item              VARCHAR(255)  NOT NULL,
-    quantity          INT           NOT NULL DEFAULT 1,
-    drop_off_location VARCHAR(255)  NOT NULL,
+    username          VARCHAR(255)            NOT NULL,
+    item              VARCHAR(255)            NOT NULL,
+    quantity          INT                     NOT NULL DEFAULT 1,
+    is_custom         TINYINT(1)              NOT NULL DEFAULT 0,       
+    est_price         DECIMAL(10,2)                    DEFAULT NULL,    
+    purchase_mode     VARCHAR(255)                     DEFAULT NULL,   
+    drop_off_location VARCHAR(255)            NOT NULL,
     delivery_speed    ENUM('urgent','common') NOT NULL DEFAULT 'common',
     status            ENUM('pending','accepted','completed','confirmed')
-                     NOT NULL DEFAULT 'pending',
-    is_custom         TINYINT(1)    NOT NULL DEFAULT 0,
-    est_price         DECIMAL(10,2) NULL,
-    purchase_mode     VARCHAR(255)   NULL,
-    total_price       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    accepted_by       VARCHAR(255)  NULL,
-
+                                         NOT NULL DEFAULT 'pending',
+    accepted_by       VARCHAR(255)                     DEFAULT NULL,   
+    total_price       DECIMAL(10,2)           NOT NULL DEFAULT 0.00,    
+    real_price        DECIMAL(10,2)                    DEFAULT NULL,     
+    receipt_photo     VARCHAR(255)                     DEFAULT NULL,   
+    created_at        DATETIME               NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_requests_user
-      FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
+        FOREIGN KEY (username)
+        REFERENCES users(username) ON DELETE CASCADE,
 
-    INDEX idx_status(status),
-    INDEX idx_dasher(accepted_by)
+    INDEX idx_status   (status),
+    INDEX idx_dasher   (accepted_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE chat_rooms (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -483,6 +486,17 @@ CREATE TABLE tips (
       ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE recharges (
+id          INT AUTO_INCREMENT PRIMARY KEY,
+username    VARCHAR(255)   NOT NULL,
+amount      INT            NOT NULL,        
+stripe_pi   VARCHAR(255)   NULL,            
+status      ENUM('pending','succeeded','failed')
+NOT NULL DEFAULT 'pending',
+created_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CONSTRAINT fk_recharge_user FOREIGN KEY (username)
+REFERENCES users(username) ON DELETE CASCADE
+) ENGINE=InnoDB CHARSET=utf8mb4;
 
 | Step | Command / Action |
 |------|------------------|
@@ -532,8 +546,34 @@ OK (4 tests, 4 assertions)
 
 
 ## problem3:PROJECT
+#### Before running:
+1.Create a account in https://stripe.com<br>
+2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys<br>
+(Notice the key might be different every day, recheck even you already set up key last time)<br>
+3.Copy the publishable key in to this line of App.js<br>
+,,,<br>
+<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY"><br>
+,,,<br>
+4.Copy the Secret key into the create-payment-intent.php line 27<br>
+,,,<br>
+\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
+,,,<br>
 
-#### 1. Switch to the main branch
+5.In terminal, run:<br>
+,,,<br>
+cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI<br>
+composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
+composer require stripe/stripe-php<br>
+,,,<br>
+
+6.Create a secrets.php under htdocs with following content:<br>
+<?php<br>
+// File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
+
+// Your Stripe Secret Key (never commit this to public repo!)<br>
+$stripeSecretKey = 'YOUR_SECRET_KEY';<br>
+
+#### 1. Switch to the main branch<br>
 git checkout main
 
 #### 2. copy backend into Apache root (macOS path shown; Windows: C:\xampp\htdocs)
@@ -546,5 +586,4 @@ choose open→ COMP333(main branch folder)
 npm install
 
 #### 5. Launch the app with Expo
-npm run android  
-
+npm run android

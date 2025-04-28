@@ -1,12 +1,4 @@
 <?php
-/*
- * accept_requests.php
- * ─ GET    : 用户查看自己的全部订单（除 confirmed）
- * ─ DELETE : 用户删除自己的订单
- * ─ PUT    :
- *      • 无 action        -> 达⼈接单  (pending → accepted)
- *      • action=drop_off  -> 达⼈送达  (accepted → completed)
- */
 
 session_start();
 error_reporting(E_ALL);
@@ -22,16 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 /* ──────────── 登录校验 ──────────── */
 if (!isset($_SESSION['username'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in.']);
-    exit;
+    echo json_encode(['success' => false, 'message' => 'User not logged in.']); exit;
 }
 $me = $_SESSION['username'];
 
 /* ──────────── 数据库连接 ──────────── */
 $conn = new mysqli('localhost', 'root', '', 'app-db');
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'DB connection failed: '.$conn->connect_error]);
-    exit;
+    echo json_encode(['success' => false, 'message' => 'DB connection failed: '.$conn->connect_error]); exit;
 }
 $conn->set_charset('utf8mb4');
 
@@ -43,13 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
           FROM  requests r
           LEFT JOIN chat_rooms cr ON cr.order_id = r.id
          WHERE  r.username = ?
-           AND  r.status <> 'confirmed'          /* 仅排除已确认，其余全部返回 */
+           AND  r.status <> 'confirmed'
          ORDER BY r.id DESC";
     $st = $conn->prepare($sql);
     $st->bind_param('s', $me);
     $st->execute();
-    $rows = $st->get_result()->fetch_all(MYSQLI_ASSOC);
-    echo json_encode(['success' => true, 'requests' => $rows]);
+    echo json_encode(['success' => true,
+                      'requests' => $st->get_result()->fetch_all(MYSQLI_ASSOC)]);
     exit;
 }
 
@@ -63,51 +53,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $st = $conn->prepare("DELETE FROM requests WHERE id=? AND username=?");
     $st->bind_param('is', $id, $me);
     $ok = $st->execute();
-    echo json_encode(['success'=>$ok,'message'=>$ok ? 'Request deleted' : 'Delete failed']);
-    exit;
+    echo json_encode(['success'=>$ok,'message'=>$ok ? 'Request deleted' : 'Delete failed']); exit;
 }
 
 /* ═══════════════════ PUT ═══════════════════ */
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $in = json_decode(file_get_contents('php://input'), true);
 
-    /* —— 1) 用户确认收到：completed → confirmed，同时关闭聊天室 —— */
+    /* —— 1) 用户确认收货：completed → confirmed —— */
     if (!empty($in['request_id'])) {
         $reqId = (int)$in['request_id'];
 
-        /* 检查状态 */
-        $chk = $conn->prepare("SELECT status FROM requests WHERE id=? AND username=?");
-        $chk->bind_param('is', $reqId, $me);
-        $chk->execute();
-        $row = $chk->get_result()->fetch_assoc();
-        if (!$row) {
-            echo json_encode(['success'=>false,'message'=>'Request not found.']); exit;
-        }
-        if ($row['status'] !== 'completed') {
-            echo json_encode(['success'=>false,'message'=>'Only completed requests can be confirmed.']); exit;
-        }
+        $conn->begin_transaction();
 
-        /* 更新状态 */
+        /* ① 锁单并取信息 */
+        $sel = $conn->prepare(
+            "SELECT status, accepted_by, est_price, delivery_speed
+               FROM requests
+              WHERE id=? AND username=? FOR UPDATE");
+        $sel->bind_param('is', $reqId, $me);
+        $sel->execute();
+        $row = $sel->get_result()->fetch_assoc();
+
+        if (!$row) { $conn->rollback();
+            echo json_encode(['success'=>false,'message'=>'Request not found.']); exit; }
+
+        if ($row['status'] !== 'completed') { $conn->rollback();
+            echo json_encode(['success'=>false,'message'=>'Only completed requests can be confirmed.']); exit; }
+
+        /* ② 计算支付给 dasher 的金额（¢） */
+        $est   = (float)$row['est_price'];
+        $rate  = $row['delivery_speed']==='urgent' ? 0.20 : 0.05;
+        $fee   = $est * $rate;
+        $tipRs = $conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM tips WHERE request_id={$reqId}");
+        $tip   = (int)$tipRs->fetch_assoc()['t'];                // 已是分
+        $totalCents = (int) round(($est + $fee) * 100) + $tip;   // 商品+配送+小费
+
+        /* ③ 更新订单状态 */
         $upd = $conn->prepare("UPDATE requests SET status='confirmed' WHERE id=?");
         $upd->bind_param('i', $reqId);
-        $ok = $upd->execute();
+        $upd->execute();
 
-        /* 删除聊天室（messages 由 ON DELETE CASCADE 处理） */
-        if ($ok) {
-            $del = $conn->prepare("DELETE FROM chat_rooms WHERE order_id=?");
-            $del->bind_param('i', $reqId);
-            $del->execute();
+        /* ④ 关闭聊天室 */
+        $conn->prepare("DELETE FROM chat_rooms WHERE order_id=?")
+             ->bind_param('i', $reqId)->execute();
+
+        /* ⑤ 打钱给 dasher */
+        if (!empty($row['accepted_by'])) {
+            $dasher = $row['accepted_by'];
+            $add = $conn->prepare(
+                "UPDATE users SET balance = balance + ? WHERE username=?");
+            $add->bind_param('is', $totalCents, $dasher);
+            $add->execute();
         }
 
-        echo json_encode([
-            'success'=>$ok,
-            'message'=>$ok ? 'Request confirmed & chat removed.' : 'Confirm failed.'
-        ]);
-        exit;
+        $conn->commit();
+        echo json_encode(['success'=>true,'message'=>'Request confirmed & payment released.']); exit;
     }
 
     /* —— 2) 用户编辑自己的请求 —— */
-    if (empty($in['id']) || empty($in['item']) ||
+    if (empty($in['id'])          || empty($in['item']) ||
         empty($in['drop_off_location']) || empty($in['delivery_speed']) ||
         empty($in['status'])) {
         echo json_encode(['success'=>false,'message'=>'Missing fields.']); exit;
@@ -116,8 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $st = $conn->prepare(
         "UPDATE requests
             SET item=?, drop_off_location=?, delivery_speed=?, status=?
-          WHERE id=? AND username=?"
-    );
+          WHERE id=? AND username=?");
     $st->bind_param(
         'ssssis',
         $in['item'],
@@ -128,8 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $me
     );
     $ok = $st->execute();
-    echo json_encode(['success'=>$ok,'message'=>$ok ? 'Request updated.' : 'Update failed.']);
-    exit;
+    echo json_encode(['success'=>$ok,'message'=>$ok ? 'Request updated.' : 'Update failed.']); exit;
 }
 
 /* ─────────── 其它方法 ─────────── */
