@@ -23,6 +23,9 @@ import CustomOrderScreen          from './screen/CustomOrderScreen';
 import ChatListScreen             from './screen/ChatListScreen';
 import ChatScreen                 from './screen/ChatScreen';
 
+import CreateReviewScreen           from './screen/CreateReviewScreen.js'
+import ManageReviewsScreen         from './screen/ManageReviewsScreen.js'
+import UpdateReviewScreen          from './UpdateReviewScreen.js'
 import NavigationToLocationScreen from './screen/NavigationToLocationScreen';   // map + navigate
 
 /* ---------- navigator ---------- */
@@ -63,6 +66,11 @@ export default function App() {
           component={NavigationToLocationScreen}
           options={{ title: 'Navigation' }}
         />
+        
+        {/* Review screens */}
+        <Stack.Screen name="CreateReviewScreen" component={CreateReviewScreen} />
+        <Stack.Screen name="UpdateReview" component={UpdateReviewScreen} options={{ title: 'Update Review' }} />
+        <Stack.Screen name="ManageReviewsScreen" component={ManageReviewsScreen} options={{ title: 'Manage Reviews' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

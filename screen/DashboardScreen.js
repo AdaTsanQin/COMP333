@@ -29,10 +29,62 @@ export default function DashboardScreen({ route, navigation }) {
 
   useEffect(() => {
     (async () => {
+      // Only check for pending reviews if user role is 'user' (buyer)
+      if (role !== 'user') return;
+      
       const sid = await AsyncStorage.getItem('PHPSESSID');
-      if (!sid) Alert.alert('Error', 'Session ID not found. Please log in again.');
+      if (!sid) {
+        Alert.alert('Error', 'Session ID not found. Please log in again.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://10.0.2.2/WesDashAPI/get_pending_review.php', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        const data = await response.json();
+
+        if (data.success && data.order) {
+          Alert.alert(
+            'Review Your Dasher',
+            `Your order "${data.order.item}" has been delivered. Would you like to leave a review for ${data.order.accepted_by}?`,
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: async () => {
+                  try {
+                    await fetch('http://10.0.2.2/WesDashAPI/cancel_review_prompt.php', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ order_id: data.order.id }),
+                      credentials: 'include',
+                    });
+                  } catch (error) {
+                    console.error('Error cancelling review prompt:', error);
+                  }
+                },
+              },
+              {
+                text: 'Leave Review',
+                onPress: () => {
+                  navigation.navigate('CreateReviewScreen', { 
+                    taskId: data.order.id,
+                    dashername: data.order.accepted_by,
+                    item: data.order.item
+                  });
+                },
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching pending review:', error);
+      }
     })();
-  }, []);
+  }, [role, navigation]);
 
   /* ---- logout ---- */
   const handleLogout = () => navigation.navigate('Home');
@@ -99,6 +151,11 @@ export default function DashboardScreen({ route, navigation }) {
           <BigButton
             title="View Request"
             onPress={() => navigation.navigate('ViewRequestScreen', { username, role })}
+          />
+          <BigButton
+            title="Manage Reviews"
+            color="#28a745"
+            onPress={() => navigation.navigate('ManageReviewsScreen', { username, role })}
           />
         </>
       ) : (

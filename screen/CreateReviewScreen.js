@@ -128,11 +128,19 @@ const CreateReviewScreen = () => {
         ? `http://10.0.2.2/WesDashAPI/create_review.php?PHPSESSID=${sessionId}` 
         : 'http://10.0.2.2/WesDashAPI/create_review.php';
       
+      console.log(`Sending review to: ${url}`);
+      console.log('Data being sent:', {
+        task_id: taskId,
+        rating: ratingNumber,
+        comment: comment
+      });
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',  // Include credentials for all requests
         body: JSON.stringify({
           task_id: taskId,
           rating: ratingNumber,
@@ -144,22 +152,13 @@ const CreateReviewScreen = () => {
       console.log('Raw create review response:', text);
       
       try {
+        // Make sure we have a response to parse
+        if (!text.trim()) {
+          throw new Error('Empty response from server');
+        }
+        
         const data = JSON.parse(text);
         if (data.success) {
-          // Update the review status in database - the create_review API already handles the review itself
-          await fetch('http://10.0.2.2/WesDashAPI/save_review.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              orderId: taskId,
-              reviewText: comment,
-              rating: ratingNumber
-            }),
-            credentials: 'include',
-          });
-          
           Alert.alert(
             'Success',
             'Review created successfully',
@@ -175,11 +174,11 @@ const CreateReviewScreen = () => {
         }
       } catch (jsonError) {
         console.error('JSON parse error:', jsonError);
-        Alert.alert('Error', 'Unexpected response from server');
+        Alert.alert('Error', 'Unexpected response from server: ' + jsonError.message);
       }
     } catch (error) {
       console.error('Error creating review:', error);
-      Alert.alert('Error', 'Network request failed');
+      Alert.alert('Error', 'Network request failed: ' + error.message);
     } finally {
       setSubmitting(false);
     }
