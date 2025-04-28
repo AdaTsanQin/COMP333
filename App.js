@@ -28,7 +28,7 @@ import DropOffScreen                from './screen/DropOffScreen';
 
 import CreateReviewScreen           from './screen/CreateReviewScreen.js'
 import ManageReviewsScreen         from './screen/ManageReviewsScreen.js'
-import UpdateReviewScreen          from './UpdateReviewScreen.js'
+import UpdateReviewScreen          from './screen/UpdateReviewScreen.js'
 
 const Stack = createNativeStackNavigator();
 

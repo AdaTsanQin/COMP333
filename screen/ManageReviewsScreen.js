@@ -68,7 +68,7 @@ const ManageReviewsScreen = () => {
   );
 
   const handleCreateReview = (taskId) => {
-    navigation.navigate('CreateReview', { taskId });
+    navigation.navigate('CreateReviewScreen', { taskId });
   };
 
   const handleUpdateReview = (taskId) => {
@@ -94,12 +94,20 @@ const ManageReviewsScreen = () => {
                 ? `http://10.0.2.2/WesDashAPI/delete_review.php?PHPSESSID=${sessionId}` 
                 : 'http://10.0.2.2/WesDashAPI/delete_review.php';
               
+              // Find the task in the tasks array
+              const task = tasks.find(t => t.task_id === taskId);
+              if (!task) {
+                Alert.alert('Error', 'Task not found');
+                return;
+              }
+              
+              // Use review_id instead of order_id
               const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ task_id: taskId }),
+                body: JSON.stringify({ review_id: task.review_id }), // Changed to review_id
               });
               
               const text = await response.text();

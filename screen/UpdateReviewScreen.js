@@ -144,7 +144,7 @@ const UpdateReviewScreen = () => {
             [
               {
                 text: 'OK',
-                onPress: () => navigation.navigate('ManageReviews')
+                onPress: () => navigation.navigate('ManageReviewsScreen')
               }
             ]
           );
