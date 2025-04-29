@@ -560,10 +560,10 @@ OK (4 tests, 4 assertions)
 \Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
 ,,,<br>
 
-5.In terminal, run:<br>
+5.In terminal, run the following,where GitHubUsername should be your github username with all lowercase:<br>
 ,,,<br>
 cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI<br>
-composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
+composer init --name="GitHubUsername/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
 composer require stripe/stripe-php<br>
 ,,,<br>
 
