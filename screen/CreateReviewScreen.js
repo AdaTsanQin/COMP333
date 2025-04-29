@@ -165,7 +165,7 @@ const CreateReviewScreen = () => {
             [
               {
                 text: 'OK',
-                onPress: () => navigation.navigate('DashboardScreen')
+                onPress: () => navigation.navigate('Dashboard')
               }
             ]
           );
