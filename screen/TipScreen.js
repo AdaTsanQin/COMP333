@@ -17,9 +17,20 @@ const BASE_URL = `http://${HOST}/WesDashAPI`;
 export default function TipScreen({ route, navigation }) {
   const { requestId } = route.params;
 
+  /* 新增：username / role 透传 */
+  const [username, setUsername] = useState(route.params?.username ?? null);
+  const [role,     setRole]     = useState(route.params?.role     ?? null);
+
   const [loading,  setLoading ] = useState(true);
   const [estPrice, setEstPrice] = useState(0);
   const [speed,    setSpeed   ] = useState('common');
+
+  useEffect(() => {                 // 拉取存储中 username / role（若路由没带）
+    (async () => {
+      if (!username) setUsername(await AsyncStorage.getItem('username'));
+      if (!role)     setRole(await AsyncStorage.getItem('role'));
+    })();
+  }, []);
 
   /* ───────────── 账单 ───────────── */
   const deliveryFee = +(estPrice * (speed === 'urgent' ? 0.20 : 0.05)).toFixed(2);
@@ -63,7 +74,7 @@ export default function TipScreen({ route, navigation }) {
         body: JSON.stringify({ request_id: requestId }),
       });
     } finally {
-      navigation.navigate('Dashboard');
+      navigation.navigate('Dashboard', { username, role });   // ← 透传
     }
   };
 
@@ -99,7 +110,7 @@ export default function TipScreen({ route, navigation }) {
   };
 
   /* ─────────── 无小费按钮 ─────────── */
-  const handleNoTip = () => handleTip(0);     // ← 关键修改：percent = 0
+  const handleNoTip = () => handleTip(0);
 
   /* ─────────── Loading ─────────── */
   if (loading) {
@@ -159,3 +170,4 @@ const styles = StyleSheet.create({
   billVal:    { fontSize: 16 },
   btnWrapper: { marginVertical: 8 },
 });
+

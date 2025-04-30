@@ -22,9 +22,20 @@ const UpdateReviewScreen = () => {
   const [submitting, setSubmitting] = useState(false);
   
   const navigation = useNavigation();
-  const route = useRoute();
+  const route      = useRoute();
   const { taskId } = route.params;
-  
+
+  /* 新增：username / role 透传 */
+  const [username, setUsername] = useState(route.params?.username ?? null);
+  const [role,     setRole]     = useState(route.params?.role     ?? null);
+
+  useEffect(() => {
+    (async () => {
+      if (!username) setUsername(await AsyncStorage.getItem('username'));
+      if (!role)     setRole(await AsyncStorage.getItem('role'));
+    })();
+  }, []);
+
   useEffect(() => {
     fetchTaskDetails();
   }, []);
@@ -68,7 +79,7 @@ const UpdateReviewScreen = () => {
               [
                 {
                   text: 'OK',
-                  onPress: () => navigation.replace('CreateReview', { taskId })
+                  onPress: () => navigation.replace('CreateReview', { taskId, username, role })
                 }
               ]
             );
@@ -144,7 +155,7 @@ const UpdateReviewScreen = () => {
             [
               {
                 text: 'OK',
-                onPress: () => navigation.navigate('ManageReviewsScreen')
+                onPress: () => navigation.navigate('ManageReviewsScreen', { username, role })
               }
             ]
           );

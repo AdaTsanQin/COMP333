@@ -2,15 +2,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Alert, Switch, TouchableOpacity,
-  Image, Dimensions, TextInput, Platform     // ← 加 Platform
+  Image, Dimensions, TextInput, Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';          // ← 加
+import { useFocusEffect } from '@react-navigation/native';
 
 const RED       = '#C41E3A';
 const RED_DARK  = '#991427';
 const BLUE      = '#5978FF';
-const GREEN     = '#2e8b57';      
+const GREEN     = '#2e8b57';
 const GREY_TXT  = '#666';
 const BG_COLOR  = '#F3F4F8';
 const CARD_BG   = '#ffffff';
@@ -187,9 +187,10 @@ export default function DashboardScreen({ route, navigation }) {
             title="View Request"
             onPress={() => navigation.navigate('ViewRequestScreen', { username, role })}
           />
+          {/* 颜色改为和 Chat 一致的绿色 */}
           <BigButton
             title="Manage Reviews"
-            color="#28a745"
+            color={GREEN}
             onPress={() => navigation.navigate('ManageReviewsScreen', { username, role })}
           />
         </>
@@ -258,7 +259,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BG_COLOR,
     alignItems: 'center',
-    paddingTop: height * 0.08,
+    // 上移内容：固定 40 而不是按屏幕高度比例
+    paddingTop: 40,
   },
   logo: { width: 90, height: 90, resizeMode: 'contain', marginBottom: 4 },
   hi: { fontSize: 34, fontWeight: '700', marginVertical: 10 },
@@ -292,10 +294,10 @@ const styles = StyleSheet.create({
   /* Big buttons */
   bigBtn: {
     width: '78%',
-    paddingVertical: 16,
+    paddingVertical: 14,         // 稍微收紧
     borderRadius: 12,
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: 6,           // 稍微收紧
   },
   bigBtnTxt: { fontSize: 20, color: '#fff', fontWeight: '600' },
 
@@ -305,7 +307,7 @@ const styles = StyleSheet.create({
     width: '80%',
     marginTop: 12,
     alignItems: 'center',
-    paddingBottom: 180,
+    paddingBottom: 120,          // 留更小的底部空间
   },
   input: {
     width: '100%',

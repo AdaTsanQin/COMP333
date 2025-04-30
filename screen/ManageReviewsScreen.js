@@ -9,12 +9,24 @@ import {
   ActivityIndicator 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 
 const ManageReviewsScreen = () => {
+  /* 新增：从路由或 Storage 读取 username / role */
+  const route = useRoute();
+  const [username, setUsername] = useState(route.params?.username ?? null);
+  const [role,     setRole]     = useState(route.params?.role     ?? null);
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  useEffect(() => {               // 若路由未带则从本地存储拉取
+    (async () => {
+      if (!username) setUsername(await AsyncStorage.getItem('username'));
+      if (!role)     setRole(await AsyncStorage.getItem('role'));
+    })();
+  }, []);
 
   const fetchCompletedTasks = async () => {
     try {
@@ -68,11 +80,13 @@ const ManageReviewsScreen = () => {
   );
 
   const handleCreateReview = (taskId) => {
-    navigation.navigate('CreateReviewScreen', { taskId });
+    /* 透传 username / role */
+    navigation.navigate('CreateReviewScreen', { taskId, username, role });
   };
 
   const handleUpdateReview = (taskId) => {
-    navigation.navigate('UpdateReview', { taskId });
+    /* 透传 username / role */
+    navigation.navigate('UpdateReview', { taskId, username, role });
   };
 
   const handleDeleteReview = (taskId) => {
@@ -212,7 +226,8 @@ const ManageReviewsScreen = () => {
       
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={() => navigation.navigate('Dashboard')}
+        /* 透传 username / role 回 Dashboard */
+        onPress={() => navigation.navigate('Dashboard', { username, role })}
       >
         <Text style={styles.backButtonText}>Back to Dashboard</Text>
       </TouchableOpacity>

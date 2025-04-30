@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Alert, 
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
@@ -24,7 +24,18 @@ const CreateReviewScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { taskId, dashername, item } = route.params;
-  
+
+  /* 新增：从 route 或 AsyncStorage 尝试获取 username / role —— 仅供跳回 Dashboard 时携带 */
+  const [username, setUsername] = useState(route.params?.username ?? null);
+  const [role,     setRole]     = useState(route.params?.role     ?? null);
+
+  useEffect(() => {
+    (async () => {
+      if (!username)  setUsername(await AsyncStorage.getItem('username'));
+      if (!role)      setRole(await AsyncStorage.getItem('role'));
+    })();
+  }, []);
+
   useEffect(() => {
     if (dashername && item) {
       // If we have direct details from the route, use them
@@ -165,7 +176,8 @@ const CreateReviewScreen = () => {
             [
               {
                 text: 'OK',
-                onPress: () => navigation.navigate('Dashboard')
+                /* 修改处：把 username / role 一并带回 Dashboard */
+                onPress: () => navigation.navigate('Dashboard', { username, role })
               }
             ]
           );
