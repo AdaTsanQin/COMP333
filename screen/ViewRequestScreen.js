@@ -120,21 +120,27 @@ export default function ViewRequestsScreen({ route, navigation }) {
     const [name,  setName]  = useState(item.item);
     const [loc ,  setLoc ]  = useState(item.drop_off_location);
     const [speed, setSpeed] = useState(item.delivery_speed);
-    const isEditable = item.status === 'pending' && item.origin !== 'search';
+    const canEditItem = item.status === 'pending';
+    const canEditLocationAndSpeed = item.status === 'pending';
 
     return (
       <View style={styles.card}>
         <Text style={styles.label}>Item Name</Text>
         <TextInput
-          style={[styles.input, { height: 60 }]}
+          style={[styles.input, { height: 60, backgroundColor: canEditItem ? '#fff' : '#eee' }]}
           multiline
-          editable={isEditable}
+          editable={canEditItem}
           value={name}
           onChangeText={setName}
         />
 
         <Text style={styles.label}>Drop-off Location</Text>
-        <TextInput style={styles.input} editable={isEditable} value={loc} onChangeText={setLoc} />
+        <TextInput
+          style={[styles.input, { backgroundColor: canEditLocationAndSpeed ? '#fff' : '#eee' }]}
+          editable={canEditLocationAndSpeed}
+          value={loc}
+          onChangeText={setLoc}
+        />
 
         <Text style={styles.label}>Delivery Speed</Text>
         <View style={styles.radioRow}>
@@ -144,9 +150,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
               style={[
                 styles.radioBtn,
                 speed === s && styles.radioSel,
-                !isEditable && { opacity: 0.5 }
+                !canEditLocationAndSpeed && { opacity: 0.5 }
               ]}
-              disabled={!isEditable}
+              disabled={!canEditLocationAndSpeed}
               onPress={() => setSpeed(s)}
             >
               <Text style={speed === s ? styles.radioTxtSel : styles.radioTxt}>
@@ -156,8 +162,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
           ))}
         </View>
 
+
         <View style={styles.btnRow}>
-        {isEditable && (
+        {(canEditItem || canEditLocationAndSpeed) && (
           <Button
             title="SAVE"
             onPress={() =>
@@ -171,6 +178,7 @@ export default function ViewRequestsScreen({ route, navigation }) {
             }
           />
         )}
+
           {item.status === 'pending' && (
             <Button
               title="DELETE"
