@@ -77,7 +77,7 @@ const RegisterScreen = () => {
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
-      <Button title="Register" onPress={handleRegister} />
+      <Button title="Register" color="#cb2f2f" onPress={handleRegister} />
     </View>
   );
 };

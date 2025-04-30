@@ -120,6 +120,7 @@ export default function ViewRequestsScreen({ route, navigation }) {
     const [name,  setName]  = useState(item.item);
     const [loc ,  setLoc ]  = useState(item.drop_off_location);
     const [speed, setSpeed] = useState(item.delivery_speed);
+    const isEditable = item.status === 'pending' && item.origin !== 'search';
 
     return (
       <View style={styles.card}>
@@ -127,12 +128,13 @@ export default function ViewRequestsScreen({ route, navigation }) {
         <TextInput
           style={[styles.input, { height: 60 }]}
           multiline
+          editable={isEditable}
           value={name}
           onChangeText={setName}
         />
 
         <Text style={styles.label}>Drop-off Location</Text>
-        <TextInput style={styles.input} value={loc} onChangeText={setLoc} />
+        <TextInput style={styles.input} editable={isEditable} value={loc} onChangeText={setLoc} />
 
         <Text style={styles.label}>Delivery Speed</Text>
         <View style={styles.radioRow}>
@@ -142,7 +144,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
               style={[
                 styles.radioBtn,
                 speed === s && styles.radioSel,
+                !isEditable && { opacity: 0.5 }
               ]}
+              disabled={!isEditable}
               onPress={() => setSpeed(s)}
             >
               <Text style={speed === s ? styles.radioTxtSel : styles.radioTxt}>
@@ -153,6 +157,7 @@ export default function ViewRequestsScreen({ route, navigation }) {
         </View>
 
         <View style={styles.btnRow}>
+        {isEditable && (
           <Button
             title="SAVE"
             onPress={() =>
@@ -165,12 +170,16 @@ export default function ViewRequestsScreen({ route, navigation }) {
               })
             }
           />
-          <Button
-            title="DELETE"
-            color="#ff6666"
-            onPress={() => doDelete(item.id)}
-          />
+        )}
+          {item.status === 'pending' && (
+            <Button
+              title="DELETE"
+              color="#ff6666"
+              onPress={() => doDelete(item.id)}
+            />
+          )}
         </View>
+
 
         {/* 根据状态切换颜色 */}
         <View style={[

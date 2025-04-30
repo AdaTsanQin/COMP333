@@ -1,4 +1,5 @@
 // screen/DashboardScreen.js
+import { ScrollView } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Alert, Switch, TouchableOpacity,
@@ -142,7 +143,7 @@ export default function DashboardScreen({ route, navigation }) {
   );
 
   return (
-    <View style={styles.root}>
+  <ScrollView contentContainerStyle={styles.scrollContainer}>
       {/* Logo + Greeting */}
       <Image source={require('../assets/cardinal.png')} style={styles.logo} />
       <Text style={styles.hi}>
@@ -221,6 +222,9 @@ export default function DashboardScreen({ route, navigation }) {
 
       {showDanger && (
         <View style={styles.deleteContainer}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: RED_DARK, marginBottom: 10 }}>
+              Delete Account
+            </Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Password"
@@ -249,7 +253,7 @@ export default function DashboardScreen({ route, navigation }) {
       <TouchableOpacity onPress={handleLogout} style={styles.logout}>
         <Text style={{ fontSize: 16, color: GREY_TXT }}>↩ Logout</Text>
       </TouchableOpacity>
-    </View>
+      </ScrollView>
   );
 }
 
@@ -326,6 +330,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
+  scrollContainer: {
+    paddingTop: 40,
+    paddingBottom: 60,
+    alignItems: 'center',
+    backgroundColor: BG_COLOR,
+    minHeight: '100%',
+  },
+
   deleteTxt: { fontSize: 16, color: '#fff', fontWeight: '600' },
 
   logout: { position: 'absolute', bottom: 20 },
