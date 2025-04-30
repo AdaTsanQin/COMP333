@@ -52,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
+
+
 /* ════════════════  POST  (dasher drop-off with receipt) ════════════════ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -152,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
           'message' => $stmt->affected_rows > 0
               ? 'Order dropped off successfully'
               : 'No matching accepted order found'
+
         ]);
         exit;
     }

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StripeProvider } from '@stripe/stripe-react-native';
 
 /* ---------- screens ---------- */
+
 import HomeScreen                   from './screen/HomeScreen';
 import LoginScreen                  from './screen/LoginScreen';
 import RegisterScreen               from './screen/RegisterScreen';
@@ -24,6 +25,11 @@ import NavigationToLocationScreen   from './screen/NavigationToLocationScreen';
 import RechargeScreen               from './screen/RechargeScreen';
 import PriceReceiptScreen           from './screen/PriceReceiptScreen'; 
 import DropOffScreen                from './screen/DropOffScreen';
+
+import CreateReviewScreen           from './screen/CreateReviewScreen.js'
+import ManageReviewsScreen         from './screen/ManageReviewsScreen.js'
+import UpdateReviewScreen          from './screen/UpdateReviewScreen.js'
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -71,8 +77,13 @@ export default function App() {
             component={NavigationToLocationScreen}
             options={{ title: 'Navigation' }}
           />
+          {/* Review screens */}
+          <Stack.Screen name="CreateReviewScreen" component={CreateReviewScreen} />
+          <Stack.Screen name="UpdateReview" component={UpdateReviewScreen} options={{ title: 'Update Review' }} />
+          <Stack.Screen name="ManageReviewsScreen" component={ManageReviewsScreen} options={{ title: 'Manage Reviews' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </StripeProvider>
+
   );
 }

@@ -78,9 +78,7 @@ if (!empty($input['items'])) {
 }
 
 /* price fields (optional) */
-$estPrice   = isset($input['est_price'])   ? floatval($input['est_price'])   : null;
-$totalPrice = isset($input['total_price']) ? floatval($input['total_price']) :
-               ($estPrice !== null ? round($estPrice * $qtyField, 2) : 0.00);
+$estPrice = isset($input['est_price']) ? floatval($input['est_price']) : 0.00;
 
 /* store / purchase mode  */
 $purchaseMode = trim($input['purchase_mode'] ?? 'DASHER_CHOOSING');
@@ -89,11 +87,11 @@ $purchaseMode = trim($input['purchase_mode'] ?? 'DASHER_CHOOSING');
 $sql = "INSERT INTO requests
         (username, item, quantity, drop_off_location,
          delivery_speed, status, created_at,
-         is_custom, est_price, purchase_mode, total_price)
+         is_custom, est_price, purchase_mode)
         VALUES
         (:u, :it, :q, :loc,
          :spd, :st, :dt,
-         :custom, :est, :pm, :tot)";
+         :custom, :est, :pm)";
 $st = $pdo->prepare($sql);
 
 try {
@@ -107,15 +105,38 @@ try {
         ':dt'     => $now,
         ':custom' => $isCustom,
         ':est'    => $estPrice,
-        ':pm'     => $purchaseMode,
-        ':tot'    => $totalPrice,
+        ':pm'     => $purchaseMode
     ]);
+    
+    // Add review_prompt_status if missing from the table
+    try {
+        $checkColumn = $pdo->query("SHOW COLUMNS FROM requests LIKE 'review_prompt_status'");
+        if ($checkColumn->rowCount() === 0) {
+            // Column doesn't exist, add it
+            $pdo->exec("ALTER TABLE requests ADD COLUMN review_prompt_status ENUM('pending', 'rejected', 'reviewed') DEFAULT 'pending'");
+        }
+        
+        // Update the newly inserted record to set review_prompt_status
+        $requestId = $pdo->lastInsertId();
+        $updateStmt = $pdo->prepare("UPDATE requests SET review_prompt_status = 'pending' WHERE id = ?");
+        $updateStmt->execute([$requestId]);
+    } catch (PDOException $columnError) {
+        // Just log the error but continue - this is non-critical
+        error_log("Could not update review_prompt_status: " . $columnError->getMessage());
+    }
+    
     echo json_encode([
         'success'     => true,
         'request_id'  => $pdo->lastInsertId(),
-        'total_price' => number_format($totalPrice, 2),
+        'est_price'   => number_format($estPrice, 2),
     ]);
 } catch (PDOException $e) {
-    echo json_encode(['error' => 'Insert failed']);
+    // For development purposes, include the actual error message
+    echo json_encode([
+        'error' => 'Insert failed: ' . $e->getMessage(),
+        'sql_state' => $e->errorInfo[0] ?? '',
+        'error_code' => $e->errorInfo[1] ?? '',
+        'error_message' => $e->errorInfo[2] ?? ''
+    ]);
 }
 ?>

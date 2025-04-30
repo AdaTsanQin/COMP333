@@ -103,6 +103,15 @@ export default function AcceptOrderScreen({ route, navigation }) {
 
       {o.status==='accepted' && (
         <>
+          {/* ── 新增：若订单指定了商店坐标，显示跳店按钮 ── */}
+          {hasCoords(o.purchase_mode) && o.purchase_mode!=='DASHER_CHOOSING' &&
+            <Button title="NAVIGATE TO STORE"
+              onPress={()=>navigation.navigate(
+                'NavigationToLocationScreen',
+                { dropOffLocation: o.purchase_mode }   // 复用同一个地图页面
+              )}
+            />}
+
           {hasCoords(o.drop_off_location)
             ? <Button title="NAVIGATE TO DROP-OFF"
                 onPress={()=>navigation.navigate('NavigationToLocationScreen',
