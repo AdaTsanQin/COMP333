@@ -537,15 +537,190 @@ OK (4 tests, 4 assertions)
 
 
 ## Problem2：AI
-1. Asking about clues:<br>
-   a.By describing the backend’s functionality, let ChatGPT give back what things should be tested<br>
-   b.ChatGPT gave me some edge tests that I did not consider myself, like:<br>
-   c.Testing the counterexamples: like making sure it returns 400 when registering with a short password<br>
-   d.Testing minor request: like the OPTION request<br>
-2. Asking to generate examples of data: like giving valid examples of information in requests<br>
-   'drop_off_location'=>'Office', 'item'=>'Banana', 'quantity'=>3, 'total_price'=>4.20<br>
-3. Asking for debugging: like giving a possible reason for the code is falling when sending a single part of the code to AI.<br> 
-   For example: pointing out the type of quantity is mismatching, and suggesting to change ‘$input['quantity'] === "3"’ to ‘'quantity' => 3’<br>
+## Problem2: AI
+
+### For Testing:
+
+1. **Asking about clues:**
+    - By describing the backend’s functionality, let ChatGPT give back what things should be tested. <br>
+    - ChatGPT gave me some edge tests that I did not consider myself, like: <br>
+    - Testing the counterexamples: make sure it returns 400 when registering with a short password. <br>
+    - Testing minor requests: like the OPTION request. <br>
+
+2. **Asking to generate examples of data:**
+    - Valid examples of information in requests:
+        - `'drop_off_location'=>'Office', 'item'=>'Banana', 'quantity'=>3, 'total_price'=>4.20` <br>
+
+3. **Asking for debugging:**
+    - Possible reason for the code falling when sending a single part of the code to AI. <br>
+    - For example: pointing out the type of `quantity` is mismatching, and suggesting to change `'$input['quantity'] === "3"'` to `'quantity' => 3` <br>
+
+### For Backend Setup:
+
+1. **When trying to install Stripe backend with command lines:**
+    - **User:** When I tried to get an API Key, there is something that shows up saying:
+        - _"You need additional access"_
+        - _"You need additional access to the project: WesDash"_
+        - _"This could be because you have insufficient permissions to access the resource because a Principal Access Boundary policy is blocking your access to the resource."_
+        - _"To request access, contact your project administrator and provide them a copy of the following information:_
+        - _"Is there any way to resolve it?"_
+
+      **GPT Response:**
+        - The error message you're encountering indicates that you don't have the necessary permissions to access the Google API project (WesDash) in the Google Cloud Console. This is a permissions issue that typically arises when you don't have sufficient roles or access rights for the project.
+
+      **Possible Ways to Resolve It:**
+        - **Check Your Google Cloud Account Permissions:**
+            - Ensure that your Google Cloud account has the appropriate permissions for the project you're trying to access.
+            - You might need to be granted permissions such as Owner, Editor, or Viewer for the project.
+            - If you don't have the necessary permissions, you'll need to contact the project administrator (the person who set up the Google Cloud project) and ask them to either grant you access or generate the API key for you.
+
+        - **Request Access:**
+            - Since the message says "You need additional access," you should contact the project administrator and provide them with the information that the error message asks for. This will likely help them identify the access issue and grant you the correct permissions.
+
+        - **Verify API Enablement:**
+            - Once you have access to the Google Cloud Console, ensure that the required Google APIs are enabled. Go to API & Services > Dashboard in the Google Cloud Console, find the API you need, and ensure that it is enabled.
+
+        - **Roles and Permissions:**
+            - The project administrator may need to check and adjust IAM roles under IAM & Admin to ensure your account has sufficient access to use the APIs.
+            - You might need one of the following roles: Viewer (read-only access), Editor (can manage resources, but not billing), or Owner (full access to manage resources and permissions).
+
+        - **Using a Service Account (if applicable):**
+            - If you're working with a service account (e.g., in a server-side application), make sure that the service account has been granted the necessary permissions to access the Google Cloud APIs.
+            - The service account should have at least the Editor role on the project.
+
+        - **Check API Key Quotas and Billing:**
+            - If you're using a billing-enabled account for the project, check if there are any quota restrictions or billing issues. Ensure that the billing account is linked to the project and that there are no restrictions preventing API usage.
+
+      **In Summary:**
+        - Contact the project administrator to verify your access and permissions to the project.
+        - Ensure the required Google APIs are enabled.
+        - If necessary, request the project administrator to generate the API key for you.
+        - If you're still having trouble, let me know, and I can provide more detailed troubleshooting advice!
+
+2. **Map Alternatives:**
+
+   **User:** Is there any other map alternatives that I can use except Google?
+
+   **GPT Response:** Yes, there are several alternatives to Google Maps API for integrating maps into your application. Here are some popular alternatives:
+
+    1. **Mapbox**
+        - **Overview:** Mapbox provides highly customizable maps with great flexibility.
+        - **Features:**
+            - Beautiful, customizable map styles.
+            - Offline maps and navigation.
+            - Rich set of features like geocoding, routing, and search.
+        - **How to Use:** You can use `react-native-mapbox-gl` for integrating Mapbox into a React Native app.
+        - **Pricing:** Mapbox offers a free tier with limited usage.
+        - **Link:** [Mapbox](https://www.mapbox.com/)
+        - **React Native Integration:** Install the `react-native-mapbox-gl` package to start integrating Mapbox.
+          ```bash
+          npm install @react-native-mapbox-gl/maps
+          ```
+
+    2. **OpenStreetMap (OSM)**
+        - **Overview:** OpenStreetMap is a free, open-source mapping platform that allows you to create your own maps, add custom markers, and handle map interactions without needing an API key.
+        - **Features:**
+            - Completely free and open-source.
+            - No API key required.
+            - Community-driven data, with worldwide coverage.
+        - **How to Use:** You can use `react-native-maps` with OpenStreetMap tiles.
+        - **Pricing:** Free to use.
+        - **Link:** [OpenStreetMap](https://www.openstreetmap.org/)
+        - **React Native Integration:** You can integrate OSM with `react-native-maps` by using OSM as the tile source:
+          ```jsx
+          <MapView provider={PROVIDER_DEFAULT} customMapStyle={osmStyle}>
+            <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
+          </MapView>
+          ```
+
+    3. **Leaflet**
+        - **Overview:** Leaflet is a lightweight open-source JavaScript library for mobile-friendly interactive maps.
+        - **Features:**
+            - Lightweight and fast.
+            - Extensive set of features, including markers, overlays, and event handling.
+        - **How to Use:** Use `react-leaflet` (for web apps) or integrate Leaflet with React Native using a WebView or native integration.
+        - **Pricing:** Free and open-source.
+        - **Link:** [Leaflet](https://leafletjs.com/)
+
+    4. **Here Maps**
+        - **Overview:** Here offers mapping, navigation, and location-based services, including APIs for mapping, geocoding, routing, and traffic information.
+        - **Features:**
+            - Provides geocoding, routing, and traffic data.
+            - High-quality maps and geolocation services.
+        - **Pricing:** Free tier with limited usage, paid plans for higher usage.
+        - **Link:** [Here Maps](https://www.here.com/)
+        - **React Native Integration:** Use `react-native-here-maps` for integrating Here Maps with React Native.
+
+    5. **TomTom**
+        - **Overview:** TomTom offers map APIs and SDKs for mapping, navigation, and traffic data.
+        - **Features:**
+            - Real-time traffic updates.
+            - Navigation services.
+            - Customizable maps.
+        - **Pricing:** Free tier with limited usage, paid plans for larger-scale apps.
+        - **Link:** [TomTom Maps](https://developer.tomtom.com/)
+        - **React Native Integration:** Use their SDK to integrate TomTom with React Native.
+
+   **Choosing the Right Map for Your App:**
+    - If you're looking for a completely free option: OpenStreetMap combined with Leaflet or Mapbox is a great choice.
+    - If you need robust features like real-time traffic, routing, and navigation: TomTom, Here Maps, or Bing Maps might be more suitable.
+    - For beautiful, customizable maps with offline support: Mapbox offers a great experience.
+
+   Let me know if you need help integrating any of these alternatives into your app!
+### For Code Correcting:
+
+**User:** Why is the `edit.php` not working properly? Where might the problem lie around these lines?
+
+```php
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    if (empty($data['id']) || empty($data['item']) || empty($data['drop_off_location']) || empty($data['delivery_speed']) || empty($data['status'])) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Missing required fields."
+        ]);
+        exit;
+    }
+
+    $id = (int)$data['id'];
+    $item = $data['item'];
+    $drop_off_location = $data['drop_off_location'];
+    $delivery_speed = $data['delivery_speed'];
+    $status = $data['status'];
+
+    $sql = "UPDATE requests
+            SET item = ?,
+                drop_off_location = ?,
+                delivery_speed = ?,
+                status = ?
+            WHERE id = ? AND username = ?";
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Failed to prepare statement: " . $conn->error
+        ]);
+        exit;
+    }
+
+    $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
+}
+```
+      **GPT Response:**
+### Ensure Correct Data Types:
+
+Make sure the data types in `bind_param` match the types of the variables. The `bind_param` method uses the following format:
+
+- `s` for strings
+- `i` for integers
+- `d` for doubles (floats)
+- `b` for blobs (binary data)
+
+If `item`, `drop_off_location`, `delivery_speed`, `status`, `id`, and `username` are all strings (except `id`, if it's an integer), you might want to modify the data types accordingly:
+
+```php
+$stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
+```
 ## problem3:PROJECT
 #### Before running:
 1.Create a account in https://stripe.com<br>
