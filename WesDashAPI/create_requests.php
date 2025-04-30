@@ -94,6 +94,9 @@ $sql = "INSERT INTO requests
          :custom, :est, :pm)";
 $st = $pdo->prepare($sql);
 
+// Get the estimated price if provided
+$estPrice = $input['est_price'] ?? '0.00';
+
 try {
     $st->execute([
         ':u'      => $username,
