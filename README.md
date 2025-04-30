@@ -441,6 +441,7 @@ CREATE TABLE requests (
     real_price        DECIMAL(10,2)                    DEFAULT NULL,     
     receipt_photo     VARCHAR(255)                     DEFAULT NULL,   
     created_at        DATETIME               NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    review_prompt_status VARCHAR(50)          DEFAULT 'pending',
     CONSTRAINT fk_requests_user
         FOREIGN KEY (username)
         REFERENCES users(username) ON DELETE CASCADE,
@@ -498,6 +499,17 @@ CONSTRAINT fk_recharge_user FOREIGN KEY (username)
 REFERENCES users(username) ON DELETE CASCADE
 ) ENGINE=InnoDB CHARSET=utf8mb4;
 
+CREATE TABLE reviews (
+id           INT(11)       NOT NULL AUTO_INCREMENT,
+order_id     INT(11)       NOT NULL,
+review_text  TEXT           CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+rating       INT(11)       NOT NULL,
+created_at   DATETIME      NOT NULL,
+PRIMARY KEY (id),
+INDEX idx_order_id (order_id)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
 | Step | Command / Action |
 |------|------------------|
 4. | Insert a test user (needed for valid‑login):INSERT INTO users VALUES ('testuser', PASSWORD('password123'), 0);|
