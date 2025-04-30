@@ -537,14 +537,15 @@ OK (4 tests, 4 assertions)
 
 
 ## Problem2：AI
-
-
-
-
-
-
-
-
+1. Asking about clues:<br>
+   a.By describing the backend’s functionality, let ChatGPT give back what things should be tested<br>
+   b.ChatGPT gave me some edge tests that I did not consider myself, like:<br>
+   c.Testing the counterexamples: like making sure it returns 400 when registering with a short password<br>
+   d.Testing minor request: like the OPTION request<br>
+2. Asking to generate examples of data: like giving valid examples of information in requests<br>
+   'drop_off_location'=>'Office', 'item'=>'Banana', 'quantity'=>3, 'total_price'=>4.20<br>
+3. Asking for debugging: like giving a possible reason for the code is falling when sending a single part of the code to AI.<br> 
+   For example: pointing out the type of quantity is mismatching, and suggesting to change ‘$input['quantity'] === "3"’ to ‘'quantity' => 3’<br>
 ## problem3:PROJECT
 #### Before running:
 1.Create a account in https://stripe.com<br>
@@ -559,10 +560,10 @@ OK (4 tests, 4 assertions)
 \Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
 ,,,<br>
 
-5.In terminal, run:<br>
+5.In terminal, run the following,where GitHubUsername should be your github username with all lowercase:<br>
 ,,,<br>
 cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI<br>
-composer init --name="yourname/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
+composer init --name="GitHubUsername/wesdashapi" --require="stripe/stripe-php:^10.0" --no-interaction<br>
 composer require stripe/stripe-php<br>
 ,,,<br>
 
