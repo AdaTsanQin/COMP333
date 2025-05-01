@@ -549,7 +549,6 @@ OK (4 tests, 4 assertions)
 
 
 ## Problem2：AI
-## Problem2: AI
 
 ### For Testing:
 
@@ -779,7 +778,6 @@ npm install
 #### 5. Launch the app with Expo
 npm run android
 
-
 #### Notice： Recharge test card
 
 
@@ -791,3 +789,4 @@ Use the Stripe test card:
 4242 4242 4242 4242
 ```
 Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
+
