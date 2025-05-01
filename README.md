@@ -733,19 +733,20 @@ If `item`, `drop_off_location`, `delivery_speed`, `status`, `id`, and `username`
 $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
 ```
 ## problem3:PROJECT
+
 #### Before running:
 1.Create a account in https://stripe.com<br>
+
 2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys<br>
 (Notice the key might be different every day, recheck even you already set up key last time)<br>
-3.Copy the publishable key in to this line of App.js<br>
-,,,<br>
-<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY"><br>
-,,,<br>
-4.Copy the Secret key into the create-payment-intent.php line 27<br>
-,,,<br>
-\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
-,,,<br>
-
+3.Copy the publishable key in to line 37 of App.js<br>
+```jsx
+<StripeProvider publishableKey="pk_test_•••YOUR_PUBLISHABLE_KEY•••">
+``` 
+4.Copy the Secret key into the create-payment-intent.php line 27 <br>
+```jsx
+\Stripe\Stripe::setApiKey('sk_test_•••YOUR_SECRET_KEY•••');
+``` 
 5.In terminal, run the following,where GitHubUsername should be your github username with all lowercase:<br>
 ,,,<br>
 cd /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI<br>
@@ -754,11 +755,13 @@ composer require stripe/stripe-php<br>
 ,,,<br>
 
 6.Create a secrets.php under htdocs with following content:<br>
-<?php<br>
+```jsx
+<?php
 // File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
 
 // Your Stripe Secret Key (never commit this to public repo!)<br>
-$stripeSecretKey = 'YOUR_SECRET_KEY';<br>
+$stripeSecretKey = 'YOUR_SECRET_KEY';
+``` 
 
 #### 1. Switch to the main branch<br>
 git checkout main
@@ -774,3 +777,16 @@ npm install
 
 #### 5. Launch the app with Expo
 npm run android
+
+#### Notice： Recharge test card
+
+
+Do not use a real card.
+
+Use the Stripe test card:
+
+```text
+4242 4242 4242 4242
+```
+Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
+
