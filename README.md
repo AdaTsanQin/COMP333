@@ -549,7 +549,6 @@ OK (4 tests, 4 assertions)
 
 
 ## Problem2：AI
-## Problem2: AI
 
 ### For Testing:
 
