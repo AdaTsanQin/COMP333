@@ -6,7 +6,7 @@ const AcceptOrderScreen = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
+      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_order.php", {
         method: "GET",
         credentials: "include",
         headers: {
@@ -35,7 +35,7 @@ const AcceptOrderScreen = () => {
 
   const handleAcceptOrder = async (id) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
+      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_order.php", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ const AcceptOrderScreen = () => {
   // Drop off 
   const handleDropOffOrder = async (id) => {
     try {
-      const response = await fetch("http://10.0.2.2/WesDashAPI/accept_order.php", {
+      const response = await fetch("http://172.21.161.56/WesDashAPI/accept_order.php", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

@@ -6,45 +6,58 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from './config';
 
 const ChatListScreen = ({ navigation, route }) => {
-  const { username: paramUser, role: paramRole } = route.params ?? {};
-
-  const [username,  setUsername]  = useState(paramUser ?? null);
-  const [role,      setRole]      = useState(paramRole ?? null);
+  const [username,  setUsername]  = useState(route.params?.username ?? null);
+  const [role,      setRole]      = useState(route.params?.role     ?? null);
   const [rooms,     setRooms]     = useState([]);
   const [sessionID, setSessionID] = useState(null);
-
-  const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-  const BASE_URL = `http://${HOST}/WesDashAPI`;
 
   const fetchRooms = async (sid) => {
     try {
       const url = `${BASE_URL}/list_chats.php?PHPSESSID=${sid}`;
-      console.log('Fetching chat rooms from:', url);
-      const resp = await fetch(url, { method: 'GET' });
+      const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Cookie: `PHPSESSID=${sid}`,
+        },
+      });
       const data = await resp.json();
-      if (data.success) setRooms(data.rooms);
-      else Alert.alert('Error', data.message || 'Failed to load chats');
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        Alert.alert('Error', data.message || 'Failed to load chats');
+      }
     } catch (e) {
-      console.error('fetchRooms error', e);
+      console.error('[fetchRooms error]', e.message);
       Alert.alert('Error', 'Network error');
     }
   };
 
   useEffect(() => {
     (async () => {
-      const sid = await AsyncStorage.getItem('PHPSESSID');
-      if (!sid) { Alert.alert('Error', 'Session not found'); return; }
-      setSessionID(sid);
+      try {
+        const sid = await AsyncStorage.getItem('PHPSESSID');
+        if (!sid) return Alert.alert('Error', 'Session not found');
+        setSessionID(sid);
 
-      if (!username) setUsername(await AsyncStorage.getItem('username'));
-      if (!role)     setRole(await AsyncStorage.getItem('role'));
+        const storedUser = username ?? await AsyncStorage.getItem('username');
+        const storedRole = role     ?? await AsyncStorage.getItem('role');
 
-      fetchRooms(sid);
+        setUsername(storedUser);
+        setRole(storedRole);
+
+        if (storedUser && storedRole) {
+          fetchRooms(sid);
+        }
+      } catch (e) {
+        console.error('[Init error]', e.message);
+        Alert.alert('Error', 'Failed to initialize chat screen');
+      }
     })();
   }, []);
 
@@ -58,9 +71,7 @@ const ChatListScreen = ({ navigation, route }) => {
         })
       }
     >
-      <Text style={styles.title}>
-        {item.order_item}
-      </Text>
+      <Text style={styles.title}>{item.order_item}</Text>
       <Text style={styles.sub}>Order status: {item.order_status}</Text>
       <Text style={styles.sub}>Last message: {item.last_time || '—'}</Text>
     </TouchableOpacity>

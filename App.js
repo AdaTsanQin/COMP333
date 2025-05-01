@@ -30,6 +30,7 @@ import CreateReviewScreen           from './screen/CreateReviewScreen.js'
 import ManageReviewsScreen         from './screen/ManageReviewsScreen.js'
 import UpdateReviewScreen          from './screen/UpdateReviewScreen.js'
 
+import GetLocationScreen            from './screen/GetLocationScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -70,6 +71,8 @@ export default function App() {
 
           {/* recharge */}
           <Stack.Screen name="RechargeScreen" component={RechargeScreen} />
+
+          <Stack.Screen name="GetLocationScreen" component={GetLocationScreen} />
 
           {/* map navigation */}
           <Stack.Screen

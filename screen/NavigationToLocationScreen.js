@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Linking } from "react-native";
+import { BASE_URL } from './config';
 
 const NavigationToLocation = ({ route, navigation }) => {
   const { dropOffLocation } = route.params;

@@ -267,7 +267,7 @@ Or if React Native CLI:
 
 npx react-native start
 
-3. IP addresses: In your JS files, you may see fetch("http://10.0.2.2/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 10.0.2.2 with your LAN IP.
+3. IP addresses: In your JS files, you may see fetch("http://172.21.161.56/..."). This is necessary for Android emulators to reach your local PHP server. If you run on a real device, you must replace 172.21.161.56 with your LAN IP.
 
 4. if you encountered any issue by using command line above, please first run:
 'rm -rf node_modules package-lock.json'

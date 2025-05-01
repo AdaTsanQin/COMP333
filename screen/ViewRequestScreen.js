@@ -1,4 +1,3 @@
-// screen/ViewRequestsScreen.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -12,9 +11,9 @@ import {
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { BASE_URL } from './config';
 
-const HOST          = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-const BASE_URL      = `http://${HOST}/WesDashAPI`;
 const PRIMARY_COLOR = '#007bff';
 const STATUS_COLOR  = '#66cc66';
 const PENDING_COLOR = '#ffcc00';
@@ -24,16 +23,14 @@ export default function ViewRequestsScreen({ route, navigation }) {
   const [requests, setRequests]   = useState([]);
   const [sessionID, setSessionID] = useState(null);
 
-  /* ───── 通用提示 ───── */
   const toast = (msg, ok = false) =>
     Alert.alert(ok ? 'Success' : 'Error', msg, [
       { text: 'OK', onPress: ok ? fetchRequests : undefined },
     ]);
 
-  /* ───── 拉取订单 ───── */
   const fetchRequests = async () => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -48,7 +45,6 @@ export default function ViewRequestsScreen({ route, navigation }) {
     }
   };
 
-  /* ───── 初始加载 ───── */
   useEffect(() => {
     (async () => {
       const sid = await AsyncStorage.getItem('PHPSESSID');
@@ -58,10 +54,18 @@ export default function ViewRequestsScreen({ route, navigation }) {
     })();
   }, []);
 
-  /* ───── 删除 ───── */
+  useFocusEffect(
+    React.useCallback(() => {
+      if (sessionID && route.params?.refreshOnFocus) {
+        fetchRequests();
+        navigation.setParams({ refreshOnFocus: false });
+      }
+    }, [sessionID, route.params?.refreshOnFocus])
+  );
+
   const doDelete = async (id) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -77,10 +81,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
     }
   };
 
-  /* ───── 保存编辑 ───── */
   const doEdit = async (payload) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -96,10 +99,9 @@ export default function ViewRequestsScreen({ route, navigation }) {
     }
   };
 
-  /* ───── 确认收货 ───── */
   const doConfirm = async (id) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -115,7 +117,6 @@ export default function ViewRequestsScreen({ route, navigation }) {
     }
   };
 
-  /* ───── 单条卡片 ───── */
   const RequestItem = ({ item }) => {
     const [name,  setName]  = useState(item.item);
     const [loc ,  setLoc ]  = useState(item.drop_off_location);
@@ -172,7 +173,6 @@ export default function ViewRequestsScreen({ route, navigation }) {
           />
         </View>
 
-        {/* 根据状态切换颜色 */}
         <View style={[
           styles.statusBox,
           item.status === 'pending' && styles.pending
@@ -180,15 +180,14 @@ export default function ViewRequestsScreen({ route, navigation }) {
           <Text style={styles.statusTxt}>{item.status.toUpperCase()}</Text>
         </View>
 
-        {/* -------- Bill → Tip → Confirm 流程 -------- */}
         {item.status === 'completed' && (
           <Button
             title="VIEW BILL"
             color={PRIMARY_COLOR}
             onPress={() =>
               navigation.navigate('BillScreen', {
-                request: item,          // 账单页需要完整订单信息
-                onDone : fetchRequests, // 账单 / Tip 完成后刷新列表
+                request: item,
+                onDone : fetchRequests,
               })
             }
           />
@@ -207,7 +206,6 @@ export default function ViewRequestsScreen({ route, navigation }) {
     );
   };
 
-  /* ───── 主视图 ───── */
   return (
     <View style={styles.container}>
       <View style={styles.infoBox}>
@@ -239,7 +237,6 @@ export default function ViewRequestsScreen({ route, navigation }) {
   );
 }
 
-/* ───── 样式 ───── */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   heading:   { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
@@ -262,3 +259,4 @@ const styles = StyleSheet.create({
   pending:   { backgroundColor: PENDING_COLOR },
   statusTxt: { color: '#fff', fontWeight: 'bold' },
 });
+

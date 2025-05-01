@@ -1,31 +1,44 @@
-// app/screens/RechargeScreen.js
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   Button,
   Alert,
   StyleSheet,
-  Platform,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useStripe } from '@stripe/stripe-react-native';
-
-const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-const BASE_URL = `http://${HOST}/WesDashAPI`;
+import { BASE_URL } from './config';
 
 export default function RechargeScreen({ navigation }) {
-  const amounts = [100, 200, 500];  // dollars
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const amounts = [100, 200, 500]; // dollars
+  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } = useStripe();
   const [loading, setLoading] = useState(false);
 
-  // 1) Hit your new endpoint for a PaymentIntent
+  // Handle deep link if redirected from browser-based authentication
+  useEffect(() => {
+    const handleDeepLink = async (event) => {
+      const handled = await handleURLCallback(event.url);
+      if (!handled) {
+        console.warn('[Stripe] Unhandled URL:', event.url);
+      }
+    };
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    const sub = Linking.addEventListener('url', handleDeepLink);
+    return () => sub.remove();
+  }, [handleURLCallback]);
+
   const fetchPaymentIntent = async (amt) => {
     const res = await fetch(`${BASE_URL}/create-payment-intent.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amt * 100 }), // to cents
+      credentials: 'include',
+      body: JSON.stringify({ amount: amt * 100 }),
     });
     const text = await res.text();
     try {
@@ -35,25 +48,30 @@ export default function RechargeScreen({ navigation }) {
     }
   };
 
-  // 2) Show Stripe’s payment sheet, then bump your balance
   const openPaymentSheet = async (amt) => {
     setLoading(true);
     try {
+      const sid = await AsyncStorage.getItem('PHPSESSID');
+
+      if (!sid || !/^[a-zA-Z0-9-_]{1,128}$/.test(sid)) {
+        Alert.alert('Error', 'Invalid session ID. Please log in again.');
+        return;
+      }
+
       const { clientSecret, error } = await fetchPaymentIntent(amt);
       if (error) throw new Error(error);
 
       const initRes = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: 'WesDash',
+        returnURL: 'wesdash://stripe-redirect', //matches deep link scheme
       });
       if (initRes.error) throw new Error(initRes.error.message);
 
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) throw new Error(presentError.message);
 
-      // Payment succeeded → call your existing PHP to update balance
-      const sid = await AsyncStorage.getItem('PHPSESSID');
-      const res2 = await fetch(`${BASE_URL}/add_balance.php`, {
+      const res2 = await fetch(`${BASE_URL}/add_balance.php?PHPSESSID=${sid}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -67,7 +85,7 @@ export default function RechargeScreen({ navigation }) {
 
       Alert.alert(
         'Success',
-        `Charged $${amt.toFixed(2)}! New balance: $${(data2.newBalance/100).toFixed(2)}`,
+        `Charged $${amt.toFixed(2)}! New balance: $${(data2.newBalance / 100).toFixed(2)}`,
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
 
@@ -103,7 +121,7 @@ export default function RechargeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container:  { flex: 1, justifyContent: 'center', padding: 20 },
-  heading:    { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
+  container: { flex: 1, justifyContent: 'center', padding: 20 },
+  heading: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
   btnWrapper: { marginVertical: 8 },
 });
