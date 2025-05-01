@@ -757,11 +757,11 @@ composer require stripe/stripe-php<br>
 
 6.Create a secrets.php under htdocs with following content:<br>
 ```jsx
-<?php<br>
+<?php
 // File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
 
 // Your Stripe Secret Key (never commit this to public repo!)<br>
-$stripeSecretKey = 'YOUR_SECRET_KEY';<br>
+$stripeSecretKey = 'YOUR_SECRET_KEY';
 ``` 
 
 #### 1. Switch to the main branch<br>
@@ -782,8 +782,11 @@ npm run android
 
 #### Recharge test card
 
+
 **Do not use a real card.**  
 Use the Stripe **test card**:
 
 ```text
 4242 4242 4242 4242
+
+Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
