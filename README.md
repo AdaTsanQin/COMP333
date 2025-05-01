@@ -734,18 +734,16 @@ If `item`, `drop_off_location`, `delivery_speed`, `status`, `id`, and `username`
 $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
 ```
 ## problem3:PROJECT
+
 #### Before running:
 1.Create a account in https://stripe.com<br>
 2.Click Dashboard in navigation bar, then you could see a box in right side of screen saying API keys<br>
 (Notice the key might be different every day, recheck even you already set up key last time)<br>
-3.Copy the publishable key in to this line of App.js<br>
-,,,<br>
-<StripeProvider publishableKey="YOUR_PUBLISHABLE_KEY"><br>
-,,,<br>
-4.Copy the Secret key into the create-payment-intent.php line 27<br>
-,,,<br>
-\Stripe\Stripe::setApiKey('YOUR_SECRET_KEY');<br>
-,,,<br>
+3.Copy the publishable key in to line 37 of App.js<br>
+   <StripeProvider publishableKey="pk_test_•••YOUR_PUBLISHABLE_KEY•••">
+
+4.Copy the Secret key into the create-payment-intent.php line 27 <br>
+\Stripe\Stripe::setApiKey('sk_test_•••YOUR_SECRET_KEY•••');
 
 5.In terminal, run the following,where GitHubUsername should be your github username with all lowercase:<br>
 ,,,<br>
