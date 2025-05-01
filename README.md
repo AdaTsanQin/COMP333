@@ -780,13 +780,14 @@ npm install
 npm run android
 
 
-#### Recharge test card
+#### Notice： Recharge test card
 
 
-**Do not use a real card.**  
-Use the Stripe **test card**:
+Do not use a real card.
+
+Use the Stripe test card:
 
 ```text
 4242 4242 4242 4242
-
+```
 Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
