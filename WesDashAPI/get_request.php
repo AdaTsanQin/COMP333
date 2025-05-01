@@ -3,6 +3,7 @@
 // 用 id 拉取一条订单；返回 { success:true, request:{…} }
 
 header('Content-Type: application/json; charset=utf-8');
+if (isset($_GET['PHPSESSID'])) session_id($_GET['PHPSESSID']);
 session_start();
 
 /* —— (可选) 登录校验 —— */
