@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Image, StyleSheet, Alert, Platform } from 'react-native';
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from './config';
 
-const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-const BASE_URL = `http://${HOST}/WesDashAPI`;
 
 export default function PriceReceiptScreen({ route, navigation }) {
   const { orderId } = route.params;

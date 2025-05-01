@@ -3,6 +3,7 @@ import {
   View, Text, FlatList, Image,
   TouchableOpacity, StyleSheet, Alert, Button,
 } from 'react-native';
+import { BASE_URL } from './config';
 
 export default function CheckoutScreen({ navigation, route }) {
   const [cart, setCart]       = useState(route.params?.cart || []);

@@ -12,9 +12,8 @@ import {
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from './config';
 
-const HOST          = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-const BASE_URL      = `http://${HOST}/WesDashAPI`;
 const PRIMARY_COLOR = '#007bff';
 const STATUS_COLOR  = '#66cc66';
 const PENDING_COLOR = '#ffcc00';
@@ -27,18 +26,17 @@ export default function ViewRequestsScreen({ route, navigation }) {
   /* ───── 通用提示 ───── */
   const toast = (msg, ok = false) =>
     Alert.alert(ok ? 'Success' : 'Error', msg, [
-      { text: 'OK', onPress: ok ? fetchRequests : undefined },
+      { text: 'OK', onPress: ok ? () => fetchRequestsWithSID(sessionID) : undefined },
     ]);
+
 
   /* ───── 拉取订单 ───── */
   const fetchRequests = async () => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'GET',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `PHPSESSID=${sessionID}`,
         },
       });
       const d = await r.json();
@@ -48,20 +46,38 @@ export default function ViewRequestsScreen({ route, navigation }) {
     }
   };
 
+
   /* ───── 初始加载 ───── */
   useEffect(() => {
     (async () => {
       const sid = await AsyncStorage.getItem('PHPSESSID');
       if (!sid) return toast('Session not found');
       setSessionID(sid);
-      fetchRequests();
+      await fetchRequestsWithSID(sid);  // use SID directly
     })();
   }, []);
+
+  const fetchRequestsWithSID = async (sid) => {
+    try {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sid}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const d = await r.json();
+      d.success ? setRequests(d.requests) : toast(d.message || 'Failed to load');
+    } catch {
+      toast('Network error');
+    }
+  };
+
+
 
   /* ───── 删除 ───── */
   const doDelete = async (id) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -72,15 +88,17 @@ export default function ViewRequestsScreen({ route, navigation }) {
       });
       const d = await r.json();
       toast(d.message, d.success);
-    } catch {
+    } catch (err) {
       toast('Delete failed');
     }
   };
 
+
+
   /* ───── 保存编辑 ───── */
   const doEdit = async (payload) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -91,7 +109,7 @@ export default function ViewRequestsScreen({ route, navigation }) {
       });
       const d = await r.json();
       toast(d.message, d.success);
-    } catch {
+    } catch (err) {
       toast('Update failed');
     }
   };
@@ -99,7 +117,7 @@ export default function ViewRequestsScreen({ route, navigation }) {
   /* ───── 确认收货 ───── */
   const doConfirm = async (id) => {
     try {
-      const r = await fetch(`${BASE_URL}/accept_requests.php`, {
+      const r = await fetch(`${BASE_URL}/accept_requests.php?PHPSESSID=${sessionID}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -110,10 +128,12 @@ export default function ViewRequestsScreen({ route, navigation }) {
       });
       const d = await r.json();
       toast(d.message, d.success);
-    } catch {
+    } catch (err) {
       toast('Confirm failed');
     }
   };
+
+
 
   /* ───── 单条卡片 ───── */
   const RequestItem = ({ item }) => {

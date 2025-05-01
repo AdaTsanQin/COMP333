@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, Button, StyleSheet, FlatList,
   ActivityIndicator, Image, Alert, TouchableOpacity
 } from 'react-native';
+import { BASE_URL } from './config';
 
 export default function SearchScreen({ navigation, route }) {
   const { username, role } = route.params || {};
@@ -17,18 +18,30 @@ export default function SearchScreen({ navigation, route }) {
     if (!query.trim()) return;
     setLoading(true);
     try {
-      const url = `http://10.0.2.2/WesDashAPI/products.php?term=${encodeURIComponent(
-        query
-      )}&fulfillment=aisle&locationId=01100002&show=items.price`;
-      // print url
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 7000); // 7s timeout
+
+      const url = `${BASE_URL}/products.php?term=${encodeURIComponent(query)}&fulfillment=aisle&locationId=01100002&show=items.price`;
       console.log('URL:', url);
-      const raw  = await (await fetch(url)).text();
+
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      const raw = await res.text();
+      if (!raw.includes('{')) throw new Error('Invalid response from server');
       const json = JSON.parse(raw.slice(raw.indexOf('{')));
       setResults(json.data || []);
     } catch (e) {
-      Alert.alert('Error', e.message);
-    } finally { setLoading(false); }
+      const msg = e.name === 'AbortError'
+        ? 'Search timed out. Please try again.'
+        : (e.message || 'Search failed');
+      Alert.alert('Error', msg);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   /* ---------- add to cart ---------- */
   const addToCart = (item) => {

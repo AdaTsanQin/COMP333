@@ -5,7 +5,8 @@ import {
   Image, Dimensions, TextInput, Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';          // ← 加
+import { BASE_URL } from './config';
 
 const RED       = '#C41E3A';
 const RED_DARK  = '#991427';
@@ -15,9 +16,6 @@ const GREY_TXT  = '#666';
 const BG_COLOR  = '#F3F4F8';
 const CARD_BG   = '#ffffff';
 const CARD_SHADOW = '#00000020';
-
-const HOST     = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-const BASE_URL = `http://${HOST}/WesDashAPI`;
 
 export default function DashboardScreen({ route, navigation }) {
   const { username = 'User', role: initRole = 'user' } = route.params || {};
@@ -32,15 +30,36 @@ export default function DashboardScreen({ route, navigation }) {
   const fetchBalance = async () => {
     try {
       const sid = await AsyncStorage.getItem('PHPSESSID');
-      if (!sid) return;
-      const r = await fetch(`${BASE_URL}/get_balance.php`, {
+      if (!sid) {
+        console.warn('No session ID found.');
+        return;
+      }
+
+      console.log('[Balance] Using SID:', sid);
+      const res = await fetch(`${BASE_URL}/get_balance.php?PHPSESSID=${sid}`, {
+        method: 'GET',
         credentials: 'include',
-        headers: { Cookie: `PHPSESSID=${sid}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `PHPSESSID=${sid}`
+        }
       });
-      const d = await r.json();
-      if (d.success) setBal((d.balance / 100).toFixed(2));
-    } catch {/* ignore 网络错误 */ }
+
+      const text = await res.text();
+      console.log('[Balance] Raw response:', text);
+
+      const data = JSON.parse(text);
+      if (data.success && typeof data.balance === 'number') {
+        setBal((data.balance / 100).toFixed(2));
+      } else {
+        console.warn('Balance fetch failed:', data.error);
+      }
+
+    } catch (err) {
+      console.error('[Balance Error]', err);
+    }
   };
+
 
   /* 首次进入 + 每次重新聚焦时刷新余额 */
   useFocusEffect(useCallback(() => { fetchBalance(); }, []));
@@ -49,7 +68,7 @@ export default function DashboardScreen({ route, navigation }) {
     (async () => {
       // Only check for pending reviews if user role is 'user' (buyer)
       if (role !== 'user') return;
-      
+
       const sid = await AsyncStorage.getItem('PHPSESSID');
       if (!sid) {
         Alert.alert('Error', 'Session ID not found. Please log in again.');
@@ -88,7 +107,7 @@ export default function DashboardScreen({ route, navigation }) {
               {
                 text: 'Leave Review',
                 onPress: () => {
-                  navigation.navigate('CreateReviewScreen', { 
+                  navigation.navigate('CreateReviewScreen', {
                     taskId: data.order.id,
                     dashername: data.order.accepted_by,
                     item: data.order.item
@@ -164,7 +183,7 @@ export default function DashboardScreen({ route, navigation }) {
       <View style={styles.balanceRow}>
         <View style={styles.balanceCard}>
           <Text style={styles.balanceTxt}>
-            Balance{balance!==null && `  $${balance}`}
+            Balance {balance !== null ? `$${balance}` : '...'}
           </Text>
         </View>
         <TouchableOpacity
@@ -200,7 +219,6 @@ export default function DashboardScreen({ route, navigation }) {
           onPress={() => navigation.navigate('AcceptOrderScreen', { username, role })}
         />
       )}
-
       <BigButton
         title="Chat Rooms"
         color={GREEN}
@@ -330,3 +348,4 @@ const styles = StyleSheet.create({
 
   logout: { position: 'absolute', bottom: 20 },
 });
+
