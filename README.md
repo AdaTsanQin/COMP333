@@ -807,6 +807,11 @@ to get ip address, copy the ip address into config.js, put it into "IP_ADDRESS"
 export const DEV_HOST = 'IP_ADDRESS';
 export const BASE_URL = `http://${DEV_HOST}/WesDashAPI`;
 ``` 
-#### 5. Launch the app with Expo<br>
+#### 6. if directly using step 7 do not work, run the following command in terminal
+``` bash
+npx expo install expo@^53.0.0
+npx expo install --fix
+``` 
+#### 7. Launch the app with Expo<br>
 npx expo start
-#### 6. open Expo Go on phone, then scan the QR code in terminal using the default code scanner from your phone <br> 
+#### 8. open Expo Go on phone, then scan the QR code in terminal using the default code scanner from your phone <br> 
