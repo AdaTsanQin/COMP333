@@ -23,7 +23,6 @@ import BillScreen                   from './screen/BillScreen';
 import TipScreen                    from './screen/TipScreen';
 import NavigationToLocationScreen   from './screen/NavigationToLocationScreen';
 import RechargeScreen               from './screen/RechargeScreen';
-import PriceReceiptScreen           from './screen/PriceReceiptScreen'; 
 import DropOffScreen                from './screen/DropOffScreen';
 
 import CreateReviewScreen           from './screen/CreateReviewScreen.js'
@@ -52,7 +51,6 @@ export default function App() {
 
           {/* dasher flow */}
           <Stack.Screen name="AcceptOrderScreen" component={AcceptOrderScreen} />
-          <Stack.Screen name="PriceReceiptScreen" component={PriceReceiptScreen} />
           <Stack.Screen name="DropOffScreen" component={DropOffScreen} />
           {/* product search & checkout */}
           <Stack.Screen name="SearchScreen"   component={SearchScreen} />
