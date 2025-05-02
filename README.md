@@ -399,23 +399,30 @@ Allan:
 
 ## Problem1-Backend Unit Tests (PHPUnit)
 
-WesDashAPI/
-└── tests-project/
-    ├── composer.json
-    ├── composer.lock
-    ├── vendor/
-    └── test/
-        └── UserTest.php ← contains all 4 required tests
+Applications/XAMPP/xamppfiles/htdocs/ <br>
+├── WesDashAPI/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accept_order.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accept_requests.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── create_requests.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── edit.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── login.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── register.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── delete_user.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ... <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── tests-project/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── composer.json <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── composer.lock <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── vendor/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── test/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── UserTest.php <br>
+Where UserTest.php contains all 4 required tests
 
 
 ### 1  Environment Setup
-
-| Step | Command / Action |
-|------|------------------|
-| 1.  | **Start XAMPP** → launch **Apache** and **MySQL**.<br>Leave Apache on port **80** (or update `base_uri` in the tests). |
-| 2.  | Create database **`app-db`** in phpMyAdmin. |
-| 3.  | Run the schema: |
-
+ 1.   **Start XAMPP** → launch **Apache** and **MySQL**.<br>Leave Apache on port **80** (or update `base_uri` in the tests). 
+ 2.   Create database **`app-db`** in phpMyAdmin. 
+ 3.   Run the schema: 
+```sql
 CREATE TABLE users (
     username   VARCHAR(255) PRIMARY KEY,
     password   VARCHAR(255) NOT NULL,
@@ -510,10 +517,14 @@ INDEX idx_order_id (order_id)
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
-| Step | Command / Action |
-|------|------------------|
-4. | Insert a test user (needed for valid‑login):INSERT INTO users VALUES ('testuser', PASSWORD('password123'), 0);|
-5. | Install test dependencies|
+``` 
+
+4.  Insert a test user (needed for valid‑login):
+```sql
+    INSERT INTO users
+    VALUES ('testuser', PASSWORD('password123'), 0);
+```
+5.  Install test dependencies
 
 ### 2  Backend tweaks to match the spec
 
@@ -733,6 +744,22 @@ If `item`, `drop_off_location`, `delivery_speed`, `status`, `id`, and `username`
 $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status, $id, $username);
 ```
 ## problem3:PROJECT
+#### Before running:
+1. copy all the backend files in main branch under WesDashAPI to your local device with following path
+Applications/XAMPP/xamppfiles/htdocs/ <br>
+├── WesDashAPI/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accept_order.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── accept_requests.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── add_balance.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── cancel_review_prompt.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── chat.php <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ... <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── update_review.php/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── composer.json <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── composer.lock <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── vendor/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── test/ <br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── UserTest.php <br>
 
 #### Before running:
 1.Create a account in https://stripe.com<br>
@@ -793,7 +820,7 @@ Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
 
 
 #### How to Use WesDash App on Your Phone
-#### 1. Downlaod 'Expo Go' from appstore<br>
+#### 1. Download 'Expo Go' from appstore<br>
 #### 2. Switch to the main branch<br>
 git checkout main
 #### 3. Make sure your computer and mac are using the same wifi
@@ -814,4 +841,8 @@ npx expo install --fix
 ``` 
 #### 7. Launch the app with Expo<br>
 npx expo start
-#### 8. open Expo Go on phone, then scan the QR code in terminal using the default code scanner from your phone <br> 
+#### 8. Open Expo Go on your iphone, then:<br> 
+1. Swipe down from the top of your phone screen to open the system’s quick access menu.<br>
+2. Tap the QR code icon (usually labeled “Scan QR Code” or “Code Scanner”).<br>
+3. Use this built-in scanner to scan the QR code shown in your terminal or browser window after running npx expo start.<br>
+4. Once scanned, the app will launch automatically on your phone.<br> 
