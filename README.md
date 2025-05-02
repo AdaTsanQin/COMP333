@@ -841,7 +841,7 @@ Use the Stripe test card:
 ```text
 4242 4242 4242 4242
 ```
-Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
+Enter any future date (e.g., 03 / 27), any 3-digit CVC (e.g., 120) and any Postal code （e.g., 06457)
 
 
 
