@@ -781,7 +781,8 @@ composer init --name="GitHubUsername/wesdashapi" --require="stripe/stripe-php:^1
 composer require stripe/stripe-php<br>
 ,,,<br>
 
-6.Create a secrets.php under htdocs with following content:<br>
+6.Create a secrets.php under htdocs/WesDashAPI with following content:<br>
+replace the text YOUR_SECRET_KEY with the secrete key you have in stripe website
 ```jsx
 <?php
 // File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
