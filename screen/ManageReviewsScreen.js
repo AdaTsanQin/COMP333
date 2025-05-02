@@ -12,6 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { BASE_URL } from './config';
 
+const STATUS_COLORS = {
+  completed: '#28a745', 
+  confirmed: '#17a2b8', 
+};
+
 const ManageReviewsScreen = () => {
   const route = useRoute();
   const [username, setUsername] = useState(route.params?.username ?? null);
@@ -36,14 +41,17 @@ const ManageReviewsScreen = () => {
         return;
       }
 
-      const response = await fetch(`${BASE_URL}/get_user_reviews.php?PHPSESSID=${sessionId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `PHPSESSID=${sessionId}`,
-        },
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${BASE_URL}/get_user_reviews.php?PHPSESSID=${sessionId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `PHPSESSID=${sessionId}`,
+          },
+          credentials: 'include',
+        }
+      );
 
       const text = await response.text();
       console.log('Raw response:', text);
@@ -117,13 +125,19 @@ const ManageReviewsScreen = () => {
     ]);
   };
 
+  /* ───── 渲染每个任务卡片 ───── */
   const renderTaskItem = ({ item }) => {
-    const hasReview = item.comment && item.comment.trim() !== '';
+    const hasReview = !!item.comment?.trim();
+    const badgeColor =
+      STATUS_COLORS[item.status?.toLowerCase()] ?? '#6c757d';
+
     return (
       <View style={styles.taskCard}>
         <View style={styles.taskHeader}>
           <Text style={styles.taskId}>Task ID: {item.task_id}</Text>
-          <Text style={styles.taskStatus}>{item.status}</Text>
+          <Text style={[styles.taskStatus, { backgroundColor: badgeColor }]}>
+            {item.status}
+          </Text>
         </View>
 
         <View style={styles.taskInfo}>
@@ -145,15 +159,24 @@ const ManageReviewsScreen = () => {
 
         <View style={styles.actionButtons}>
           {!hasReview ? (
-            <TouchableOpacity style={styles.createButton} onPress={() => handleCreateReview(item.task_id)}>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => handleCreateReview(item.task_id)}
+            >
               <Text style={styles.buttonText}>Create Review</Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={styles.updateButton} onPress={() => handleUpdateReview(item.task_id)}>
+              <TouchableOpacity
+                style={styles.updateButton}
+                onPress={() => handleUpdateReview(item.task_id)}
+              >
                 <Text style={styles.buttonText}>Update</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteReview(item.task_id)}>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeleteReview(item.task_id)}
+              >
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
             </View>
@@ -166,12 +189,14 @@ const ManageReviewsScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Manage Reviews</Text>
-      <Text style={styles.subtitle}>Only completed orders can be reviewed</Text>
+      <Text style={styles.subtitle}>
+        Completed or confirmed orders can be reviewed
+      </Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="#0066cc" style={styles.loader} />
       ) : tasks.length === 0 ? (
-        <Text style={styles.emptyText}>No completed tasks found</Text>
+        <Text style={styles.emptyText}>No completed/confirmed tasks found</Text>
       ) : (
         <FlatList
           data={tasks}
@@ -191,50 +216,90 @@ const ManageReviewsScreen = () => {
   );
 };
 
+/* ───── styles (未改动) ───── */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f8f9fa' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#6c757d', marginBottom: 16, fontStyle: 'italic' },
+  subtitle: {
+    fontSize: 16,
+    color: '#6c757d',
+    marginBottom: 16,
+    fontStyle: 'italic',
+  },
   loader: { marginTop: 50 },
-  emptyText: { fontSize: 16, color: '#6c757d', textAlign: 'center', marginTop: 50 },
+  emptyText: {
+    fontSize: 16,
+    color: '#6c757d',
+    textAlign: 'center',
+    marginTop: 50,
+  },
   listContainer: { paddingBottom: 16 },
   taskCard: {
-    backgroundColor: '#fff', borderRadius: 8, padding: 16, marginBottom: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1, shadowRadius: 4, elevation: 2
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  taskHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  taskHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   taskId: { fontWeight: 'bold', fontSize: 16 },
   taskStatus: {
-    backgroundColor: '#28a745', color: '#fff', fontSize: 12,
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4
+    color: '#fff',
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    textTransform: 'capitalize',
   },
   taskInfo: { marginBottom: 12 },
   reviewInfo: {
-    marginBottom: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#eee'
+    marginBottom: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   reviewTitle: { fontWeight: 'bold', marginBottom: 4 },
   noReview: { fontStyle: 'italic', color: '#6c757d', marginBottom: 12 },
   actionButtons: { marginTop: 8 },
   buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
   createButton: {
-    backgroundColor: '#007bff', padding: 10, borderRadius: 4, alignItems: 'center'
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 4,
+    alignItems: 'center',
   },
   updateButton: {
-    backgroundColor: '#17a2b8', padding: 10, borderRadius: 4, flex: 1,
-    marginRight: 8, alignItems: 'center'
+    backgroundColor: '#17a2b8',
+    padding: 10,
+    borderRadius: 4,
+    flex: 1,
+    marginRight: 8,
+    alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#dc3545', padding: 10, borderRadius: 4,
-    flex: 1, alignItems: 'center'
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 4,
+    flex: 1,
+    alignItems: 'center',
   },
   buttonText: { color: '#fff', fontWeight: 'bold' },
   backButton: {
-    backgroundColor: '#6c757d', padding: 12, borderRadius: 4,
-    alignItems: 'center', marginTop: 16
+    backgroundColor: '#6c757d',
+    padding: 12,
+    borderRadius: 4,
+    alignItems: 'center',
+    marginTop: 16,
   },
   backButtonText: { color: '#fff', fontWeight: 'bold' },
 });
 
 export default ManageReviewsScreen;
-
