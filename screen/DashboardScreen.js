@@ -80,8 +80,9 @@ export default function DashboardScreen({ route, navigation }) {
 
     const fetchAndPromptReviews = async () => {
       try {
+        const sid = await AsyncStorage.getItem('PHPSESSID');
         const res = await fetch(
-          `${BASE_URL}/get_pending_review.php`,
+          `${BASE_URL}/get_pending_review.php?PHPSESSID=${sid}`,
           { method: 'GET', credentials: 'include' }
         );
         const data = await res.json();
@@ -92,7 +93,8 @@ export default function DashboardScreen({ route, navigation }) {
           const showNextAlert = () => {
             if (orders.length === 0) return;
 
-            const order = orders.shift(); // Get first order
+            const order = orders.shift(); // first order
+
             Alert.alert(
               'Review Your Dasher',
               `Your order "${order.item}" has been delivered. Would you like to leave a review for ${order.accepted_by}?`,
@@ -100,8 +102,24 @@ export default function DashboardScreen({ route, navigation }) {
                 {
                   text: 'Not Now',
                   style: 'cancel',
-                  onPress: () => {
-                    showNextAlert(); // Show next one immediately
+                  onPress: async () => {
+                    /* ---------- ① 告诉后端用户暂不评价 ---------- */
+                    try {
+                      if (sid) {
+                        await fetch(
+                          `${BASE_URL}/cancel_review_prompt.php?PHPSESSID=${sid}`,
+                          {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ order_id: order.id }),
+                          }
+                        );
+                      }
+                    } catch (e) {
+                      console.log('[Dashboard] cancel prompt error', e);
+                    }
+                    showNextAlert(); // 继续检查下一条
                   },
                 },
                 {
@@ -114,11 +132,12 @@ export default function DashboardScreen({ route, navigation }) {
                     });
                   },
                 },
-              ]
+              ],
+              { cancelable: false }
             );
           };
 
-          showNextAlert(); // Start alert loop
+          showNextAlert(); // start
         }
       } catch (err) {
         console.error('[Dashboard] pending review error:', err);
@@ -169,10 +188,10 @@ export default function DashboardScreen({ route, navigation }) {
 
   return (
     <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.root}
-          keyboardShouldPersistTaps="handled"
-        >
+      style={styles.scrollView}
+      contentContainerStyle={styles.root}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Logo & greeting */}
       <Image
         source={require('../assets/cardinal.png')}
@@ -306,9 +325,7 @@ export default function DashboardScreen({ route, navigation }) {
 
 const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
+  scrollView: { flex: 1 },
   root: {
     flexGrow: 1,
     backgroundColor: BG_COLOR,
@@ -316,32 +333,11 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 20,
   },
-  logo: {
-    width: 90,
-    height: 90,
-    resizeMode: 'contain',
-    marginBottom: 4,
-  },
-  hi: {
-    fontSize: 34,
-    fontWeight: '700',
-    marginVertical: 10,
-  },
-  roleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 22,
-  },
-  roleTxt: {
-    fontSize: 17,
-    color: GREY_TXT,
-    marginRight: 8,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
+  logo: { width: 90, height: 90, resizeMode: 'contain', marginBottom: 4 },
+  hi: { fontSize: 34, fontWeight: '700', marginVertical: 10 },
+  roleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 22 },
+  roleTxt: { fontSize: 17, color: GREY_TXT, marginRight: 8 },
+  balanceRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
   balanceCard: {
     backgroundColor: CARD_BG,
     paddingHorizontal: 24,
@@ -350,11 +346,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     shadowColor: CARD_SHADOW,
   },
-  balanceTxt: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: GREY_TXT,
-  },
+  balanceTxt: { fontSize: 18, fontWeight: '700', color: GREY_TXT },
   topUpBtn: {
     marginLeft: 10,
     width: 44,
@@ -365,11 +357,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 4,
   },
-  topUpTxt: {
-    fontSize: 26,
-    color: '#fff',
-    marginTop: -2,
-  },
+  topUpTxt: { fontSize: 26, color: '#fff', marginTop: -2 },
   bigBtn: {
     width: '78%',
     paddingVertical: 14,
@@ -377,26 +365,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 6,
   },
-  bigBtnTxt: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  dangerToggle: {
-    marginTop: 20,
-  },
+  bigBtnTxt: { fontSize: 20, color: '#fff', fontWeight: '600' },
+  dangerToggle: { marginTop: 20 },
   deleteContainer: {
     width: '80%',
     marginTop: 12,
     alignItems: 'center',
     paddingBottom: 20,
   },
-  dangerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: RED_DARK,
-    marginBottom: 10,
-  },
+  dangerTitle: { fontSize: 18, fontWeight: '700', color: RED_DARK, marginBottom: 10 },
   input: {
     width: '100%',
     height: 42,
@@ -414,12 +391,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  deleteTxt: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  logout: {
-    marginTop: 20,
-  },
+  deleteTxt: { fontSize: 16, color: '#fff', fontWeight: '600' },
+  logout: { marginTop: 20 },
 });
