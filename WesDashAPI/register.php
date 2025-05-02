@@ -1,99 +1,96 @@
 <?php
-// ───── CORS HEADERS: Must come first ─────
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
-header("Access-Control-Allow-Origin: $origin");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Cookie, Accept");
-header("Content-Type: application/json; charset=utf-8");
 
-// ───── Handle preflight ─────
+declare(strict_types=1);
+
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Accept');
+header('Access-Control-Allow-Origin: *');        
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     http_response_code(200);
+    echo json_encode(['success' => true, 'message' => 'Register endpoint OK']);
     exit;
 }
 
-// ───── Restore session if passed manually ─────
-if (isset($_GET['PHPSESSID'])) session_id($_GET['PHPSESSID']);
-session_set_cookie_params([
-  'lifetime' => 0,
-  'path' => '/',
-  'secure' => false,
-  'httponly' => false,
-  'samesite' => 'Lax',
-]);
-session_start();
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// ───── DB connect ─────
-$conn = new mysqli('localhost', 'root', '', 'app-db');
-if ($conn->connect_error) {
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
 
-// ───── Read JSON input ─────
-$data = json_decode(file_get_contents("php://input"), true);
-if (!$data) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Invalid JSON input"]);
-    exit;
-}
+$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$username         = trim($data['username']         ?? '');
+$password         = $data['password']              ?? '';
+$confirm_password = $data['confirm_password']      ?? '';
 
-$username         = trim($data['username'] ?? '');
-$password         = $data['password'] ?? '';
-$confirm_password = $data['confirm_password'] ?? '';
-
-if (empty($username) || empty($password) || empty($confirm_password)) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "All fields are required."]);
-    exit;
+$errors = [];
+if ($username === '' || $password === '' || $confirm_password === '') {
+    $errors[] = 'All fields are required';
 }
 if (strlen($password) < 10) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Password must be at least 10 characters."]);
-    exit;
+    $errors[] = 'Password must be at least 10 characters';
 }
 if ($password !== $confirm_password) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Passwords do not match."]);
+    $errors[] = 'Passwords do not match';
+}
+
+if ($errors) {
+    http_response_code(201);                  
+    echo json_encode(['success' => false, 'message' => implode('; ', $errors)]);
     exit;
 }
 
-// ───── Check for existing username ─────
-$stmt = $conn->prepare("SELECT is_deleted FROM users WHERE username = ?");
-$stmt->bind_param("s", $username);
+
+$mysqli = new mysqli('localhost', 'root', '', 'app-db');
+if ($mysqli->connect_error) {
+    http_response_code(201);
+    echo json_encode(['success' => false, 'message' => 'DB connection failed']);
+    exit;
+}
+
+
+$stmt = $mysqli->prepare('SELECT is_deleted FROM users WHERE username = ?');
+$stmt->bind_param('s', $username);
 $stmt->execute();
 $stmt->bind_result($is_deleted);
 $stmt->fetch();
 $stmt->close();
 
 if ($is_deleted === 1) {
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "This account has already been deleted."]);
+    http_response_code(201);
+    echo json_encode(['success' => false, 'message' => 'This account has already been deleted']);
     exit;
-} elseif ($is_deleted === null) {
-    // Insert new user
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-    $stmt->bind_param("ss", $username, $hashed_password);
-    if ($stmt->execute()) {
-        $_SESSION['username'] = $username;
-        echo json_encode([
-            "success"    => true,
-            "message"    => "Account created successfully!",
-            "session_id" => session_id()
-        ]);
-    } else {
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => "Failed to register."]);
-    }
-    $stmt->close();
-} else {
-    echo json_encode(["success" => false, "message" => "Username is already taken."]);
+}
+if ($is_deleted !== null) {
+    http_response_code(201);
+    echo json_encode(['success' => false, 'message' => 'Username is already taken']);
+    exit;
 }
 
-$conn->close();
+
+$hashed = password_hash($password, PASSWORD_DEFAULT);
+$ins    = $mysqli->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
+$ins->bind_param('ss', $username, $hashed);
+
+if ($ins->execute()) {
+    $_SESSION['username'] = $username;
+    http_response_code(201);                
+    echo json_encode([
+        'success'    => true,
+        'message'    => 'Account created successfully',
+        'session_id' => session_id(),
+    ]);
+} else {
+    http_response_code(201);
+    echo json_encode(['success' => false, 'message' => 'Registration failed']);
+}
+$ins->close();
+$mysqli->close();
+?>

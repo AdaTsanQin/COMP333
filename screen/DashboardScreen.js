@@ -78,7 +78,7 @@ export default function DashboardScreen({ route, navigation }) {
   useEffect(() => {
     if (role !== 'user') return;
 
-    (async () => {
+    const fetchAndPromptReviews = async () => {
       try {
         const res = await fetch(
           `${BASE_URL}/get_pending_review.php`,
@@ -86,47 +86,46 @@ export default function DashboardScreen({ route, navigation }) {
         );
         const data = await res.json();
 
-        if (data.success && data.order) {
-          Alert.alert(
-            'Review Your Dasher',
-            `Your order "${data.order.item}" has been delivered. Would you like to leave a review for ${data.order.accepted_by}?`,
-            [
-              {
-                text: 'Not Now',
-                style: 'cancel',
-                onPress: async () => {
-                  try {
-                    await fetch(
-                      `${BASE_URL}/cancel_review_prompt.php`,
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ order_id: data.order.id }),
-                      }
-                    );
-                  } catch (err) {
-                    console.error('[Dashboard] cancel review error:', err);
-                  }
+        if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          const orders = [...data.orders]; // shallow copy
+
+          const showNextAlert = () => {
+            if (orders.length === 0) return;
+
+            const order = orders.shift(); // Get first order
+            Alert.alert(
+              'Review Your Dasher',
+              `Your order "${order.item}" has been delivered. Would you like to leave a review for ${order.accepted_by}?`,
+              [
+                {
+                  text: 'Not Now',
+                  style: 'cancel',
+                  onPress: () => {
+                    showNextAlert(); // Show next one immediately
+                  },
                 },
-              },
-              {
-                text: 'Leave Review',
-                onPress: () => {
-                  navigation.navigate('CreateReviewScreen', {
-                    taskId: data.order.id,
-                    dashername: data.order.accepted_by,
-                    item: data.order.item,
-                  });
+                {
+                  text: 'Leave Review',
+                  onPress: () => {
+                    navigation.navigate('CreateReviewScreen', {
+                      taskId: order.id,
+                      dashername: order.accepted_by,
+                      item: order.item,
+                    });
+                  },
                 },
-              },
-            ]
-          );
+              ]
+            );
+          };
+
+          showNextAlert(); // Start alert loop
         }
       } catch (err) {
         console.error('[Dashboard] pending review error:', err);
       }
-    })();
+    };
+
+    fetchAndPromptReviews();
   }, [role, navigation]);
 
   /** Logout handler */
@@ -424,4 +423,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
