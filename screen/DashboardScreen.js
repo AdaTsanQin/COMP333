@@ -10,6 +10,7 @@ import {
   Dimensions,
   TextInput,
   Alert,
+  ScrollView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -168,7 +169,11 @@ export default function DashboardScreen({ route, navigation }) {
   );
 
   return (
-    <View style={styles.root}>
+    <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.root}
+          keyboardShouldPersistTaps="handled"
+        >
       {/* Logo & greeting */}
       <Image
         source={require('../assets/cardinal.png')}
@@ -262,6 +267,7 @@ export default function DashboardScreen({ route, navigation }) {
 
       {showDanger && (
         <View style={styles.deleteContainer}>
+          <Text style={styles.dangerTitle}>Delete Account</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Password"
@@ -295,17 +301,21 @@ export default function DashboardScreen({ route, navigation }) {
           ↩ Logout
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  root: {
+  scrollView: {
     flex: 1,
+  },
+  root: {
+    flexGrow: 1,
     backgroundColor: BG_COLOR,
     alignItems: 'center',
     paddingTop: 40,
+    paddingBottom: 20,
   },
   logo: {
     width: 90,
@@ -380,7 +390,13 @@ const styles = StyleSheet.create({
     width: '80%',
     marginTop: 12,
     alignItems: 'center',
-    paddingBottom: 120,
+    paddingBottom: 20,
+  },
+  dangerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: RED_DARK,
+    marginBottom: 10,
   },
   input: {
     width: '100%',
@@ -405,8 +421,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   logout: {
-    position: 'absolute',
-    bottom: 20,
+    marginTop: 20,
   },
 });
 
