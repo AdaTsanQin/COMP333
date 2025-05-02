@@ -396,7 +396,10 @@ Allan:
 
 
 # PROJECT
-
+## Work distribution：
+1. Haihan Wang：Payment system(balance table), custom order, chat room <br>
+2. Ada: Payment system(Recharge), map navigation, mobile device setup <br>
+3. Allan: Review,nearby shop searching system <br>
 ## Problem1-Backend Unit Tests (PHPUnit)
 
 Applications/XAMPP/xamppfiles/htdocs/ <br>
