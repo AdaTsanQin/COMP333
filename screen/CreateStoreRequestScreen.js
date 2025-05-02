@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from "react-native";
+import { BASE_URL } from './config';
 
 const CreateStoreRequestScreen = ({ navigation, route }) => {
   // Check if product data was passed from SearchScreen
   const productData = route.params?.productData;
-  
+
   const [item, setItem] = useState(productData?.item_name || "");
   const [dropOffLocation, setDropOffLocation] = useState("");
   const [deliverySpeed, setDeliverySpeed] = useState("common");
@@ -23,18 +24,18 @@ const CreateStoreRequestScreen = ({ navigation, route }) => {
         drop_off_location: dropOffLocation,
         delivery_speed: deliverySpeed,
       };
-      
+
       // Add product_id if it was provided from the SearchScreen
       if (productData?.product_id) {
         requestData.product_id = productData.product_id;
       }
-      
+
       // Add image_url if available
       if (productImage) {
         requestData.image_url = productImage;
       }
 
-      const response = await fetch("http://10.0.2.2/WesDashAPI/create_requests.php", {
+      const response = await fetch("http://172.21.161.56/WesDashAPI/create_requests.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

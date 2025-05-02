@@ -743,7 +743,7 @@ $stmt->bind_param("ssssis", $item, $drop_off_location, $delivery_speed, $status,
 ```jsx
 <StripeProvider publishableKey="pk_test_•••YOUR_PUBLISHABLE_KEY•••">
 ``` 
-4.Copy the Secret key into the create-payment-intent.php line 27 <br>
+4.Copy the Secret key into the create-payment-intent.php line 43 <br>
 ```jsx
 \Stripe\Stripe::setApiKey('sk_test_•••YOUR_SECRET_KEY•••');
 ``` 
@@ -759,7 +759,7 @@ composer require stripe/stripe-php<br>
 <?php
 // File: /Applications/XAMPP/xamppfiles/htdocs/WesDashAPI/secrets.php<br>
 
-// Your Stripe Secret Key (never commit this to public repo!)<br>
+// Your Stripe Secret Key<br>
 $stripeSecretKey = 'YOUR_SECRET_KEY';
 ``` 
 
@@ -790,3 +790,28 @@ Use the Stripe test card:
 ```
 Enter any future date (e.g., 03 / 27) and any 3-digit CVC (e.g., 120).
 
+
+
+#### How to Use WesDash App on Your Phone
+#### 1. Downlaod 'Expo Go' from appstore<br>
+#### 2. Switch to the main branch<br>
+git checkout main
+#### 3. Make sure your computer and mac are using the same wifi
+#### 4. In your terminal, run<br> 
+``` bash
+ipconfig getifaddr en0
+``` 
+to get ip address, copy the ip address into config.js, put it into "IP_ADDRESS"
+``` jsx
+// config.js
+export const DEV_HOST = 'IP_ADDRESS';
+export const BASE_URL = `http://${DEV_HOST}/WesDashAPI`;
+``` 
+#### 6. if directly using step 7 do not work, run the following command in terminal
+``` bash
+npx expo install expo@^53.0.0
+npx expo install --fix
+``` 
+#### 7. Launch the app with Expo<br>
+npx expo start
+#### 8. open Expo Go on phone, then scan the QR code in terminal using the default code scanner from your phone <br> 

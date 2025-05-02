@@ -1,6 +1,7 @@
 <?php
 // create_tip.php ─ 扣款 + 写 tip + 付给 dasher + 确认订单 + 关聊天室
 header('Content-Type: application/json; charset=utf-8');
+if (isset($_GET['PHPSESSID'])) session_id($_GET['PHPSESSID']);
 session_start();
 
 /* ─────────── 登录校验 ─────────── */

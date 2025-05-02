@@ -1,16 +1,22 @@
 <?php
 // File: /WesDashAPI/accept_order.php
 
-session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// JSON + CORS headers
+if (isset($_GET['PHPSESSID'])) {
+    session_id($_GET['PHPSESSID']);
+}
+session_start();
+
+// CORS headers
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Origin: $origin");
 header('Access-Control-Allow-Methods: GET, PUT, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Cookie, Accept');
 header('Access-Control-Allow-Credentials: true');
+
 
 // Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

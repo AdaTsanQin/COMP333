@@ -1,6 +1,11 @@
 <?php
-
+if (isset($_GET['PHPSESSID'])) {
+    session_id($_GET['PHPSESSID']);
+} elseif (isset($_COOKIE['PHPSESSID'])) {
+    session_id($_COOKIE['PHPSESSID']);
+}
 session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
