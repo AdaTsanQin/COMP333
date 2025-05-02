@@ -804,8 +804,30 @@ npm install
 
 #### 5. Launch the app with Expo
 npm run android
+#### Notice1: Current location
+To simulate a location on the Android emulator for convenient map testing:<br>
 
-#### Notice： Recharge test card
+Start the emulator from Android Studio.<br>
+
+In the emulator window, click the three-dot menu icon on the right side.<br>
+(Hovering over it will show: Extended controls, not the one shows options)<br>
+
+In the left sidebar of the Extended Controls window, select Location.<br>
+
+In the location search bar, enter a place name, such as Wesleyan University.<br>
+
+Click the Save Point button.<br>
+
+A pop-up titled "Save route as" will appear — just click OK to confirm.<br>
+
+On the right-hand panel, under Saved Points, select the newly saved location.<br>
+
+Finally, click Set Location to update the emulator's GPS position.<br>
+
+The map in your app will now respond as if the emulator is physically located at the selected point.<br>
+
+
+#### Notice2： Recharge test card
 
 
 Do not use a real card.
