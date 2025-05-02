@@ -30,23 +30,21 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Get the pending review for the current user
 $stmt = $conn->prepare(
     "SELECT id, item, accepted_by 
      FROM requests 
-     WHERE username = ? AND review_prompt_status = 'pending' AND status = 'completed'
-     LIMIT 1"
+     WHERE username = ? AND review_prompt_status = 'pending' AND status = 'completed'"
 );
 $stmt->bind_param('s', $username);
 $stmt->execute();
 $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $order = $result->fetch_assoc();
-    echo json_encode(['success' => true, 'order' => $order]);
-} else {
-    echo json_encode(['success' => true, 'order' => null]);
+$orders = [];
+while ($row = $result->fetch_assoc()) {
+    $orders[] = $row;
 }
+
+echo json_encode(['success' => true, 'orders' => $orders]);
 
 $stmt->close();
 $conn->close();
